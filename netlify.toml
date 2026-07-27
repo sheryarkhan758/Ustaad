@@ -33,6 +33,11 @@
   # A native module that must never enter the bundle: production never opens
   # SQLite, and bundling a `.node` binary breaks the build outright.
   external_node_modules = ["better-sqlite3"]
+  # The prompts are Markdown read from disk at runtime, never inlined in source
+  # (§7.3) — so esbuild, which bundles JavaScript, ships none of them. Without
+  # this every agent call reached `loadPrompt` and threw ENOENT, which arrived
+  # at the user as a 500 rather than as the manual-search fallback (NFR-11).
+  included_files = ["Backend/prompts/**"]
 
 # Every /api/* call reaches the single Express handler.
 [[redirects]]

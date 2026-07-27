@@ -18,7 +18,33 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const PROMPTS_DIR = process.env.PROMPTS_DIR ?? 'prompts';
+/**
+ * Where the prompt files are, in whichever layout the process is running under.
+ *
+ * `'prompts'` is relative to the working directory, and that directory is not
+ * the same in the two places this code runs. Locally the process starts in
+ * `Backend/`, so `prompts/` resolves. In a Netlify Function the working
+ * directory is `/var/task` and the repository sits below it, so the same
+ * relative path resolves to nothing — every agent call then threw ENOENT
+ * *before* reaching the fallback that exists to keep AI failures from
+ * surfacing as errors (NFR-11), and the user got a 500 instead of the manual
+ * search path.
+ *
+ * The candidates are tried in order and the first that exists wins.
+ * `PROMPTS_DIR` still overrides everything, so the directory is one variable
+ * away from moving. Bundling is the other half of this: esbuild ships
+ * JavaScript, so `netlify.toml` has to declare the `.md` files as
+ * `included_files` or there is nothing here to find.
+ */
+function resolvePromptsDir(): string {
+  const explicit = process.env.PROMPTS_DIR?.trim();
+  if (explicit) return explicit;
+
+  const candidates = ['prompts', 'Backend/prompts', path.join(process.cwd(), 'Backend', 'prompts')];
+  return candidates.find((dir) => fs.existsSync(dir)) ?? 'prompts';
+}
+
+export const PROMPTS_DIR = resolvePromptsDir();
 
 export interface LoadedPrompt {
   id: string;
