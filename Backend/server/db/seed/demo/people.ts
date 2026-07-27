@@ -939,7 +939,7 @@ export const DEMO_PARENTS: DemoParentSpec[] = [
   {
     key: 'parent-karachi',
     email: 'parent@demo.ustaad.test',
-    displayName: 'Asma Khalid',
+    displayName: 'IQRA SHAHID',
     cityId: 'karachi',
     areaId: 'karachi-clifton',
     students: [

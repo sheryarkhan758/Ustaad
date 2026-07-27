@@ -47,7 +47,7 @@ function stubUser() {
     id: `stub-${role}`,
     email: `${role}@demo.ustaad.test`,
     role,
-    displayName: { parent: 'Asma Khalid', tutor: 'Ayesha Siddiqui', student: 'Hira Yousuf', organisation: 'Al-Noor Academy', admin: 'Platform Administrator' }[role] ?? 'Guest',
+    displayName: { parent: 'IQRA SHAHID', tutor: 'Ayesha Siddiqui', student: 'Hira Yousuf', organisation: 'Al-Noor Academy', admin: 'Platform Administrator' }[role] ?? 'Guest',
     preferredLang: 'en',
   };
 }
