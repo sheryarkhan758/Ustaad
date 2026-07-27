@@ -15,10 +15,27 @@
 
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RoleGuard } from './RoleGuard';
+import * as access from './access';
 import * as authContext from '../context/AuthContext';
+
+/**
+ * `OPEN_NAVIGATION` is a demonstration convenience that lets one signed-in
+ * person walk every screen (see `access.js`). It changes what this guard does,
+ * so these tests pin **both** behaviours rather than only whichever is
+ * currently switched on — the restrictive path is the one that ships, and a
+ * suite that stopped covering it would let it rot while the flag was up.
+ */
+function openNavigation(open) {
+  vi.spyOn(access, 'OPEN_NAVIGATION', 'get').mockReturnValue(open);
+}
+
+beforeEach(() => {
+  // Default the whole suite to the restrictive behaviour, then opt in below.
+  openNavigation(false);
+});
 
 function mockAuth({ role, isAuthenticated = Boolean(role), isLoading = false }) {
   vi.spyOn(authContext, 'useAuth').mockReturnValue({
@@ -104,4 +121,31 @@ describe('RoleGuard', () => {
       expect(screen.queryByText('Guarded content')).not.toBeInTheDocument();
     },
   );
+
+  /* ---------------------------------------------------------------------
+   * The demonstration switch
+   * ------------------------------------------------------------------ */
+
+  it('lets any signed-in role open any screen when navigation is open', () => {
+    openNavigation(true);
+    mockAuth({ role: 'parent' });
+    renderAt('/guarded', { allow: ['admin'] });
+
+    // The screen opens. What it *shows* is still decided by the API, which
+    // checks role and ownership on every request (NFR-6) — so a parent here
+    // gets the shell and an error state, not an administrator's data.
+    expect(screen.getByText('Guarded content')).toBeInTheDocument();
+  });
+
+  it('still requires a session when navigation is open', () => {
+    // The switch relaxes *role*, never authentication. Anonymous visitors keep
+    // exactly what FR-1.6 promises and nothing beyond it.
+    openNavigation(true);
+    mockAuth({ role: null, isAuthenticated: false });
+    renderAt('/guarded', { allow: ['admin'] });
+
+    expect(screen.getByText('Sign in')).toBeInTheDocument();
+    expect(screen.queryByText('Guarded content')).toBeNull();
+  });
+
 });

@@ -20,6 +20,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { AppShell } from '../components/layout/AppShell';
 import { RoleShell } from '../components/layout/RoleShell';
+import { OPEN_NAVIGATION } from './access';
 import { RoleGuard } from './RoleGuard';
 
 const page = (loader) => ({ Component: lazy(loader) });
@@ -195,7 +196,15 @@ export const NAV = [
   { to: '/admin/flags', labelKey: 'nav.reports', roles: ['admin'] },
 ];
 
-/** `roles: null` means everyone, signed in or not. */
+/**
+ * `roles: null` means everyone, signed in or not.
+ *
+ * Under `OPEN_NAVIGATION` a signed-in person sees every item regardless of
+ * their own role — the demonstration convenience described in `access.js`.
+ * Anonymous visitors are unaffected either way: they see the public items,
+ * which is exactly the set FR-1.6 promises without an account.
+ */
 export function navFor(role) {
+  if (OPEN_NAVIGATION && role) return NAV;
   return NAV.filter((item) => item.roles === null || (role && item.roles.includes(role)));
 }

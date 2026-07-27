@@ -20,6 +20,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
+import { OPEN_NAVIGATION } from './access';
 import { SkeletonCard } from '../components/ui/Card';
 
 export function RoleGuard({ allow = [], children }) {
@@ -39,7 +40,14 @@ export function RoleGuard({ allow = [], children }) {
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
 
-  if (allow.length > 0 && !allow.includes(role)) {
+  /*
+   * `OPEN_NAVIGATION` lets any signed-in person open any screen — see
+   * `access.js`. It relaxes this courtesy only; the endpoints each screen
+   * calls still check role and ownership on every request (NFR-6), so a
+   * screen reached this way shows its shell and an error state rather than
+   * somebody else's data.
+   */
+  if (!OPEN_NAVIGATION && allow.length > 0 && !allow.includes(role)) {
     /**
      * A signed-in user in the wrong place is sent home, not to login — asking
      * someone to re-authenticate when they are already authenticated tells them
