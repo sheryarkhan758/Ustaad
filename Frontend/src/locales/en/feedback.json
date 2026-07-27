@@ -21,5 +21,42 @@
   },
   "submit": "Send report",
   "thanks": "Thank you",
-  "recorded": "Your report has been recorded and is in the team’s queue. If you raised a safety concern, it is prioritised and is never shown to the tutor concerned."
+  "recorded": "Your report has been recorded and is in the team’s queue. If you raised a safety concern, it is prioritised and is never shown to the tutor concerned.",
+  "anonymous": "You do not need an account. An anonymous report carries no name, no email and nothing that could identify you.",
+  "rating": {
+    "1": "1 — badly",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5 — well",
+    "label": "How is Ustaad.com working for you overall?",
+    "hint": "Optional.",
+    "none": "Prefer not to say"
+  },
+  "attachment": {
+    "label": "Attach a screenshot or document",
+    "hint": "Optional. PNG, JPG or PDF, up to 5 MB. One file.",
+    "chosen": "{{name}} ({{size}})",
+    "remove": "Remove",
+    "tooLarge": "That file is larger than 5 MB. Nothing has been uploaded.",
+    "wrongType": "Only PNG, JPG or PDF can be attached. Nothing has been uploaded.",
+    "reading": "Reading the file…"
+  },
+  "context": {
+    "heading": "Sent with your report",
+    "body": "So the team can reproduce what you saw without having to ask you. Nothing here identifies you.",
+    "page": "Page",
+    "language": "Language",
+    "role": "Signed in as",
+    "roleNone": "Not signed in",
+    "version": "App version"
+  },
+  "next": {
+    "heading": "Your report is recorded",
+    "body": "It is in the team’s queue with a status of new, and somebody reads every one. You will not get a reply here — there is no address attached to an anonymous report — but the record is what gets acted on.",
+    "safety": "You marked this a safety concern, so it is escalated in the queue. It is never shown publicly and never shown to any tutor in a form that identifies you.",
+    "close": "Close"
+  },
+  "errorTitle": "That did not send",
+  "detailTooShort": "Please describe what happened — a sentence is enough."
 }

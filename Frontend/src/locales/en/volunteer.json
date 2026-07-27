@@ -14,8 +14,44 @@
   "deliveryModes": "How you can teach",
   "motivation": "Why do you want to volunteer?",
   "motivationHint": "In your own words, in any language. Stored exactly as you write it.",
-  "document": "Attach a CV (PDF, optional)",
+  "document": {
+    "label": "Attach a CV, degree or transcript",
+    "hint": "PDF only, up to 5 MB, one file.",
+    "optionalNow": "Optional now — you can send it later. It is required before an application can be approved, because verification is against documents.",
+    "private": "It goes to a private store that only Ustaad.com administrators can open, through a link that expires. It is never public and never in the repository.",
+    "chosen": "{{name}} ({{size}})",
+    "remove": "Remove",
+    "wrongType": "Only a PDF can be attached. Nothing has been uploaded.",
+    "tooLarge": "That file is larger than 5 MB. Nothing has been uploaded.",
+    "reading": "Reading the file…"
+  },
   "submit": "Send application",
   "thanks": "Application received",
-  "received": "Your application has been recorded and the team has been notified. Verification is the same process a paid tutor goes through."
+  "received": "Your application has been recorded and the team has been notified. Verification is the same process a paid tutor goes through.",
+  "why": {
+    "heading": "Why this programme exists",
+    "reach": "Some families cannot pay at any rate. A tuition market that only sells to those who can leaves those students with nothing, and no amount of matching fixes that.",
+    "supply": "And the thinnest part of supply is the part that matters most: verified female tutors who will teach at a family’s home. Where a daughter is not permitted to travel to a centre, that tutor is the only route to any tuition at all.",
+    "standard": "A volunteer is verified on exactly the same basis as a paid tutor — CNIC and academic documents, checked by an administrator. The fee is what differs, not the standard."
+  },
+  "form": {
+    "heading": "Your application",
+    "noAccount": "No account needed. Nothing here signs you up for anything.",
+    "contactHeading": "How to reach you",
+    "teachingHeading": "What you can teach",
+    "aboutHeading": "About you"
+  },
+  "errors": {
+    "summaryTitle": "Please check these before sending",
+    "required": "This is needed"
+  },
+  "success": {
+    "heading": "Your application has been received",
+    "saved": "It is saved and in the queue. That record is what the team works from, and it exists now whatever happens to any email.",
+    "mailSent": "An email is on its way to the team, and an acknowledgement to you.",
+    "mailFailed": "The notification email did not go out — that is our problem, not yours, and it changes nothing about your application. The record is saved and the team will see it.",
+    "next": "What happens next: an administrator reads it, and you will hear back within about a week. Before approval you will be asked for a CNIC and academic documents, exactly as any paid tutor is.",
+    "again": "Send another application"
+  },
+  "submitting": "Sending…"
 }

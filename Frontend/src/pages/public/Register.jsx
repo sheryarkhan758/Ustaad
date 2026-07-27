@@ -207,6 +207,25 @@ export default function Register() {
             {t('signIn.title')}
           </Link>
         </p>
+
+        {/*
+          FR-33.1 — the volunteer route, from the tutor onboarding path.
+          Shown only to somebody registering as a tutor, because that is the
+          moment the choice is live: they are already deciding to teach through
+          this platform, and the programme is a different way of doing it rather
+          than a different product.
+        */}
+        {role === 'tutor' ? (
+          <p className="text-center text-small text-slate">
+            {t('register.volunteerPrompt')}{' '}
+            <Link
+              to="/volunteer"
+              className="font-medium text-verdigris-deep underline underline-offset-2"
+            >
+              {t('register.volunteerLink')}
+            </Link>
+          </p>
+        ) : null}
       </form>
     </div>
   );

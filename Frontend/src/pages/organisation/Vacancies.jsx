@@ -41,7 +41,8 @@ import {
   useSubjects,
 } from '../../lib/reference';
 
-const MODES = ['home', 'online', 'tutor_premises'];
+/** `TEACHING_MODES` from `shared/rates.ts`, and the dictionary keys match it. */
+const MODES = ['home', 'online', 'own_place'];
 const RATE_TYPES = ['monthly', 'hourly', 'per_session'];
 
 /** The tutors who put their hand up. Read only, by design — see the header. */

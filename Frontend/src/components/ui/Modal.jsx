@@ -13,7 +13,20 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-export function Modal({ open, onClose, title, description, children, footer }) {
+/**
+ * `placement="side"` — a slide-over rather than a centred card.
+ *
+ * Still the same `<dialog showModal()>`, and deliberately so: the focus trap,
+ * the inert background, Escape-to-close and the top layer are the platform's
+ * and are the four things a hand-rolled panel gets wrong. Only the box changes.
+ *
+ * It exists for the feedback channel (§6.32), which has to be reachable from
+ * every page without leaving it. A full-height panel down one edge keeps more
+ * of the page the user is reporting on visible behind it than a centred card
+ * does — and on a phone it stays a bottom sheet, because a side panel on a
+ * 360px screen is just a modal with extra steps.
+ */
+export function Modal({ open, onClose, title, description, children, footer, placement = 'center' }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -48,8 +61,13 @@ export function Modal({ open, onClose, title, description, children, footer }) {
       className={[
         'w-full max-w-prose rounded-t-card border border-slate-line bg-white p-0 text-ink shadow-raised',
         'backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]',
-        // Bottom sheet on a phone, centred card above it.
-        'mb-0 mt-auto sm:my-auto sm:rounded-card',
+        // Bottom sheet on a phone, either way.
+        'mb-0 mt-auto',
+        placement === 'side'
+          ? // Full height against the inline-end edge — `me-0` rather than
+            // `mr-0`, so it lands on the correct side in the Urdu view.
+            'sm:my-0 sm:me-0 sm:ms-auto sm:h-full sm:max-h-full sm:rounded-none sm:rounded-s-card'
+          : 'sm:my-auto sm:rounded-card',
       ].join(' ')}
     >
       <div onClick={(event) => event.stopPropagation()}>
@@ -76,7 +94,14 @@ export function Modal({ open, onClose, title, description, children, footer }) {
           </button>
         </div>
 
-        <div className="max-h-[65vh] overflow-y-auto p-4">{children}</div>
+        <div
+          className={[
+            'overflow-y-auto p-4',
+            placement === 'side' ? 'max-h-[65vh] sm:max-h-[calc(100vh-13rem)]' : 'max-h-[65vh]',
+          ].join(' ')}
+        >
+          {children}
+        </div>
 
         {footer ? (
           <div className="flex flex-col-reverse gap-2 border-t border-slate-line p-4 sm:flex-row sm:justify-end">
