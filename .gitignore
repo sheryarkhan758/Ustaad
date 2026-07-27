@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# Ustaad.com — .gitignore
+#
+# This repository is PUBLIC. Nothing below is a convenience rule.
+# NFR-4, SEC-25 and §10.2 of the specification all depend on this file:
+# no credential, no user data and no database file may ever be committed.
+# If you add a new secret-bearing or data-bearing path, add it here in the
+# same change that introduces it — never afterwards.
+# ---------------------------------------------------------------------------
+
+# --- Secrets ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Database files (user data lives outside the repo, always) -------------
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+local.db
+local.db-journal
+
+# --- Dependencies and build output -----------------------------------------
+# Deliberately NOT root-anchored. The backend now lives under Backend/ and the
+# client under client/, so a leading-slash rule would match neither. An ignore
+# rule that silently stops matching is worse than no rule, because the file it
+# was protecting looks protected.
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# --- Uploaded / generated user artefacts ------------------------------------
+# CNIC images, academic documents and volunteer CVs live in the private
+# Supabase Storage bucket. If anything ever lands on local disk, it stops here.
+# Unanchored for the same reason as above: this one guards identity documents,
+# so it is the last rule that should quietly stop matching.
+uploads/
+tmp/
+*.pem
+*.key
+*.p12
+
+# --- Tooling and editor noise ------------------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-error.log*
+.drizzle/
+.netlify/
+.vercel/
+.turbo/
+.idea/
+.vscode/*
+!.vscode/extensions.json

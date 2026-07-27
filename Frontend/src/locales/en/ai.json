@@ -1,0 +1,176 @@
+{
+  "intake": {
+    "pageTitle": "Tell us what is going wrong",
+    "pageBody": "Describe the difficulty in your own words. Three or four questions is usually enough to find the topic underneath it — which is often not the one you would have named.",
+    "constraintsTitle": "Your requirements",
+    "constraintsBody": "Set these first. They are applied by the system when tutors are shortlisted, not by the assistant.",
+    "signInTitle": "You will need an account for this",
+    "signInBody": "The conversation is saved against your account so a dropped connection resumes rather than starting again. Searching for tutors yourself needs no account at all.",
+    "openingTitle": "What is the difficulty?",
+    "openingBody": "For example: “My daughter is in Matric, Sindh Board, and she is weak in Maths.” Write in whichever language you prefer — English, Urdu, or a mix.",
+    "placeholder": "Describe what is going wrong…",
+    "composerLabel": "Describe the difficulty",
+    "transcriptLabel": "Conversation",
+    "thinking": "Thinking",
+    "begin": "Start",
+    "send": "Send",
+    "turnsLeft_one": "{{count}} question left",
+    "turnsLeft_other": "{{count}} questions left",
+    "startOver": "Start over",
+    "resumedNote": "This conversation was saved on this device and picked up where you left it."
+  },
+  "gapMap": {
+    "title": "What we found",
+    "subtitle": "The topic named first is the one to teach. The others follow from it.",
+    "rootGap": "The root gap",
+    "chainHeading": "Why this topic",
+    "chainNote": "This chain comes from the curriculum itself, not from the assistant. Each topic depends on the one before it.",
+    "unresolvedHeading": "Not worked out",
+    "unresolvedNote": "These could not be settled from what was described. Answering about them would narrow it further."
+  },
+  "constraints": {
+    "heading": "Applied by the system",
+    "gender": {
+      "female_only": "Female tutors only",
+      "male_only": "Male tutors only"
+    },
+    "area": "In {{area}}",
+    "budget": "Up to {{amount}} per hour",
+    "enforcedByCode": "These were applied by the search itself, in the database query, after the assistant had finished. The assistant has no way to set or relax them — the request it makes carries only the subject, level, board and topics.",
+    "notRanking": "A tutor who does not meet one is not in the list at all. They are not ranked lower or shown further down."
+  },
+  "shortlist": {
+    "title": "Tutors who match",
+    "subtitle": "At most three, ordered by the same score every search uses. Every figure comes from the platform’s records.",
+    "verified": "Identity verified",
+    "viewProfile": "See the full profile"
+  },
+  "fallback": {
+    "manualSearch": "Search for tutors yourself",
+    "busy": {
+      "title": "The assistant is busy",
+      "body": "It is handling more than it can right now. Nothing you have written is lost, and searching directly works as normal."
+    },
+    "unclear": {
+      "title": "That did not come back usable",
+      "body": "The assistant’s answer could not be read. Rather than guess at what it meant, here is the direct route."
+    },
+    "insufficient": {
+      "title": "We could not pin it down",
+      "body": "From what was described, the gap could not be located confidently. Saying so is better than naming a topic on a hunch — the search below is a good place to start instead."
+    }
+  },
+  "exam": {
+    "pageTitle": "Topic assessments",
+    "pageBody": "Each topic you have claimed can be assessed on its own. Passing one adds a badge naming that topic and the date it was assessed.",
+    "perTopicNote": "Assessed per topic, never per subject. A topic you do not pass leaves every other claim exactly as it was.",
+    "emptyTitle": "No claims to assess yet",
+    "emptyBody": "Add the subjects, levels and boards you teach on your profile first.",
+    "backToClaims": "All claims",
+    "startAssessment": "Take the assessment",
+    "assessedOn": "Assessed {{date}}",
+    "expiresOn": "expires {{date}}",
+    "startTitle": "Assessment: {{topic}}",
+    "startBody": "Read the rules before you begin. They do not change once you start.",
+    "rulesHeading": "The rules",
+    "rules": {
+      "items": "Three or four written questions, on this topic only, at the level and board you claimed.",
+      "graded": "Your answers are read for whether they are correct, whether you explain your reasoning, and whether you pitch the explanation at a student. The mark itself is calculated by a fixed rule, not decided by the assistant.",
+      "onPass": "Passing adds a badge naming this topic and the date. It is valid for twelve months.",
+      "onFail": "Not passing changes nothing else. Your identity verification, your other topics, your profile and your bookings are untouched.",
+      "override": "An administrator can overturn an automated result. That is a real route, not a formality.",
+      "appealOnly": "This is your appeal attempt for this topic."
+    },
+    "maxExchanges": "At most {{count}} exchanges in one session.",
+    "begin": "Begin the assessment",
+    "itemLabel": "Question {{index}} of {{total}}",
+    "answerPlaceholder": "Answer as you would explain it to a student…",
+    "explainHint": "Explain your reasoning rather than giving only the answer, and pitch it at the student rather than at another teacher. Both are part of what is being assessed.",
+    "submit": "Submit answers",
+    "appealBadge": "Appeal attempt",
+    "reasoningHeading": "Why this result",
+    "markedInCode": "The result was calculated by a fixed rule from how your answers were read. The same answers always produce the same result.",
+    "verdict": {
+      "passed": {
+        "title": "Passed: {{topic}}",
+        "body": "A badge naming this topic and today’s date now appears on your profile. It is valid for twelve months."
+      },
+      "notPassed": {
+        "title": "Not passed: {{topic}}",
+        "body": "This result applies to this topic only. Nothing else about your profile has changed."
+      }
+    },
+    "appeal": {
+      "overrideNote": "You can appeal this. An administrator reviews the questions, your answers and the reasoning, and can overturn the automated result. Their decision is recorded with the reason.",
+      "oncePerClaim": "One appeal per topic.",
+      "action": "Appeal this result",
+      "restOfProfile": "Your identity verification and every other topic you have claimed are unaffected."
+    },
+    "toast": {
+      "passed": "Assessment passed",
+      "notPassed": "Assessment not passed"
+    },
+    "unavailableClaimSafe": "Your claim is unchanged. Nothing was recorded against it, and you can take the assessment later."
+  },
+  "plan": {
+    "pageTitle": "Study plan",
+    "title": "The plan",
+    "validated": "Order checked",
+    "notValidated": "Order not confirmed",
+    "validatedNote": "The order was checked against the curriculum’s own prerequisites after the plan was written, and rewritten where it did not hold. A topic never appears before something it depends on.",
+    "notValidatedNote": "This plan’s order has not been confirmed against the prerequisite graph. Read it as a suggestion rather than a sequence.",
+    "weekLabel": "Week {{number}}",
+    "next": "Next",
+    "orderingHeading": "What depends on what",
+    "orderingNote": "From the curriculum, not from the plan. This is what the order above was checked against.",
+    "datesInCode": "The dates were calculated from your start date and the exam date. The assistant ordered the topics; it did not choose any date.",
+    "emptyTitle": "No study plan yet",
+    "emptyBody": "A plan is generated from a completed diagnostic and a target exam date."
+  },
+  "countdown": {
+    "heading": "Until the exam",
+    "headingFor": "Until {{name}}’s exam",
+    "daysUnit_one": "day",
+    "daysUnit_other": "days",
+    "daysLeft_one": "{{count}} day until the exam",
+    "daysLeft_other": "{{count}} days until the exam",
+    "passed": "The exam date has passed",
+    "examOn": "Exam on {{date}}",
+    "progressHeading": "Plan progress",
+    "progressCount": "{{done}} of {{total}}",
+    "progressNote": "Counted from what the tutor recorded in session notes, not from ticking topics off.",
+    "nextHeading": "Next topic",
+    "allDone": "Plan complete",
+    "allDoneBody": "Every topic in the plan has been covered and rated. Revision from here is repetition rather than new ground.",
+    "seeFullPlan": "See the whole plan"
+  },
+  "replay": {
+    "badge": "Recorded session",
+    "liveCalls": "Live model calls: {{count}}",
+    "body": "This is a stored conversation being replayed. It is not happening now, and no AI provider is contacted when you open it.",
+    "why": "Built this way on purpose: a demonstration that depends on a live service is one that a rate limit can take away at the wrong moment.",
+    "provenance": "Model {{model}} · prompt {{version}}",
+    "transcriptLabel": "Recorded conversation",
+    "role": {
+      "parent": "Parent",
+      "agent": "Assistant",
+      "tutor": "Tutor",
+      "system": "System"
+    },
+    "nextTurn": "Next turn",
+    "restart": "Start again",
+    "finished": "End of the recording",
+    "position": "Turn {{shown}} of {{total}}",
+    "exhibitHeading": "What this shows",
+    "verdict": {
+      "passed": "Passed",
+      "failed": "Not passed"
+    }
+  },
+  "demo": {
+    "title": "See it work",
+    "body": "Five recorded scenarios, each showing one thing the platform does. No account needed.",
+    "replay": "Replay this",
+    "backToList": "All scenarios"
+  }
+}

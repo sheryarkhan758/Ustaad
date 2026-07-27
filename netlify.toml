@@ -1,0 +1,73 @@
+# Netlify deployment — §10.2, §12.
+#
+# ── This file lives at the repository root, not inside Backend/ ────────────
+# The repository is an npm workspace with two members, `Backend` and
+# `Frontend`. Netlify installs dependencies from the directory it treats as
+# the base, so the base must be the root — otherwise the workspace link that
+# lets the client import `@shared/*` from `Backend/shared` does not exist at
+# build time and every shared Zod schema fails to resolve.
+#
+# One function serves the whole API. The routing lives in Express, and a second
+# route table here would be one more thing to keep in step with the first.
+
+[build]
+  # The workspace root. `npm install` here links both members.
+  base = "."
+  # Build only the client. The Function is bundled separately by esbuild.
+  command = "npm run build --workspace Frontend"
+  publish = "Frontend/dist"
+  functions = "Backend/netlify/functions"
+
+[build.environment]
+  # Node 20 is the floor `Backend/package.json` declares. better-sqlite3 is a
+  # development dependency only — production selects postgres-js through the
+  # presence of SUPABASE_DB_URL, and never opens a SQLite file.
+  NODE_VERSION = "20"
+  # Netlify sets NODE_ENV=production, which by default skips devDependencies.
+  # The client build needs Vite, which is one. Without this the build fails on
+  # a missing binary rather than on anything to do with the code.
+  NPM_FLAGS = "--include=dev"
+
+[functions]
+  node_bundler = "esbuild"
+  # A native module that must never enter the bundle: production never opens
+  # SQLite, and bundling a `.node` binary breaks the build outright.
+  external_node_modules = ["better-sqlite3"]
+
+# Every /api/* call reaches the single Express handler.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# The PWA is a single-page application: unknown paths are routes, not 404s.
+# Declared *after* the API redirect so it never swallows one.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # A token must never reach a log, a referrer header or an analytics script
+    # (§2.11). The session cookie is httpOnly, so this is defence in depth.
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+
+# The service worker must not be cached, or an installed PWA can pin itself to
+# a stale build and never see a deployment again (NFR-8).
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Hashed assets are immutable by construction — the filename changes when the
+# content does, so a year-long cache can never serve a stale one.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

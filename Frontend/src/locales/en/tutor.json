@@ -1,0 +1,207 @@
+{
+  "profile": {
+    "title": "My profile",
+    "biography": "Biography",
+    "biographyHint": "Stored exactly as you write it, and never translated.",
+    "qualifications": "Qualifications",
+    "experience": "Years of experience",
+    "areas": "Areas you will travel to"
+  },
+  "rates": {
+    "title": "Rates",
+    "rateType": "How you charge",
+    "mode": "Where you teach",
+    "monthly": "Monthly fee",
+    "hourly": "Per hour",
+    "single_session": "Per session",
+    "group_monthly": "Group, monthly",
+    "amount": "Amount",
+    "groupTotal": "Total you receive each month",
+    "perHead": "Per student, each month",
+    "perHeadHint": "What one family pays. This is the figure a parent compares.",
+    "sessionsPerWeek": "Sessions a week",
+    "minutesPerSession": "Minutes a session",
+    "groupSizeMax": "Most students in the group",
+    "travel": "Travel charge",
+    "travelHint": "Added on top for home visits. Leave blank if none.",
+    "rupeesOnly": "Whole rupees. No decimals, no commas.",
+    "negotiable": "This rate is negotiable",
+    "negotiableHint": "Families see that you are open to discussing it.",
+    "negotiableShort": "Negotiable",
+    "add": "Add this rate",
+    "remove": "Remove",
+    "comparableLabel": "What a parent compares",
+    "comparableShort": "Per hour",
+    "perHour": "an hour",
+    "previewPending": "Fill in the amount and we will show you the hourly equivalent.",
+    "previewNote": "This is the figure used to compare you with other tutors. It is not what you charge.",
+    "emptyTitle": "No rates yet",
+    "emptyBody": "Add at least one rate so families know what an arrangement with you costs.",
+    "whyTitle": "Why we show an hourly figure",
+    "whyBody": "Tuition in Pakistan is quoted four different ways, and a family comparing a monthly fee against a per-session fee cannot tell which is cheaper. So we convert every rate the same way and show the result. You still charge exactly what you set.",
+    "whyExample": "A monthly fee of {{monthly}} for three ninety-minute sessions a week works out at about {{hourly}} an hour.",
+    "whyWeeks": "A month is counted as {{weeks}} weeks, so the figure does not jump between a four-week and a five-week month."
+  },
+  "safety": {
+    "enforcedTitle": "These are enforced, not preferences",
+    "enforcedBody": "When you set a condition here, the system refuses any booking that breaks it. A family cannot request a session that contradicts what you have set, and you will not be asked to decline one.",
+    "noPenaltyBody": "Declines you make under these conditions are excluded from your confirmation rate. Setting them costs you nothing in how you appear to families.",
+    "femaleOnly": "I teach female students only",
+    "femaleOnlyHint": "Requests for male students will not reach you.",
+    "guardian": "A guardian must be present",
+    "guardianHint": "The family is told this before they book, and confirms it as part of the request.",
+    "restrictedAreas": "Areas I will not travel to",
+    "restrictedHint": "Home-visit requests from these areas will not reach you. You do not have to give a reason.",
+    "restrictedPlaceholder": "Search for an area to exclude",
+    "noRestrictedAreas": "You have not excluded any areas.",
+    "removeArea": "Stop excluding {{area}}",
+    "inForceTitle": "Currently in force",
+    "inForce": "Enforced",
+    "summaryFemaleOnly": "Only female students may book you.",
+    "summaryGuardian": "Every booking requires a guardian to be present.",
+    "summaryAreas_one": "One area is excluded from home visits.",
+    "summaryAreas_other": "{{count}} areas are excluded from home visits.",
+    "noneSet": "No conditions set. You will receive every request that matches your subjects and availability."
+  },
+  "verification": {
+    "statusLabel": "Verification",
+    "status": {
+      "draft": "Draft",
+      "pending_verification": "Waiting for review",
+      "documents_submitted": "Documents received",
+      "under_review": "Being reviewed",
+      "approved": "Approved",
+      "rejected": "Not approved",
+      "more_info_needed": "More information needed"
+    },
+    "explain": {
+      "draft": "Nobody has seen this yet. Complete the items below and submit when you are ready.",
+      "pending_verification": "An administrator will check your documents. You do not need to do anything.",
+      "documents_submitted": "Your documents have arrived and are in the queue.",
+      "under_review": "An administrator is reading your documents now.",
+      "approved": "Your profile is searchable. Families can find you and request bookings.",
+      "rejected": "Your profile is not searchable. The reason is below, and you can appeal.",
+      "more_info_needed": "An administrator needs something more before deciding. The details are below."
+    },
+    "submit": "Submit for verification",
+    "cannotSubmit_one": "One thing is still needed before you can submit",
+    "cannotSubmit_other": "{{count}} things are still needed before you can submit",
+    "checkedTitle": "What we checked",
+    "approvedBy": "Approved by {{name}} on {{date}}",
+    "notChecked": "No police or background check is performed. Your badge says exactly what was checked and nothing more.",
+    "decision": {
+      "approved": "Approved",
+      "rejected": "Not approved",
+      "more_info_needed": "More information needed",
+      "expired": "Lapsed",
+      "overridden": "Overridden on appeal"
+    },
+    "decidedOn": "Decided on {{date}}",
+    "appealTitle": "You can appeal this",
+    "appealBody": "An administrator will read your appeal and can overturn the decision. You may appeal once, after seven days.",
+    "appealAction": "Start an appeal",
+    "historyTitle": "Decision history",
+    "historyNote": "Every decision is kept. A later one replaces an earlier one without erasing it.",
+    "artefact": {
+      "cnic": "CNIC (national identity card)",
+      "degree": "Academic degree certificate",
+      "transcript": "Academic transcript",
+      "other": "Other document"
+    }
+  },
+  "claims": {
+    "statusAsserted": "Asserted — not yet tested",
+    "statusUnderAssessment": "Assessment in progress",
+    "statusVerified": "Passed assessment",
+    "statusFailed": "Not passed",
+    "statusExpired": "Lapsed",
+    "statusAppealed": "Under appeal",
+    "explain": {
+      "asserted": "You have told us you teach this. Nobody has tested it yet, and families see it described exactly that way.",
+      "under_assessment": "The assessment has started. Your badge appears only if you pass.",
+      "failed": "This topic was assessed and not passed. You keep the claim, and you may appeal or re-sit after the cooling period.",
+      "expired": "This badge has lapsed after twelve months. You remain listed; the badge returns when you re-sit.",
+      "appealed": "Your appeal is with an administrator."
+    },
+    "verifiedExplain": "Assessed on {{date}} and valid until {{expires}}. Families see the topic named, never a general claim about the subject.",
+    "untestedTitle_one": "One claim has not been tested",
+    "untestedTitle_other": "{{count}} claims have not been tested",
+    "untestedBody": "An untested claim is shown to families as something you said about yourself, not as something we checked. Sitting the assessment is what turns it into a badge.",
+    "requestAssessment": "Sit the assessment",
+    "withdraw": "Withdraw claim",
+    "emptyTitle": "No subjects claimed yet",
+    "emptyBody": "Tell us what you teach — subject, level and board. You will not be searchable until you claim at least one.",
+    "assertedHeading": "Also says she teaches",
+    "assertedNote": "These are her own statements. They have not been assessed, and Ustaad.com does not present them as verified."
+  },
+  "availability": {
+    "caption": "Your weekly availability",
+    "time": "Time",
+    "weekday": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
+    "cellLabel": "{{weekday}}, {{start}} to {{end}}",
+    "modeForNew": "How you will teach these slots",
+    "modeHint": "Applies to the blocks you tap next. You can mix modes across the week.",
+    "areaForNew": "Area for home visits",
+    "areaHint": "Only for slots where you travel.",
+    "emptyHint": "Tap the blocks when you are free. Tap again to remove one.",
+    "count_one": "{{count}} slot set",
+    "count_other": "{{count}} slots set",
+    "clearAll": "Clear the whole week"
+  },
+  "documents": {
+    "privacyTitle": "Your documents are never public",
+    "privacyBody": "They are stored in a private area that no search engine and no visitor can reach. They never appear on your profile.",
+    "privacyAccess": "Only an administrator can open them, only through a link that expires within minutes, and every time one is opened it is recorded against the administrator who did it.",
+    "whoSees": "Seen by: administrators only, during verification. Never by families, never by other tutors.",
+    "cnic_front": {
+      "title": "CNIC — front",
+      "purpose": "Confirms you are who you say you are. The number itself is never stored in a form anyone can search."
+    },
+    "cnic_back": {
+      "title": "CNIC — back",
+      "purpose": "Confirms the card is genuine and current."
+    },
+    "degree": {
+      "title": "Degree certificate",
+      "purpose": "Supports the subjects and levels you claim to teach."
+    },
+    "transcript": {
+      "title": "Transcript",
+      "purpose": "Optional. Helps where a degree title does not name the subject you teach."
+    },
+    "choose": "Choose a file",
+    "replace": "Replace",
+    "uploaded": "Uploaded",
+    "uploading": "Uploading",
+    "uploadingPercent": "{{percent}}% uploaded",
+    "accepted": "JPG, PNG or PDF, up to {{max}} MB.",
+    "errorNoFile": "No file was chosen.",
+    "errorTooLarge": "That file is larger than {{max}} MB. A photograph taken on a phone is usually well under it.",
+    "errorType": "That file type is not accepted. Use a JPG, PNG or PDF.",
+    "errorMismatch": "That file says it is a {{type}} but its name does not match. Save it again and retry."
+  },
+  "completeness": {
+    "title": "Profile completeness",
+    "count": "{{done}} of {{total}}",
+    "optional": "(optional)",
+    "item": {
+      "basics": "City and gender",
+      "bio": "A short biography",
+      "qualifications": "Your qualifications",
+      "modes": "How you teach",
+      "claims": "At least one subject claim",
+      "rates": "At least one rate",
+      "availability": "Your weekly availability",
+      "identityDocuments": "CNIC (front)",
+      "academicDocuments": "A degree certificate or transcript"
+    }
+  }
+}

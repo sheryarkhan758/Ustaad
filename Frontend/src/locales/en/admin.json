@@ -1,0 +1,45 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "pendingVerifications": "Awaiting a decision",
+    "documentsAwaitingReview": "Documents to review",
+    "pendingOrganisations": "Organisations awaiting approval",
+    "openFlags": "Open reports",
+    "safetyConcernReviews": "Safety-concern reviews",
+    "openVerificationAppeals": "Open appeals",
+    "expiringVerifications": "Badges lapsing soon",
+    "openDisputes": "Open disputes",
+    "newFeedback": "New feedback",
+    "newVolunteerApplications": "New volunteers",
+    "unmetDemandGaps": "Unmet demand",
+    "activeEngagements": "Active engagements",
+    "usersByRole": "Accounts by role"
+  },
+  "flags": {
+    "title": "Reports",
+    "reason": "Reason",
+    "reporter": "Reported by",
+    "target": "About",
+    "resolve": "Resolve",
+    "resolveTitle": "Resolve this report",
+    "resolveHint": "At least 15 characters. This is written to the audit log and cannot be edited afterwards.",
+    "decision": "Decision",
+    "actioned": "Confirmed and actioned",
+    "dismissed": "Dismissed",
+    "recorded": "Report recorded",
+    "inQueue": "It is now in the administrator queue.",
+    "empty": {
+      "title": "Nothing to review",
+      "body": "Reports appear here as they are raised."
+    }
+  },
+  "verifications": {
+    "title": "Verifications",
+    "queue": "Queue",
+    "approve": "Approve",
+    "reject": "Reject",
+    "requestInfo": "Request more information",
+    "artefacts": "Artefacts checked",
+    "reasonRequired": "A written reason is required for every decision, including approval."
+  }
+}

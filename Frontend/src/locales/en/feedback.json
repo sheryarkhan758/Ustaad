@@ -1,0 +1,25 @@
+{
+  "title": "Report a problem",
+  "intro": "This goes to the Ustaad.com team, not to any tutor. You do not need an account.",
+  "category": {
+    "label": "What kind of problem is it?",
+    "defect": "Something is broken",
+    "usability": "Something is hard to use",
+    "incorrect_ai_output": "The AI gave a wrong answer",
+    "missing_feature": "Something is missing",
+    "content_or_safety": "A safety or content concern",
+    "other": "Something else"
+  },
+  "detail": {
+    "label": "What happened?",
+    "hint": "Write in English or Urdu — whichever you prefer. It is stored exactly as you write it.",
+    "placeholder": "The area filter was hard to find on my phone…"
+  },
+  "safety": {
+    "label": "This is a safety concern",
+    "hint": "Safety reports jump the queue and are never shown to the tutor concerned."
+  },
+  "submit": "Send report",
+  "thanks": "Thank you",
+  "recorded": "Your report has been recorded and is in the team’s queue. If you raised a safety concern, it is prioritised and is never shown to the tutor concerned."
+}

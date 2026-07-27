@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ustaad.com">
+  <!--
+    The mark is the seal from the Verification Record, not a book or a
+    graduation cap. The product's subject is the record, so the icon is the
+    stamp that closes one.
+
+    Drawn inside the maskable safe zone: everything meaningful sits within the
+    centre 80%, so Android's circular, squircle and rounded-square masks all
+    crop to something intact rather than clipping the ring.
+  -->
+  <rect width="512" height="512" fill="#1B3A57"/>
+
+  <!-- Seal rings -->
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#A8763E" stroke-width="10" opacity="0.85"/>
+  <circle cx="256" cy="256" r="122" fill="none" stroke="#A8763E" stroke-width="5" opacity="0.5"/>
+
+  <!-- The check, in teal: the platform's act, inside the seal -->
+  <path d="M196 262l42 42 84-92"
+        fill="none" stroke="#0F7B8A" stroke-width="34"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,62 @@
+{
+  "name": "Ustaad.com — verified tutors and home tuition",
+  "short_name": "Ustaad",
+  "description": "Verified tutor discovery and home tuition for Pakistan. Every tutor's identity is checked by the platform, and the record says exactly what was checked.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#F1F4F7",
+  "theme_color": "#1B3A57",
+  "dir": "auto",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a tutor",
+      "short_name": "Search",
+      "url": "/search?source=pwa-shortcut",
+      "description": "Search verified tutors by subject, level, area and gender preference"
+    },
+    {
+      "name": "My bookings",
+      "short_name": "Bookings",
+      "url": "/my/bookings?source=pwa-shortcut",
+      "description": "Your current and past engagements"
+    }
+  ]
+}

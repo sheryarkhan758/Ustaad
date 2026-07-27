@@ -1,0 +1,12 @@
+{
+  "name": "ustaad",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ustaad.com — verified tutor discovery and home tuition for Pakistan",
+  "workspaces": ["Backend", "Frontend"],
+  "scripts": {
+    "dev:api": "npm run dev --workspace Backend",
+    "dev:web": "npm run dev --workspace Frontend",
+    "verify": "npm run verify --workspace Frontend && npm test --workspace Backend"
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "title": "My bookings",
+  "status": {
+    "requested": "Requested",
+    "confirmed": "Confirmed",
+    "in_progress": "In progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "declined": "Declined",
+    "no_show": "Did not attend"
+  },
+  "engagement": {
+    "monthly": "Monthly",
+    "short_term_package": "Short package",
+    "single_session": "Single session",
+    "group": "Group"
+  },
+  "address": {
+    "areaOnly": "Area shown until you confirm",
+    "revealed": "Full address",
+    "note": "The tutor sees only the area until she confirms. The street address is shared afterwards."
+  },
+  "guardian": "A guardian will be present",
+  "actions": {
+    "confirm": "Confirm booking",
+    "decline": "Decline",
+    "cancel": "Cancel booking",
+    "complete": "Mark completed"
+  },
+  "empty": {
+    "title": "No bookings yet",
+    "body": "When you request a tutor, the engagement appears here."
+  },
+  "list": {
+    "familyTitle": "My bookings",
+    "tutorTitle": "Bookings",
+    "open": "Needs attention",
+    "awaiting": "Waiting for your answer",
+    "live": "Confirmed and running",
+    "past": "Finished",
+    "tutor": "Tutor",
+    "student": "Student",
+    "emptyTitle": "No bookings yet",
+    "emptyBody": "When you request a tutor, the engagement appears here with its state and what happens next.",
+    "findTutor": "Find a tutor",
+    "tutorEmptyTitle": "No requests yet",
+    "tutorEmptyBody": "Requests from families appear here. Answering quickly matters — a family that waits books somebody else."
+  },
+  "card": {
+    "untitled": "Booking",
+    "trial": "Trial"
+  },
+  "request": {
+    "title": "Request a booking",
+    "engagementLegend": "What kind of arrangement",
+    "studentLabel": "Who is this for",
+    "studentHint": "Add your child here. Children do not have accounts on Ustaad.com — you hold the account and arrange everything through it.",
+    "studentPlaceholder": "Choose a student",
+    "claimLabel": "Subject, level and board",
+    "modeLabel": "Where the sessions happen",
+    "modeAny": "Any of the ways she teaches",
+    "addressLabel": "Where you are",
+    "addressHint": "House and street. Read what the tutor will and will not see, below.",
+    "agreedHeading": "What you are agreeing to",
+    "travelCharge": "Travel: {{amount}}, recorded separately",
+    "submit": "Send request",
+    "sent": "Request sent",
+    "slotTaken": "That time was booked by somebody else while you were filling this in. The times below have been refreshed — please choose another."
+  },
+  "slots": {
+    "legend": "Choose a time",
+    "chosen": "Chosen: {{day}}, {{start}} to {{end}}",
+    "onlyFreeNote": "Only times the tutor is actually free are shown. A time already booked does not appear here at all, so nothing you can choose can be refused for being taken.",
+    "emptyTitle": "No free times in the next two weeks",
+    "emptyBody": "She may have no availability set, or everything may be booked. You can still ask on the unmet demand board."
+  },
+  "single": {
+    "heading": "What this hour is for",
+    "whyRequired": "Both of these are required. They are what lets the tutor arrive prepared — it is the difference between a useful hour and an hour spent working out why you came.",
+    "purposeLabel": "Why this session",
+    "purpose": {
+      "concept_clarification": "A concept that is not going in",
+      "assessment_review": "Going over a test or assignment",
+      "doubt_solving": "Specific questions to work through",
+      "exam_revision": "Revision before an exam"
+    },
+    "topicsLabel": "Which topics",
+    "topicsHint": "Choose at least one. The tutor prepares from this.",
+    "noTopics": "This tutor has not listed topics for the chosen subject yet."
+  },
+  "monthly": {
+    "sessionsPerWeekLabel": "Sessions each week",
+    "cycleWeeksLabel": "Weeks in this cycle",
+    "cycleWeeksHint": "Usually four. A payment record is raised per cycle."
+  },
+  "package": {
+    "sessionsLabel": "How many sessions in total",
+    "sessionsHint": "Between 2 and 40, agreed in advance."
+  },
+  "disclosure": {
+    "heading": "Who sees the address",
+    "family": {
+      "beforeConfirm": "Before she confirms, the tutor sees only your area — not your street or house number.",
+      "afterConfirm": "After she confirms, she sees the full address, because she has to get there.",
+      "nowVisible": "She has confirmed, so she can now see the full address."
+    },
+    "tutor": {
+      "beforeConfirm": "Until you confirm, you see the area only. That is enough to decide whether you are willing to travel there.",
+      "afterConfirm": "Once you confirm, you see the full address.",
+      "nowVisible": "You have confirmed, so the full address is available to you."
+    },
+    "nobodyElse": "Nobody else ever sees it. It is not on any public profile and not in any search result."
+  },
+  "safety": {
+    "heading": "Conditions this tutor has set",
+    "guardianRequired": "She teaches only with a parent or guardian present in the home.",
+    "femaleStudentsOnly": "She teaches female students only.",
+    "enforcedNote": "Ustaad.com enforces these — a request that does not meet them is refused rather than passed on. Declines she makes under her own conditions do not count against her statistics.",
+    "acknowledgeLabel": "A parent or guardian will be present for every session",
+    "acknowledgeHint": "The request cannot be sent without this.",
+    "refused": "This tutor requires a guardian present. Tick the box above to continue, or choose a tutor who does not set this condition."
+  },
+  "trial": {
+    "flagLabel": "Make this a trial session",
+    "flagHint": "One session to find out whether this tutor suits your child, before committing to a month. Afterwards you will be asked a few private questions about how it went."
+  },
+  "fit": {
+    "heading": "How did the trial go?",
+    "privateNotice": "The tutor never sees this. Not the scores, not your comments, not whether you filled it in. It is not shown on her profile, does not affect her ranking, and is not included in any statistic about her. Please answer honestly — that is the only reason this is worth asking.",
+    "dimension": {
+      "communication": "Communication",
+      "punctuality": "Punctuality",
+      "engagement": "Engagement",
+      "pace": "Pace"
+    },
+    "dimensionHint": {
+      "communication": "Could your child follow her explanations and ask questions?",
+      "punctuality": "Did she arrive when she said she would?",
+      "engagement": "Was your child involved, or sitting through it?",
+      "pace": "Too fast, too slow, or about right?"
+    },
+    "continueLegend": "Would you continue with this tutor?",
+    "continue": {
+      "yes": "Yes, continue",
+      "no": "No, look for someone else"
+    },
+    "noteLabel": "Anything else",
+    "noteHint": "Optional. Write in whatever language you like — it is stored exactly as you write it.",
+    "submit": "Send fit check",
+    "sent": "Fit check sent",
+    "submittedHeading": "Your fit check"
+  },
+  "lifecycle": {
+    "heading": "What happens next",
+    "action": {
+      "confirmed": "Confirm booking",
+      "declined": "Decline",
+      "in_progress": "Start session",
+      "completed": "Mark completed",
+      "cancelled": "Cancel booking",
+      "no_show": "Record a no-show"
+    },
+    "done": {
+      "confirmed": "Booking confirmed",
+      "declined": "Request declined",
+      "in_progress": "Session started",
+      "completed": "Booking completed",
+      "cancelled": "Booking cancelled",
+      "no_show": "No-show recorded"
+    },
+    "noActions": "This booking is finished. Nothing further can be changed on it.",
+    "terminal": {
+      "completed": "This engagement is complete. Completed bookings are not reopened — reviews, payment records and the progress ledger all hang off them.",
+      "cancelled": "This booking was cancelled.",
+      "declined": "This request was declined.",
+      "no_show": "Recorded as a no-show."
+    },
+    "reasonRequired": "A reason is required, and the other party will see it. A booking that disappears without explanation is worse than one that is declined clearly.",
+    "reasonLabel": "Reason",
+    "reasonGiven": "Reason given: {{reason}}",
+    "underSafetyConstraintLabel": "I am declining because of a condition I declared",
+    "underSafetyConstraintHint": "Declines made under your own declared conditions are excluded from your confirmation rate. Tick this now — it cannot be added afterwards."
+  },
+  "detail": {
+    "back": "All bookings",
+    "summaryCaption": "Booking details",
+    "when": "When",
+    "mode": "Where",
+    "agreedRate": "Agreed rate",
+    "travelCharge": "Travel charge",
+    "guardianPresence": "Guardian present",
+    "guardianPresenceValue": "Required for every session"
+  }
+}

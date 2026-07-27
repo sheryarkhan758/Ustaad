@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Fonts are self-hosted rather than fetched from Google Fonts.
+ *
+ * Two reasons, both about this audience: a third-party font request is a
+ * render-blocking round trip to a host that may be slow or blocked from
+ * Pakistan, and it leaks every visitor's IP to that host. `npm run fonts`
+ * downloads them into /public/fonts; until then the stacks fall back to the
+ * system faces declared in tailwind.config.js, which is why every family has a
+ * real fallback rather than a bare `sans-serif`.
+ */
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    /* Never below 16px: iOS Safari zooms a focused input under 16px, which on
+       a form-heavy interface throws the whole layout sideways mid-entry. */
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-body text-body antialiased;
+    /* Bottom action bars are fixed; this keeps the last element reachable. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /**
+   * Urdu.
+   *
+   * `[lang="ur"]` rather than a class, so the rule follows the document
+   * language wherever it is set — including on a single element quoting Urdu
+   * inside an English page, which happens on every tutor card that shows a
+   * biography verbatim (FR-27.5).
+   */
+  [lang='ur'] {
+    @apply font-urdu text-urdu-body;
+  }
+
+  [lang='ur'] h1,
+  [lang='ur'] h2,
+  [lang='ur'] .u-display {
+    @apply font-nastaliq;
+    /* Nastaliq's cascading baseline clips at Latin leading. This is the floor. */
+    line-height: 2.4;
+  }
+
+  /**
+   * Focus.
+   *
+   * `:focus-visible`, so a mouse user does not get a ring on every click but a
+   * keyboard user never loses their place. Two-tone: a light halo inside the
+   * dark ring, so the indicator survives on both paper and ink grounds.
+   */
+  :focus-visible {
+    outline: 2px solid theme('colors.verdigris.deep');
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Removing the default only after :focus-visible is defined, never before. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /**
+   * Reduced motion.
+   *
+   * Not a nicety. Vestibular disorders are real, and the one animation in this
+   * product that matters — the skeleton shimmer — is precisely the kind of
+   * repeating movement that triggers them.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Amounts and dates align in a column on a record. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /**
+   * Skip link. Present in the DOM at all times, visible only on focus.
+   *
+   * A role-aware navigation can run to a dozen items; a keyboard or switch user
+   * should not traverse all of them on every page.
+   */
+  .skip-link {
+    @apply sr-only;
+  }
+
+  .skip-link:focus {
+    @apply not-sr-only fixed start-4 top-4 z-50 rounded-control bg-ink px-4 py-3 text-white shadow-raised;
+  }
+}

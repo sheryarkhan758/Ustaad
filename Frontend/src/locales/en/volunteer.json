@@ -1,0 +1,21 @@
+{
+  "title": "Volunteer as a tutor",
+  "intro": "You do not need an account. A volunteer is verified on exactly the same basis as a paid tutor.",
+  "fullName": "Full name",
+  "email": "Email address",
+  "phone": "Phone number",
+  "city": "City",
+  "area": "Area",
+  "gender": "Gender",
+  "subjects": "Subjects you can teach",
+  "levels": "Levels",
+  "weeklyHours": "Hours a week you can give",
+  "weeklyHoursHint": "Be realistic. A volunteer who is over-committed stops turning up, and the family that loses those sessions is the one that could not pay for them.",
+  "deliveryModes": "How you can teach",
+  "motivation": "Why do you want to volunteer?",
+  "motivationHint": "In your own words, in any language. Stored exactly as you write it.",
+  "document": "Attach a CV (PDF, optional)",
+  "submit": "Send application",
+  "thanks": "Application received",
+  "received": "Your application has been recorded and the team has been notified. Verification is the same process a paid tutor goes through."
+}

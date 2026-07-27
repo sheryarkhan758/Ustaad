@@ -1,0 +1,61 @@
+{
+  "boundary": {
+    "heading": "How payment works here",
+    "body": "Ustaad.com records what was agreed and what both parties confirm was paid. It does not process, hold or transfer money. Payment is made directly between the family and the tutor."
+  },
+  "ledger": {
+    "title": "Payment record",
+    "emptyTitle": "No payment records yet",
+    "emptyBody": "A record is raised when the booking is confirmed, with the rate frozen as it stood at that moment.",
+    "totalsCaption": "Totals across this engagement",
+    "totalSettled": "Confirmed by both parties",
+    "totalOutstanding": "Not yet confirmed by both",
+    "totalsNote": "Only records both parties have acknowledged count as confirmed. A single-party claim stays in the second row until the other side agrees."
+  },
+  "status": {
+    "pending": "Not yet acknowledged",
+    "family_marked": "Marked paid by the family",
+    "settled": "Confirmed by both",
+    "disputed": "Disputed"
+  },
+  "line": {
+    "caption": "Cycle {{cycle}}",
+    "agreedAmount": "Agreed amount",
+    "travelCharge": "Travel charge",
+    "total": "Total agreed",
+    "amountLocked": "The agreed amount can no longer be changed on this record. Correct it by raising a dispute, which leaves a trail, rather than by editing a figure both people already agreed to."
+  },
+  "ack": {
+    "family": {
+      "done": "The family has marked this paid.",
+      "pending": "The family has not marked this paid yet."
+    },
+    "tutor": {
+      "done": "The tutor has confirmed receiving it.",
+      "pending": "The tutor has not confirmed receiving it yet."
+    }
+  },
+  "action": {
+    "markPaid": "I have paid this",
+    "markedPaid": "Marked as paid",
+    "confirmReceived": "I received this",
+    "confirmedReceived": "Confirmed as received"
+  },
+  "dispute": {
+    "open": "Raise a dispute",
+    "heading": "Raise a dispute",
+    "notARefund": "This is not a refund request. Ustaad.com never held the money, so there is nothing here for it to return. A dispute is a written disagreement that an administrator reads and resolves in writing.",
+    "reasonLabel": "What is the disagreement",
+    "reasonHint": "One line. This is what an administrator sees first.",
+    "detailLabel": "Details",
+    "detailHint": "Optional. Write as much as you need, in whichever language you prefer.",
+    "submit": "Raise dispute",
+    "raised": "Dispute raised",
+    "status": {
+      "open": "Dispute open",
+      "under_review": "Under review by an administrator",
+      "resolved": "Dispute resolved",
+      "withdrawn": "Dispute withdrawn"
+    }
+  }
+}

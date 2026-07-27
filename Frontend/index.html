@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      `viewport-fit=cover` so the bottom action bar can sit inside the safe
+      area on a notched device. `user-scalable` is deliberately NOT disabled:
+      pinch-zoom is an accessibility feature, and a product read by parents on
+      small screens is the last place to take it away.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1B3A57" />
+    <meta name="description" content="Ustaad.com — verified tutor discovery and home tuition for Pakistan. Every tutor's identity is checked by the platform, and the record says exactly what was checked." />
+
+    <title>Ustaad.com — verified tutors and home tuition</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Android home-screen install, full-screen launch (§10.4, NFR-8). -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ustaad" />
+  </head>
+  <body>
+    <!-- The skip link is the first focusable thing on every page. -->
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

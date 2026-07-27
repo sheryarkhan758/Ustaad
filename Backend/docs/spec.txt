@@ -1,0 +1,2383 @@
+
+USTAAD.COM
+Verified Tutor Discovery, Home Tuition & Matching Platform
+
+PROJECT PROPOSAL & REQUIREMENTS SPECIFICATION
+Prepared by
+Iqra
+Project title
+Ustaad.com — Verified Tutor Discovery, Home Tuition & Matching Platform
+Document type
+Project Proposal and Software Requirements Specification
+Project type
+Individual final project — full-stack web application (installable PWA)
+Document version
+4.0 (supersedes 3.0)
+Date
+26 July 2026
+Target market
+Pakistan — multi-city, area-level granularity
+Total requirements
+219 functional requirements across 32 modules
+
+Confidential — Academic Submission
+
+
+Document Control
+Revision history
+Version
+Date
+Author
+Summary of change
+1.0
+25 Jul 2026
+Iqra
+Initial specification. Five roles, location taxonomy, tutor profiles, pricing, booking, reviews, three AI components.
+2.0
+25 Jul 2026
+Iqra
+Twelve additional feature modules integrated. Gender preference filtering added as a Must requirement. AI layer expanded to five components. Phase gating introduced.
+3.0
+25 Jul 2026
+Iqra
+Brand set to Ustaad.com. Problem statement extended with restricted-mobility home tuition, platform-owned verification and fraud transparency, and short-term hourly engagements. Three new modules added (§6.29–§6.31): Restricted-Mobility Home Tuition & Grooming, Short-Term and Single-Session Engagements, Payment Transparency & Fraud Prevention. Two-way tutor safety controls added.
+4.0
+26 Jul 2026
+Iqra
+Database decision restaged: development on a local SQLite file, production on Supabase Postgres at deployment to Netlify, with the migration cost stated and contained (§10.2, §10.3, §12). Two new modules added (§6.32–§6.33): Platform Feedback and Product Improvement, and the Volunteer Tutor Programme — a public application form accepting a PDF attachment and dispatching every submission to the team mailbox through EmailJS. Data model extended (§9.10); SEC-24 to SEC-26 added.
+
+What changed in version 3.0
+Four directed amendments have been incorporated. Each is traceable to a specific new or revised section.
+Amendment
+Incorporated at
+Project identity set to Ustaad.com; author recorded as Iqra
+Title page, §1
+Restricted household mobility: families who do not permit daughters to travel to tuition centres require a female tutor who teaches and mentors at home
+§2.1 (new primary driver), §3 OBJ-1, §6.29 (new module), §6.16 elevated
+Platform-owned verification and end-to-end transparency against fraud: every tutor verified by the administrator through CNIC and academic documents; agreed rates and payment status recorded and auditable
+§2.3, §6.6 revised, §6.31 (new module), §11 SEC-19 to SEC-23
+Short-term hourly engagement: a tutor may be hired for a single session for concept clarification or assessment support, without monthly commitment
+§2.6, §6.30 (new module), §6.5 revised, §6.8 revised
+
+Note on terminology
+Section 2.1 addresses households in which daughters are not permitted to travel outside the home for education. This document describes that circumstance in neutral descriptive language — "restricted household mobility" — rather than characterising the families themselves. The wording is chosen deliberately: the specification is an engineering document, the constraint is a design input, and neutral framing keeps the analysis defensible in academic review while describing exactly the same real situation.
+What changed in version 4.0
+Three directed amendments have been incorporated. Each is traceable to a specific new or revised section.
+Amendment
+Incorporated at
+Database restaged: development proceeds on a local SQLite file now, and the schema migrates to Supabase Postgres at the point of deployment to Netlify
+§9 preamble, §10.1, §10.2 rewritten, §10.3, §12, §14.1, §14.6, §17 decision 1
+Platform feedback channel: any user may report on Ustaad.com itself — bugs, usability difficulty, wrong AI output, feature requests — into an administrator triage queue
+§4.1, §6.32 (new module), §9.10, §11 SEC-26, §17 decision 20
+Volunteer tutor programme: a publicly reachable application form with an optional PDF attachment, wired to EmailJS so that every submission arrives in the team mailbox as well as in the database
+§4.1, §6.33 (new module), §9.10, §10.1, §11 SEC-24 to SEC-25, §17 decisions 21–22
+
+
+
+Table of Contents
+The contents field below populates when the document is opened in Microsoft Word. To refresh it, select the field and press F9, or use References → Update Table.
+
+TOC \h \o "1-3"
+
+
+
+1. Project Identification
+Field
+Detail
+Project title
+Ustaad.com — Verified Tutor Discovery, Home Tuition & Matching Platform
+Short name
+Ustaad.com
+Prepared by
+Iqra
+Document type
+Project Proposal and Requirements Specification
+Project type
+Individual final project — full-stack web application delivered as an installable Progressive Web App
+Document version
+4.0
+Date
+26 July 2026
+Target market
+Pakistan — multi-city coverage at province, city and area granularity
+Primary platform
+Responsive web application, installable on Android as a PWA
+Total functional requirements
+219 across 32 modules
+AI components
+Five (two multi-turn agents, three single-shot components)
+Infrastructure cost
+Zero — all services operate within permanent free tiers
+
+1.1 Executive summary
+Ustaad.com is a verified tutor discovery and matching platform for Pakistan. It addresses a market that is large, entirely informal, and coordinated almost exclusively through WhatsApp groups, notice boards and word of mouth — with no mechanism for verifying that a tutor can teach what they claim to teach, no way to compare prices quoted in incompatible units, and no record of what was agreed or paid.
+The platform contributes four things that existing tutor directories do not. First, it serves households where a female student cannot travel to a tuition centre, by making verified female home tutors discoverable under a hard gender constraint that the system enforces rather than merely suggests. Second, it replaces self-declared expertise with assessed expertise: every subject claim is challenged by an AI examiner at topic level, and every identity is verified by the platform administrator against a CNIC and academic documents before the profile is approved. Third, it matches at topic level rather than subject level, using an AI diagnostic agent that interviews a parent to locate the actual gap — which is frequently two chapters upstream of the symptom. Fourth, it makes the market legible: rates are normalised to a comparable basis, benchmarked against local medians, and every engagement records what was agreed and what was paid.
+The platform also supports engagement shapes the market currently cannot express — a single hourly session for concept clarification or assessment support, a structured trial before any monthly commitment, and group tuition pooled across neighbouring students at a reduced per-head rate.
+
+
+2. Problem Statement
+Private tuition in Pakistan is a large, entirely informal market. Coordination happens through WhatsApp groups, notice boards, and personal referral. Seven distinct failures are consistent across the market, and the first is the most consequential because it determines whether education continues at all.
+2.1 Restricted household mobility denies girls access to tuition entirely
+In a significant proportion of Pakistani households — particularly in conservative communities, rural districts, and lower-income urban neighbourhoods — daughters are not permitted to travel outside the home for education. Tuition centres, academies and a male tutor's residence are all unavailable to them. Where the family will not permit travel, the practical outcome is that supplementary education stops, regardless of the student's ability or the family's willingness to pay.
+For these families a single arrangement remains acceptable: a female tutor who comes to the home, teaches the student there, and additionally provides the personal mentoring and grooming that families expect alongside academic instruction. This arrangement is not a preference to be accommodated at the margins. It is the only viable channel, and for a large group of students it is the difference between continued schooling support and none.
+The informal market serves this need badly. Finding a female tutor who is genuinely qualified, will travel to a specific area, and can be trusted in the family home is done entirely by referral. There is no verification, no record, and no recourse. Families either accept an unverified stranger on a neighbour's recommendation, or they do without.
+Design consequence
+Gender is treated as a hard, system-enforced exclusion criterion rather than a ranking preference (§6.16). A dedicated home-tuition pathway combines a female-only constraint, home-delivery mode, area matching and guardian-presence expectations into a single flow (§6.29). Because the tutor is a woman travelling to an unfamiliar residence, the same module provides reciprocal safety controls for her — she may restrict herself to female students, require guardian presence, and see the area before accepting any engagement. Safety in this arrangement is two-directional, and the specification treats it as such.
+2.2 Expertise is asserted, never demonstrated
+Anyone can list themselves as an FSc Physics tutor. No existing platform in this market tests the claim. A parent discovers whether a tutor actually commands the syllabus only after paying for a month of sessions, by which point both the money and the student's time are gone. The parent has no instrument for assessing subject competence, which is precisely why referral persists — a neighbour's experience is weak evidence, but it is the only evidence available.
+2.3 No verification, no accountability, and consequently fraud
+The informal market has no identity verification whatsoever. A tutor may misrepresent qualifications, experience, or identity with no possibility of detection and no consequence. Fabricated degrees, inflated experience, and in the worst cases impersonation are all unchecked. Because no institution stands behind any arrangement, a family that is defrauded — of fees, of a student's exam term, or of trust — has nowhere to take the complaint.
+Payment compounds this. Rates are agreed verbally. Nothing records what was agreed, what was delivered, or what was paid. Disputes over fees for sessions that did not take place, or sessions delivered but not paid for, are resolved by whoever argues more forcefully, and both tutors and families lose in this arrangement.
+Ustaad.com addresses this through platform-owned verification. Every tutor is verified by the platform administrator against a CNIC and original academic documents before the profile becomes approved and searchable. The verification is performed by the platform, recorded by the platform, timestamped, attributed to the approving administrator, and displayed publicly as a specific statement of what was checked. Ustaad.com owns the verification chain; it is not delegated to the tutor's own assertion or to a third party. Every engagement additionally records the agreed rate and the payment status acknowledged by both parties, producing an auditable trail where the informal market produces nothing.
+An important boundary, stated plainly
+Ustaad.com records and makes transparent what was agreed and what both parties confirm was paid. It does not process payments, hold funds, or move money. Payment settlement remains directly between the family and the tutor. This distinction is deliberate and is stated in these terms wherever payment is discussed (§6.31, §4.2). Building a payment gateway would require licensed payment-service integration, know-your-customer obligations, and a funded dispute-resolution process — none of which is achievable within this project, and claiming otherwise would misrepresent the system. Transparency of record is achievable, is genuinely valuable against fraud, and is what the platform delivers.
+2.4 Matching happens at the wrong granularity
+Existing directories match at subject level: a parent searches for a "Maths tutor". The actual problem is almost always at topic level and is almost always upstream of the symptom. A student failing quadratic equations usually has an unresolved weakness in signed-number arithmetic or algebraic factorisation, two chapters earlier. A tutor engaged to teach quadratics will teach quadratics, and the student will continue to fail, because the prerequisite was never repaired.
+Subject-level search cannot express this problem, and parents are not equipped to diagnose it — that is a teacher's skill. So families hire on proximity, price and gender, and hope.
+2.5 Feedback carries no usable signal
+Star ratings compress to a meaningless average. On every platform in this category, effectively every listed tutor sits near 4.7 stars, which distinguishes nothing. The real signal exists in review text — whether the tutor arrives on time, whether they teach the concept or simply complete the homework, whether they know the board's paper pattern, whether the student's confidence changed — but that text is unstructured, uncomparable, and unweighted by whether the reviewer had one session or thirty.
+2.6 The market has no short engagement, and no way to try before committing
+The default unit in Pakistani tuition is one month, frequently paid in advance. This produces two failures at once.
+A family that discovers a mismatch — wrong pace, wrong communication style, wrong subject depth — discovers it four weeks and twelve thousand rupees late. There is no trial mechanism.
+Separately, and just as importantly, the market cannot serve short needs at all. A student who needs one hour on a single misunderstood concept, one session to work through a returned assessment paper, or a focused revision block before a paper has no way to buy that. The available product is a month. Because the minimum purchase is far larger than the actual need, the need goes unmet — the student either struggles on alone or the family commits to a month they did not want. A market whose smallest unit is thirty times the smallest need is failing a large volume of genuine demand.
+Design consequence
+Ustaad.com supports three engagement types as first-class concepts: monthly ongoing, short-term package, and single session (§6.30). A single session may be booked on an hourly basis for a declared purpose — concept clarification, assessment or paper review, doubt-solving, or pre-examination revision — with no monthly commitment and no obligation on either side to continue. This is paired with a structured trial mechanism (§6.20) so that a family entering an ongoing arrangement does so after evidence rather than before it.
+2.7 Prices are quoted in incompatible units
+Rates are quoted monthly, hourly, and per-session interchangeably. "Rupees eight thousand a month for three days a week" and "rupees nine hundred an hour" cannot be compared by inspection, and no one performs the arithmetic. Neither families nor tutors know the prevailing rate for their subject, level and area. Tutors under-price themselves in ignorance; families over-pay in ignorance; and no one can tell which is happening.
+2.8 No accountability for outcomes
+A family paying fifteen thousand rupees a month for six months has no evidence of progress beyond the tutor's own reassurance. Nothing records which topics were covered, whether mastery improved, or whether the original weakness was ever addressed. The arrangement is expensive, long-running, and entirely unmeasured.
+2.9 Target users
+User segment
+Need addressed
+Families with restricted mobility for daughters
+A verified female tutor who will teach and mentor at home, in their area, under conditions the family finds acceptable — where no other route to supplementary education exists
+Parents of school students (Class 1–12)
+A tutor whose competence is demonstrated rather than asserted, whose identity is verified by the platform, and whom they can trial before committing to a month
+Independent students aged 18 and over (FSc, O/A Level, university)
+Topic-specific help on a compressed timeline, including single hourly sessions for a specific concept or assessment
+Students with a short, specific need
+The ability to buy one hour rather than one month
+Tutors
+Discoverability, a credible instrument for proving expertise, knowledge of the market rate, and a record of what was agreed
+Female tutors specifically
+Access to a large underserved demand segment, with safety controls governing whose home they enter and under what conditions
+Academies and educational organisations
+A searchable pool of pre-verified tutors for vacancies
+
+2.10 Differentiation from existing platforms
+The comparison below is stated explicitly at the top of the project README. Naming what already exists and stating precisely what is different is a stronger position than leaving the distinction implicit.
+Existing platforms (Preply, Superprof, Tutors.pk and similar)
+Ustaad.com
+Gender treated as an optional filter, if present at all
+Gender is a hard, system-enforced exclusion; a dedicated female home-tuition pathway exists as a primary flow
+No identity verification; profiles are self-asserted
+Platform-owned verification: CNIC and academic documents checked by the administrator before approval, with a public record of what was verified
+Self-declared subject expertise
+AI-assessed per-topic competency, badged, expiring at twelve months, with an appeal path
+Subject-level search
+Topic-level search against a diagnosed prerequisite gap map
+Star rating average
+Structured review dimensions with quoted evidence, credibility-weighted by completed sessions
+Search box as the entry point
+Conversational AI diagnostic agent as the primary entry point
+Monthly or hourly commitment only
+Three engagement types including single hourly sessions for a declared short-term purpose
+No trial mechanism
+Structured trial session with a private fit check before ongoing commitment
+No price context
+Normalised hourly equivalents plus two-sided benchmarking against local medians
+No record of agreement or payment
+Agreed rate and mutually acknowledged payment status recorded per engagement, with an auditable trail
+One-to-one only
+Deterministic group tuition pooling across neighbouring students at a reduced per-head rate
+Opaque ranking
+AI narration of a deterministic score, with the underlying signal table viewable
+No outcome tracking
+Session-level topic mastery ledger visible to the parent
+English-only interface
+Bilingual interface, English and Urdu
+Failed searches discarded
+Unmet demand aggregated and surfaced to tutors and administrators
+
+
+3. Objectives
+ID
+Objective
+Measure of achievement
+OBJ-1
+Make verified female home tutors discoverable to families with restricted mobility
+A dedicated home-tuition pathway returning only female tutors offering home delivery in the selected area, with the constraint enforced in application code
+OBJ-2
+Establish platform-owned identity verification against fraud
+Every approved tutor verified by the administrator against CNIC and academic documents, with a timestamped, attributed, publicly displayed record
+OBJ-3
+Replace declared expertise with assessed expertise
+Per-topic verification badge, issued on assessment, expiring at twelve months, appealable
+OBJ-4
+Enable topic-level rather than subject-level discovery
+Search filters operate on topic; matching runs against a diagnosed gap map
+OBJ-5
+Guide non-expert parents to an accurate requirement
+AI agent produces a prerequisite gap map from a plain-language description of the symptom
+OBJ-6
+Convert free-text feedback into comparable signal
+Eight structured dimensions extracted per review with quoted evidence and credibility weighting
+OBJ-7
+Serve short and single-session demand
+Single-session hourly booking with a declared purpose, no monthly commitment
+OBJ-8
+Lower the commitment barrier for ongoing engagements
+Structured trial session with a private fit check preceding any monthly arrangement
+OBJ-9
+Make the market's pricing legible
+Normalised hourly equivalents plus median benchmarking per subject, level, area and mode
+OBJ-10
+Create a transparent record of agreement and payment
+Agreed rate recorded per booking; payment status mutually acknowledged; immutable audit trail
+OBJ-11
+Protect minors structurally
+No account for under-18 learners; no private adult-to-minor channel anywhere in the system
+OBJ-12
+Protect visiting tutors reciprocally
+Student-gender restriction, guardian-presence requirement, and pre-acceptance area visibility, all tutor-controlled
+OBJ-13
+Provide outcome visibility
+Parent-facing topic mastery progression across sessions
+OBJ-14
+Make ranking explainable
+AI narration of a deterministic breakdown, with the raw signal table viewable alongside
+OBJ-15
+Reduce cost through supply pooling
+Deterministic group matching by topic, level, board, area and availability
+OBJ-16
+Serve users who are not English-primary
+Bilingual interface with right-to-left layout support for Urdu
+OBJ-17
+Deploy publicly at zero infrastructure cost
+Live public URL; every service within a permanent free tier
+
+
+4. Scope
+4.1 In scope
+Authentication and five roles; Pakistan location taxonomy at province, city and area level with inter-area adjacency; curriculum taxonomy with a topic prerequisite graph; tutor profiles with document upload and multi-dimensional pricing; platform-owned administrator verification of CNIC and academic documents; restricted-mobility female home tuition pathway with reciprocal tutor safety controls; topic-level search with hard gender and availability constraints; availability templates and slot booking; three engagement types including single hourly sessions; booking lifecycle; trial sessions with private fit checks; payment transparency records without payment processing; reviews gated on completed bookings; AI diagnostic intake agent; AI competency verification agent; AI review intelligence classifier; AI ranking narration; AI study-plan generation; deterministic ranking engine; reliability statistics; comparison tray; rate benchmarking; shareable profiles with QR codes; group tuition matching; unmet demand board; examination countdown mode; bilingual interface; verification integrity controls covering expiry, appeal and duplicate detection; session notes and a progress ledger; organisation vacancy board; report and flag moderation queue; administrator dashboard; platform feedback capture with an administrator triage queue; a public volunteer tutor application form with PDF attachment and email dispatch; and a seeded demonstration replay path.
+4.2 Explicitly out of scope
+Excluded
+Rationale
+Payment processing, fund custody, or money movement
+Requires licensed payment-service integration, know-your-customer obligations, and a funded dispute process. Payment transparency of record is delivered instead (§6.31); the distinction is stated wherever payment is discussed
+Tutor payout or commission handling
+Depends on payment processing above
+Real-time in-application chat
+Messaging infrastructure. A WhatsApp deep-link handoff is used instead, matching how this market actually coordinates, and it keeps the parent in the channel by design
+Video calling
+Third-party dependency with no assessment value
+Live GPS tracking
+A privacy hazard where minors are involved; area-level granularity is sufficient for every function in this specification
+Push notification infrastructure
+Operational cost with no assessment value
+Organisation applicant-tracking system
+A second marketplace in its own right; trimmed to interest expression only (§6.13)
+Native Android application build
+Superseded by an installable Progressive Web App (§10.4)
+Google Calendar synchronisation
+An OAuth surface for marginal gain
+Machine-learning recommendation engine
+Deterministic ranking is more defensible, reproducible and explainable (§7.2)
+Gamification and referral systems
+Growth features appropriate to a product that already has users
+Background or police-record checks
+Not obtainable by this project. Badge wording is therefore constrained so that no such check is ever implied (FR-6.5)
+
+4.3 Planned but not built — deliberately deferred
+The following are documented under this heading in the project README so that scope decisions read as judgment rather than appearing as gaps. Each is a defensible feature that does not fit the delivery window.
+Deferred item
+Reason
+Weekly automated progress coach (scheduled AI agent)
+Requires longitudinal data the demonstration period cannot produce. The progress ledger ships; automated coaching over it does not
+Tutor replies to reviews with tone checking
+Adds a moderation surface for marginal value
+Multi-student sibling bookings
+Complicates the booking model for a single use case
+Attendance register and fee-collection tracking
+Adjacent to payment processing and excluded by the same reasoning
+Public platform transparency statistics page
+Presentational; delivers no user value
+Tutor identity re-verification on a recurring cycle
+Competency badges expire (FR-28.1); recurring identity re-checks require operational capacity beyond this project
+
+
+5. Stakeholders, Roles and Permissions
+5.1 Role definitions
+Role
+Definition
+ADMIN
+Platform operator acting on behalf of Ustaad.com. Verifies tutor identity against CNIC and academic documents, approves or rejects profiles, manages taxonomy, resolves flags and verification appeals, and reviews payment disputes. Every administrator action is logged immutably
+TUTOR
+Individual offering tuition. Owns profile, documents, topic claims, availability, pricing, engagement-type offerings, group willingness, and personal safety constraints
+PARENT
+Account holder acting for one or more minor students. The sole contact channel for any minor on the platform
+STUDENT
+Self-managing learner aged 18 or over. Holds the same capabilities as a Parent, exercised on their own behalf
+ORGANIZATION
+Academy, school or tuition centre searching for tutors and posting vacancies
+
+Design note — why Parent and Student are separate roles
+Under-18 learners hold no account on Ustaad.com. They exist as student profiles owned by a Parent account. All discovery, booking, communication, payment acknowledgement and review activity is performed by the parent. This structurally prevents any private channel between an adult tutor and a minor from existing in the system at all — it is not a policy that could be violated, it is an absence in the data model. This is a core safety property of the platform, not an implementation convenience, and it holds within group tuition as well as one-to-one engagements.
+
+5.2 Permission matrix
+Capability
+ADMIN
+TUTOR
+PARENT
+STUDENT
+ORG
+Browse and search tutors (no login required)
+✓
+✓
+✓
+✓
+✓
+Create and edit own tutor profile
+—
+✓
+—
+—
+—
+Upload CNIC and academic documents
+—
+✓
+—
+—
+—
+Set personal safety constraints
+—
+✓
+—
+—
+—
+Take competency assessment
+—
+✓
+—
+—
+—
+Appeal a failed verification
+—
+✓
+—
+—
+—
+View own rate benchmark
+—
+✓
+—
+—
+—
+View unmet demand board
+✓
+✓
+—
+—
+✓
+Verify identity documents
+✓
+—
+—
+—
+—
+Approve or reject profiles
+✓
+—
+—
+—
+—
+View verification documents
+✓
+own
+—
+—
+—
+Manage minor student profiles
+—
+—
+✓
+—
+—
+Run AI diagnostic intake
+—
+—
+✓
+✓
+—
+Generate study plan
+—
+—
+✓
+✓
+—
+Use comparison tray
+✓
+✓
+✓
+✓
+✓
+Create booking (any engagement type)
+—
+—
+✓
+✓
+—
+Confirm or decline booking
+—
+✓
+—
+—
+—
+Mark booking completed
+—
+✓
+✓
+✓
+—
+Acknowledge payment status
+—
+✓
+✓
+✓
+—
+Raise a payment dispute
+—
+✓
+✓
+✓
+—
+Submit trial fit check
+—
+—
+✓
+✓
+—
+Submit review (completed booking only)
+—
+—
+✓
+✓
+—
+Log session notes
+—
+✓
+—
+—
+—
+View progress ledger
+✓
+own students
+✓
+✓
+—
+Opt into group tuition
+—
+✓
+✓
+✓
+—
+Post vacancy
+—
+—
+—
+—
+✓
+Express interest in vacancy
+—
+✓
+—
+—
+—
+Flag content
+✓
+✓
+✓
+✓
+✓
+Access administrator dashboard
+✓
+—
+—
+—
+—
+
+
+6. Functional Requirements
+Priority key. Must — ships and is claimed in the project README. Should — ships if the schedule holds. Could — documented under §4.3 if dropped. No requirement is ever claimed in the README in a partially working state.
+
+6.1 Authentication and accounts
+ID
+Requirement
+Priority
+FR-1.1
+Email and password registration with role selection at signup
+Must
+FR-1.2
+Session-based authentication using a JSON Web Token in an httpOnly cookie
+Must
+FR-1.3
+Server-side role-based route guards on every protected endpoint
+Must
+FR-1.4
+Parent accounts may create, edit and archive minor student profiles
+Must
+FR-1.5
+Registration self-declares role; the ADMIN role is assignable only by database seed or by an existing administrator
+Must
+FR-1.6
+Unauthenticated visitors may browse and search; booking requires login
+Must
+FR-1.7
+Language preference persisted per user (English or Urdu)
+Should
+6.2 Location taxonomy
+ID
+Requirement
+Priority
+FR-2.1
+Three-level hierarchy of province, city and area, seeded as static reference data
+Must
+FR-2.2
+All eight top-level units seeded: Punjab, Sindh, Khyber Pakhtunkhwa, Balochistan, Gilgit-Baltistan, Azad Jammu and Kashmir, and Islamabad Capital Territory
+Must
+FR-2.3
+Full area-level seeding for Karachi, Lahore, Islamabad and Rawalpindi
+Must
+FR-2.4
+Area-level seeding for Faisalabad, Multan, Peshawar, Quetta, Hyderabad, Gujranwala, Sialkot, Sukkur, Bahawalpur, Sargodha and Abbottabad
+Must
+FR-2.5
+City-level seeding for all remaining districts; areas optional at this level
+Should
+FR-2.6
+Cascading dependent dropdowns: province filters cities, city filters areas
+Must
+FR-2.7
+Tutors may serve multiple areas (many-to-many relationship)
+Must
+FR-2.8
+Public profiles display area only. A street address is never stored on a profile; it is captured on a confirmed booking and visible only to the two parties to that booking
+Must
+FR-2.9
+Adjacency map between areas within a city, enabling nearby-area expansion in search and in group matching
+Should
+6.3 Curriculum taxonomy
+ID
+Requirement
+Priority
+FR-3.1
+Board and syllabus as a first-class field: Sindh, Punjab, Federal, Khyber Pakhtunkhwa, Balochistan, Aga Khan, Cambridge O Level, Cambridge A Level, International Baccalaureate, University
+Must
+FR-3.2
+Level taxonomy: Primary (1–5), Middle (6–8), Matriculation (9–10), Intermediate (11–12), O Level, A Level, Undergraduate
+Must
+FR-3.3
+Subject to topic hierarchy with prerequisite links between topics
+Must
+FR-3.4
+Prerequisite chain queryable as a directed graph for consumption by the diagnostic agent
+Must
+FR-3.5
+Seeded coverage of Mathematics, Physics, Chemistry, Biology, English and Computer Science across Matriculation and Intermediate
+Must
+FR-3.6
+Board examination window calendar seeded per board and level, holding series name, start date and end date
+Should
+FR-3.7
+Non-academic service categories seeded: personality grooming and mentoring, Quran and Islamiat, spoken English, and skill-based instruction
+Must
+6.4 Tutor profile and portfolio
+ID
+Requirement
+Priority
+FR-4.1
+Profile fields: name, photograph, biography, gender, years of experience, contact details, areas served, teaching modes
+Must
+FR-4.2
+Qualifications: degree, institution, year of award, with document upload
+Must
+FR-4.3
+Boards taught, as a multiple selection
+Must
+FR-4.4
+Topic claims, each scoped to subject, level, board and topic list
+Must
+FR-4.5
+Teaching mode per offering: home tuition, at the tutor's own premises, or online
+Must
+FR-4.6
+CNIC image upload to private storage for administrator identity verification
+Must
+FR-4.7
+Academic document upload — degree, transcript or certificate — to private storage
+Must
+FR-4.8
+Service categories offered, including non-academic grooming and mentoring (FR-3.7)
+Must
+FR-4.9
+Profile completeness indicator listing unmet requirements
+Should
+FR-4.10
+Tutor-facing view of own verification status and any administrator rejection reason
+Must
+FR-4.11
+Tutor may declare willingness to teach group sessions, with a minimum and maximum group size
+Should
+FR-4.12
+Tutor may declare which engagement types they accept: monthly ongoing, short-term package, single session
+Must
+6.5 Pricing and engagement types
+ID
+Requirement
+Priority
+FR-5.1
+Multiple rate rows per tutor, each scoped to subject, level and mode
+Must
+FR-5.2
+Rate types supported: monthly (the market default), hourly, and per-session
+Must
+FR-5.3
+Monthly rates capture sessions per week and session duration in minutes
+Must
+FR-5.4
+Group size field: 1 denotes one-to-one, 2 or more denotes a group rate
+Must
+FR-5.5
+Negotiable flag, displayed on the profile
+Must
+FR-5.6
+Optional travel charge for home tuition outside the tutor's own area
+Should
+FR-5.7
+A separate hourly rate for single-session engagements, which may legitimately exceed the pro-rata monthly equivalent
+Must
+FR-5.8
+The system computes a normalised hourly equivalent in application code for sorting and comparison, displayed as a secondary line beneath the quoted rate
+Must
+FR-5.9
+Parent and student side captures a budget band comprising minimum, maximum and rate type, for agent filtering
+Must
+Rationale — why monthly is primary and why single-session pricing is separate
+Pakistani tuition is contracted monthly: "eight thousand rupees a month, three days a week." A model that accepts only hourly rates forces tutors to enter figures they did not agree to and do not use, which corrupts the data at source. Normalisation (FR-5.8) is therefore computed rather than entered, which gives families the cross-offer comparability the informal market cannot provide. FR-5.7 exists because a one-off hour genuinely costs more per hour than a committed month — travel and preparation are not amortised — and forcing a single rate would either overprice monthly engagements or make single sessions uneconomic for the tutor.
+6.6 Verification workflow — platform-owned
+ID
+Requirement
+Priority
+FR-6.1
+Tutor status machine: draft, pending, documents submitted, under review, then approved, rejected, or more information needed
+Must
+FR-6.2
+Two independent verification tracks displayed separately on every profile: Identity, performed manually by the administrator, and Competency, assessed per topic by AI
+Must
+FR-6.3
+A tutor profile does not become searchable until identity verification is approved by an administrator
+Must
+FR-6.4
+Administrator queue listing pending tutors, with a document viewer served by short-lived signed URLs
+Must
+FR-6.5
+Identity verification requires the administrator to record which artefacts were checked: CNIC, academic document, or both
+Must
+FR-6.6
+Every verification decision records the approving administrator identity and a timestamp, written to the immutable audit log
+Must
+FR-6.7
+Rejection requires a written reason, which is surfaced to the tutor
+Must
+FR-6.8
+Badges state exactly what was verified — for example "CNIC verified by Ustaad.com", "Academic documents reviewed", "Passed assessment: Organic Chemistry". Wording implying a check that was not performed, such as "Trusted", "Safe", "Vetted" or "Background checked", is prohibited
+Must
+FR-6.9
+Public verification record on each profile showing verification date, verifying platform, artefacts checked, and per-topic assessment outcomes
+Must
+FR-6.10
+Unverified tutors may hold a draft profile but do not appear in search results until approved
+Must
+FR-6.11
+Organisation profiles follow the same administrator approval workflow
+Must
+Design note — verification is owned by the platform, not delegated
+FR-6.3, FR-6.6 and FR-6.9 together constitute the platform-ownership model. Ustaad.com performs the verification, records who performed it and when, and publishes a specific statement of what was checked. The tutor cannot self-certify, and no third party is relied upon. This is the platform's substantive answer to fraud in the informal market: not a claim that fraud is impossible, but a chain of custody that makes every approval attributable and every claim specific. FR-6.8 is the discipline that keeps this honest — the platform states what it actually verified and never implies a background check it did not perform.
+6.7 Search and discovery
+ID
+Requirement
+Priority
+FR-7.1
+Filters: subject, topic, level, board, province, city, area, gender preference, service category, engagement type, rate band, rate type, mode, group availability, verification status, availability window, trial offered
+Must
+FR-7.2
+Result cards display name, photograph, area, gender, verification badges, per-topic score, rate summary with hourly equivalent, review count and reliability summary
+Must
+FR-7.3
+Sort options: relevance by deterministic composite, rate ascending or descending, per-topic score, review count, response time
+Must
+FR-7.4
+Paginated results with active-filter chips
+Must
+FR-7.5
+Ranking is computed by deterministic application code from stored structured signals, and is never generated by a model
+Must
+FR-7.6
+Tutor detail page presenting full profile, per-topic breakdown, structured review dimensions, availability calendar, rate table with benchmark context, verification record and reliability statistics
+Must
+FR-7.7
+Nearby-area expansion offered when a strict area filter returns fewer than five results, using the adjacency map from FR-2.9
+Should
+FR-7.8
+Dedicated home-tuition preset combining female-only, home delivery and area, presented as a primary entry point on the landing page (see §6.29)
+Must
+6.8 Availability and booking
+ID
+Requirement
+Priority
+FR-8.1
+Tutor sets a weekly recurring availability template of weekday, start time and end time
+Must
+FR-8.2
+Tutor may record date-specific exceptions marking unavailability
+Should
+FR-8.3
+Parent or student views available slots and requests a booking
+Must
+FR-8.4
+Booking lifecycle: requested, then confirmed, completed, cancelled or no-show, with declined reachable from requested
+Must
+FR-8.5
+Booking captures engagement type, subject, topics, mode, agreed rate, rate type, and delivery address where the mode is home tuition
+Must
+FR-8.6
+Double booking prevented by a server-side slot conflict check
+Must
+FR-8.7
+On confirmation the system generates a WhatsApp deep link carrying prefilled context for coordination
+Should
+FR-8.8
+Cancellation records the acting party and a timestamp; a no-show is recorded against the responsible party
+Should
+FR-8.9
+Where the student is a minor, the booking flow prompts for a first session in a public setting or with a guardian present
+Must
+FR-8.10
+The first booking between a given tutor and student is automatically flagged as a trial
+Must
+FR-8.11
+Single-session bookings may be requested for a date within the next 72 hours without a monthly commitment (see §6.30)
+Must
+6.9 Feedback and review intelligence
+ID
+Requirement
+Priority
+FR-9.1
+A review is permitted only against a booking in completed status, one review per booking
+Must
+FR-9.2
+A review captures a one-to-five star rating and free text; Roman Urdu and mixed-language text are accepted
+Must
+FR-9.3
+On submission the review is queued for AI structured analysis asynchronously, without blocking the interface
+Must
+FR-9.4
+Analysis extracts sentiment, quoted evidence and specificity across eight defined dimensions
+Must
+FR-9.5
+Credibility signals computed: completed-session basis, detail level, generic flag, contradiction flag
+Must
+FR-9.6
+Generic reviews are down-weighted in ranking, never hidden and never deleted
+Must
+FR-9.7
+Contradiction flag surfaced publicly where the star rating conflicts with the review text
+Should
+FR-9.8
+A safety-concern flag routes the review privately to the administrator queue; it is never displayed publicly and the tutor is never automatically notified
+Must
+FR-9.9
+Per-topic scores aggregated separately from the overall composite score
+Must
+FR-9.10
+Each analysis stores the model identifier and prompt version for audit
+Must
+FR-9.11
+SHA-256 content-hash cache: identical review text reuses the stored analysis at zero token cost
+Must
+6.10 AI diagnostic intake — Agent 1
+ID
+Requirement
+Priority
+FR-10.1
+Conversational intake replacing the search form as the primary landing call to action
+Must
+FR-10.2
+Session state persisted per turn in an agent-sessions table, since HTTP is stateless while the agent is not
+Must
+FR-10.3
+The curriculum prerequisite tree is injected into the system prompt at session start rather than fetched by a tool call
+Must
+FR-10.4
+A single dynamic tool, searching tutors by topics, level, board, area, gender preference, service category, engagement type, maximum rate, mode and group willingness, invoked once when the gap map has settled
+Must
+FR-10.5
+Each turn returns a structured decision object whose next action is one of ask user, search, conclude, or insufficient information — a provider-agnostic contract with no dependency on native function calling
+Must
+FR-10.6
+Hard caps enforced in application code and not in the prompt: a maximum of six user turns; conclude at confidence of 0.75 or above; conclude if the same topic is probed twice
+Must
+FR-10.7
+All agent tools are read-only. The agent never writes a booking, contacts a tutor, or sends any message
+Must
+FR-10.8
+Insufficient information is a valid terminal outcome, handing off to manual search
+Must
+FR-10.9
+Reasoning trace displayed to the user as a collapsible step list
+Must
+FR-10.10
+Output comprises a gap map with root gaps, per-topic confidence and an explicit insufficient-information list, together with a shortlist of up to three matched tutors
+Must
+FR-10.11
+Graceful degradation: on provider failure or rate limit the manual search is presented with an explanatory notice, never an error state
+Must
+FR-10.12
+Hard constraints — gender preference, budget ceiling, area and engagement type — are enforced by application code on the tool result and are never delegated to model judgment
+Must
+FR-10.13
+Sessions ending without a match are logged as unmet demand (see §6.24)
+Should
+FR-10.14
+Where an examination date is known, the remaining weeks are injected into the prompt as urgency context
+Should
+6.11 AI competency verification — Agent 2
+ID
+Requirement
+Priority
+FR-11.1
+Triggered per claimed subject during tutor registration
+Must
+FR-11.2
+Generates three to four topic-specific items scoped to the claimed level and board
+Must
+FR-11.3
+Adaptive behaviour: probes explanation quality where an answer is correct but poorly explained, and steps down a level where an answer is incorrect, to locate where knowledge actually ends
+Must
+FR-11.4
+Items are regenerated per attempt, with prior items retrieved to prevent repetition
+Must
+FR-11.5
+Grading rubric assesses correctness, explanation quality, and whether the explanation is pitched at the student's level rather than the tutor's
+Must
+FR-11.6
+The verdict is per topic and not per subject; partial passes are permitted and displayed as such
+Must
+FR-11.7
+Attempt log retained with model identifier and prompt version
+Must
+FR-11.8
+A maximum of five exchanges per verification session, enforced in application code
+Must
+6.12 Progress ledger
+ID
+Requirement
+Priority
+FR-12.1
+Tutor logs session notes after each completed booking: topics covered, a one-to-five mastery rating per topic, and a free-text note
+Must
+FR-12.2
+Parent-facing progress view charting mastery per topic over time
+Must
+FR-12.3
+The original diagnostic gap map displayed alongside actual coverage, showing which gaps have been addressed and which have not
+Should
+FR-12.4
+Stagnation indicator where a topic shows three or more sessions with no increase in mastery
+Should
+6.13 Organisation module
+ID
+Requirement
+Priority
+FR-13.1
+Organisation profile holding name, type, location, description and contact, subject to administrator approval
+Must
+FR-13.2
+Full access to the same tutor search engine available to parents
+Must
+FR-13.3
+Post a vacancy specifying subject, level, board, mode, rate offered, area, description and status
+Must
+FR-13.4
+Tutors browse open vacancies and express interest in a single action, with no cover letter
+Must
+FR-13.5
+Organisation views interested tutors and marks them shortlisted, contacted or closed
+Must
+FR-13.6
+Vacancy list publicly browsable
+Should
+FR-13.7
+Organisations may view the unmet demand board as hiring intelligence
+Could
+6.14 Moderation and administration
+ID
+Requirement
+Priority
+FR-14.1
+Report and flag control on every tutor profile, review and vacancy
+Must
+FR-14.2
+Administrator flag queue showing reason, reporter, target and resolution action
+Must
+FR-14.3
+Administrator dashboard with live counts: pending approvals, documents awaiting review, open flags, safety-concern reviews, open verification appeals, expiring badges, open payment disputes, and totals by role
+Must
+FR-14.4
+Every administrator action logged with actor and timestamp in an immutable audit trail
+Must
+FR-14.5
+Taxonomy management: add and edit subjects, topics and prerequisite links
+Should
+FR-14.6
+Administrator view of unmet demand aggregated by area and subject
+Should
+6.15 Demonstration and presentation layer
+ID
+Requirement
+Priority
+FR-15.1
+Landing page "See it work" panel offering five one-click scenarios, none requiring login
+Must
+FR-15.2
+Scenario A — diagnostic replay: a stated weakness in Mathematics resolving to an integer-operations root gap, with matched tutors
+Must
+FR-15.3
+Scenario B — review analysis: a five-star review whose text describes repeated lateness, flagged as contradictory; a review reading only "Best teacher ever" flagged as generic and down-weighted
+Must
+FR-15.4
+Scenario C — verification: a tutor claiming FSc Chemistry passes Organic Chemistry and fails Thermodynamics, with the badge withheld for the failed topic only
+Must
+FR-15.5
+Scenario D — ranking explanation: the narrated breakdown of a deterministic score, shown beside the raw signal table
+Must
+FR-15.6
+Scenario E — restricted-mobility home tuition: a female-only home tuition search in a specific area, demonstrating that the constraint is enforced rather than ranked
+Must
+FR-15.7
+Demonstration scenarios replay stored agent sessions, making zero live API calls on the demonstration path
+Must
+FR-15.8
+Seed data of at least 25 tutors across at least four cities, with varied genders, review histories, verification states, service categories, engagement types, pricing models and group willingness
+Must
+FR-15.9
+Read-only guest credentials published in the README for each role
+Must
+FR-15.10
+Seeded booking and payment history sufficient to make reliability statistics and rate benchmarks non-empty on first view
+Must
+
+
+6.16 Gender preference filtering
+This module is foundational to the platform's primary use case rather than an optional refinement, and its requirements are correspondingly all mandatory.
+ID
+Requirement
+Priority
+FR-16.1
+Gender is a required field on every tutor profile
+Must
+FR-16.2
+Gender preference — female only, male only, or no preference — is captured on student profiles and available as a search filter
+Must
+FR-16.3
+Applied as a hard exclusion in search, never as a soft ranking signal
+Must
+FR-16.4
+Passed to the diagnostic agent as a constraint and enforced in application code on the tool result, so that the agent cannot shortlist a tutor who violates it
+Must
+FR-16.5
+Tutor gender displayed on result cards and on detail pages
+Must
+FR-16.6
+The default is no preference; the filter is never pre-set by the system on the user's behalf
+Must
+FR-16.7
+Tutors may reciprocally restrict themselves to students of a specified gender (see §6.29)
+Must
+Rationale
+A substantial proportion of Pakistani families will engage only a female tutor for a daughter, and in households with restricted mobility this is the condition on which any tuition happens at all. Treating gender as a soft preference that influences ranking rather than a hard constraint that governs inclusion would make the platform unusable for its primary target segment — a family would be shown male tutors they cannot engage, and would leave. FR-16.4 is the technically important clause: the constraint is enforced by code operating on the search result, not by asking a language model to respect it.
+6.17 Reliability statistics
+ID
+Requirement
+Priority
+FR-17.1
+Median response time computed from the interval between request and confirmation or decline
+Must
+FR-17.2
+Confirmation rate, computed as confirmed bookings divided by requested bookings
+Must
+FR-17.3
+Completed session count
+Must
+FR-17.4
+No-show count attributed to the tutor
+Must
+FR-17.5
+Cancellation rate, counting tutor-initiated cancellations only
+Should
+FR-17.6
+Displayed on cards and detail pages; suppressed and replaced with a "New tutor" indicator below a threshold of three bookings
+Must
+FR-17.7
+Computed by deterministic code from the bookings table, with no AI involvement and no new user input
+Must
+FR-17.8
+Response time available as a sort option
+Should
+Rationale
+Entirely derived data — no new tables, no model calls, no tutor self-reporting, and therefore nothing a tutor can inflate. It builds family confidence more effectively than any badge, and it creates a behavioural incentive for tutors to respond promptly. For a family choosing a stranger who will enter their home, a demonstrated record of reliability is materially more informative than a star average.
+6.18 Comparison tray
+ID
+Requirement
+Priority
+FR-18.1
+Select up to three tutors from search results into a tray that persists across navigation
+Must
+FR-18.2
+Side-by-side comparison of rates both as quoted and as normalised hourly equivalents, per-topic scores, verification state, area, gender, reliability statistics, review dimension summary, group availability, engagement types accepted and trial availability
+Must
+FR-18.3
+The tray persists across navigation within a session
+Must
+FR-18.4
+Differing values visually highlighted
+Should
+FR-18.5
+Comparison shareable by URL, with the tutor identifier list encoded in the query string
+Could
+6.19 Rate benchmarking
+ID
+Requirement
+Priority
+FR-19.1
+Median normalised hourly rate computed per cohort of subject, level, area and mode
+Must
+FR-19.2
+Tutor-facing view showing percentage deviation from the local median, cohort size and verified count within the cohort
+Must
+FR-19.3
+Family-facing band indicator on the detail page: below, within, or above the typical range
+Must
+FR-19.4
+Suppressed where cohort size is below four, so as not to imply a precision the data does not support
+Must
+FR-19.5
+Recomputed on rate change or nightly, and cached in a materialised table
+Should
+FR-19.6
+Deterministic; no AI involvement
+Must
+6.20 Trial session and fit check
+ID
+Requirement
+Priority
+FR-20.1
+The first booking between a tutor and a student is automatically flagged as a trial
+Must
+FR-20.2
+Tutors may offer a discounted or free trial rate, exposed as a search filter
+Should
+FR-20.3
+On trial completion the family is prompted for a structured fit check, which is distinct from a public review
+Must
+FR-20.4
+Fit check dimensions: communication style, punctuality, student engagement, pace appropriateness, and a continue decision of yes, no, or undecided
+Must
+FR-20.5
+Fit checks are private to the requesting family and the administrator, and are never shown on the tutor's public profile
+Must
+FR-20.6
+Aggregate trial-continuation rate shown on the tutor profile once at least five trials have been recorded
+Should
+FR-20.7
+An undecided outcome triggers a one-time prompt to book a second session before deciding
+Could
+Rationale
+This addresses §2.6 directly. The market's default unit is a month paid in advance; a trial converts that into a single-session decision. Keeping fit checks private (FR-20.5) is deliberate — they are decision aids for the family, not public judgments on the tutor, and privacy is what keeps them candid. A parent will record "pace was too fast for my daughter" privately where they would not post it publicly.
+6.21 Shareable profile and QR code
+ID
+Requirement
+Priority
+FR-21.1
+A human-readable public slug per tutor, of the form /t/name-subject-city
+Must
+FR-21.2
+Open Graph and Twitter Card metadata so that WhatsApp and social previews render correctly
+Must
+FR-21.3
+Downloadable QR code encoding the profile URL
+Must
+FR-21.4
+Publicly accessible without authentication
+Must
+FR-21.5
+Copy-link control with confirmation feedback
+Should
+FR-21.6
+Slug uniqueness enforced, with collisions resolved by a numeric suffix
+Must
+Rationale
+Tutors already market themselves in WhatsApp groups by circulating a phone number. This makes the circulated artefact a verified Ustaad.com profile instead — carrying the verification badges, the assessed topic scores and the reliability record with it. It is the platform's entire distribution mechanism, and it is an afternoon of work.
+6.22 Ranking explanation — AI component 4
+ID
+Requirement
+Priority
+FR-22.1
+A "Why this ranking?" control on every search result and detail page
+Must
+FR-22.2
+Application code assembles the deterministic breakdown: verification score, weighted review dimensions, session counts, topic match strength, and count of down-weighted reviews
+Must
+FR-22.3
+The model narrates only the breakdown it is supplied, in plain language
+Must
+FR-22.4
+The prompt forbids introducing any figure, claim or comparison not present in the supplied breakdown
+Must
+FR-22.5
+The raw signal table is viewable alongside the narration
+Must
+FR-22.6
+Cached by score hash and regenerated only when the underlying score changes
+Must
+FR-22.7
+On model unavailability the raw breakdown table is shown alone, with no error state
+Must
+FR-22.8
+Bilingual output honouring the user's language preference
+Could
+Rationale
+This is the clearest demonstration of the architectural principle set out in §7.2. It converts "the model classifies, the code computes" from a claim in a report into something an assessor can click and inspect. The cost is near zero because of the score-hash cache. It also serves a real user need — a family that understands why a tutor ranks highly is better placed to judge whether those reasons matter to them.
+6.23 Group tuition matching
+ID
+Requirement
+Priority
+FR-23.1
+Families and students may opt into group sharing per requirement, specifying maximum group size and area flexibility
+Must
+FR-23.2
+The system pools compatible open requests on: matching or sufficiently overlapping topic set, same level, same board, same or adjacent area, overlapping availability, and compatible gender preference
+Must
+FR-23.3
+Candidate groups presented to all participants showing the per-head rate at the tutor's group price
+Must
+FR-23.4
+A group forms only on explicit confirmation from every participant
+Must
+FR-23.5
+Tutors see incoming group proposals and accept or decline them as a unit
+Must
+FR-23.6
+Group bookings create linked booking rows sharing a group identifier, while each participant retains an individual booking record for reviews and progress tracking
+Must
+FR-23.7
+Matching is deterministic constraint satisfaction performed in application code, with no AI involvement
+Must
+FR-23.8
+Participant identities are limited to first name and area until the group confirms
+Must
+FR-23.9
+Where minors are involved, all group communication remains parent-mediated, preserving the structural property in §5.1
+Must
+FR-23.10
+Partial groups persist for seven days awaiting additional participants, then expire
+Should
+Rationale
+Twelve thousand rupees a month one-to-one becomes five thousand each across three students; the tutor earns more per hour and every family pays less. Demand for this is self-evident to anyone in the market — neighbourhood study groups form informally all the time — and no existing platform implements it. It is also the strongest contribution to the originality of the project. Keeping it deterministic (FR-23.7) matters: a family needs to know why it was grouped with these particular students, and a constraint solver can answer that where a model cannot.
+6.24 Unmet demand board
+ID
+Requirement
+Priority
+FR-24.1
+Every intake session ending in insufficient information, or with zero matches, is logged as an unmet demand record
+Must
+FR-24.2
+Records store subject, topic set, level, board, area, gender preference and budget band, and never store the requester's identity
+Must
+FR-24.3
+Tutor-facing aggregate view of unmet requests by subject and area over the trailing thirty days
+Must
+FR-24.4
+Administrator-facing supply-gap view by area and subject
+Should
+FR-24.5
+Displayed as counts only; individual requests are never exposed
+Must
+FR-24.6
+Suppressed below a threshold of three records per cohort, to prevent re-identification
+Must
+FR-24.7
+Deterministic aggregation; no AI involvement
+Must
+Rationale
+The platform's failed searches become a product surface — supply intelligence for tutors and for administrators. A female tutor learning that eleven families in her district sought a female Mathematics tutor last month has actionable information she cannot obtain anywhere else, and it is information the platform already holds and would otherwise discard. Reframing failure data as an asset is a substantive design point.
+6.25 Examination countdown mode
+ID
+Requirement
+Priority
+FR-25.1
+Board examination windows seeded per board and level
+Should
+FR-25.2
+Student profile displays days remaining to the relevant examination window
+Should
+FR-25.3
+Urgency search mode prioritising immediate availability, short-term intensive slots and revision-focused offerings
+Should
+FR-25.4
+Remaining weeks injected into the diagnostic agent as context
+Should
+FR-25.5
+Tutors may mark offerings as examination revision or crash course
+Could
+6.26 Study plan generation — AI component 5
+ID
+Requirement
+Priority
+FR-26.1
+Generated from an existing diagnostic gap map together with a target examination or goal date
+Should
+FR-26.2
+The topic sequence must respect the prerequisite graph; the ordering is validated in application code after generation and regenerated on violation
+Must
+FR-26.3
+Output comprises a week-by-week topic schedule, an estimated session count per topic, and checkpoint milestones
+Should
+FR-26.4
+Session-count arithmetic and date arithmetic are computed in application code, not by the model
+Must
+FR-26.5
+The plan is persisted and comparable against the actual progress ledger
+Should
+FR-26.6
+A single AI call per plan, cached against the gap map and target date
+Must
+FR-26.7
+The plan is advisory and never automatically creates bookings
+Must
+6.27 Bilingual interface — English and Urdu
+ID
+Requirement
+Priority
+FR-27.1
+All interface strings externalised into an internationalisation dictionary, with no hardcoded copy
+Must
+FR-27.2
+Language toggle in the header, with preference persisted per user and in local storage for guests
+Should
+FR-27.3
+Right-to-left direction and mirrored layout applied for the Urdu view
+Should
+FR-27.4
+Urdu coverage for navigation, search filters, tutor cards, booking flow, review form and diagnostic agent interface chrome
+Should
+FR-27.5
+User-generated content is never machine-translated; reviews, biographies and notes display verbatim in their original language
+Must
+FR-27.6
+Numerals and currency remain in Western-Arabic form in both views, for unambiguous reading of amounts
+Must
+FR-27.7
+Urdu localisation of AI-generated narration
+Could
+Rationale
+The families least served by an English-only interface are precisely those the platform most needs to reach — and there is a direct overlap with the restricted-mobility segment in §2.1. FR-27.5 is a point of principle: translating a reviewer's words would misrepresent them, and the review-intelligence prompt already preserves original wording in its evidence fields.
+6.28 Verification integrity controls
+ID
+Requirement
+Priority
+FR-28.1
+Competency badges expire twelve months after issue; the status becomes expired rather than failed
+Must
+FR-28.2
+Tutor notified in-application thirty days before expiry, with re-assessment available
+Should
+FR-28.3
+A failed verification may be appealed once, after a seven-day cooling period
+Must
+FR-28.4
+Appeals generate fresh assessment items; the prior attempt is retained and never overwritten
+Must
+FR-28.5
+Appeal outcomes logged with actor, timestamp and reasoning
+Must
+FR-28.6
+Administrator appeal queue with the ability to override an AI verdict, requiring a written reason
+Must
+FR-28.7
+CNIC hash duplicate detection flags identity reuse across accounts
+Must
+FR-28.8
+Biography text-similarity check flags copy-pasted profiles for administrator review
+Should
+FR-28.9
+Public verification history showing badge issue date, expiry date and whether an appeal occurred — outcomes only, never attempt content
+Should
+Rationale
+FR-28.3 and FR-28.6 matter disproportionately. The platform withholds a badge that affects a person's livelihood on the basis of an automated assessment. An appeal path with human override is the minimum requirement of fair process, and the alternative — an unappealable machine verdict on someone's professional competence — would be indefensible. FR-28.7 is a direct anti-fraud control: it detects the same identity document being used to create multiple profiles.
+
+
+6.29 Restricted-mobility home tuition and grooming
+This module implements the platform's primary use case as set out in §2.1. It is not a filter refinement; it is a distinct pathway with its own entry point, its own constraint set, and reciprocal safety provisions for the visiting tutor.
+6.29.1 Family-side pathway
+ID
+Requirement
+Priority
+FR-29.1
+A dedicated home-tuition entry point on the landing page, presented alongside the diagnostic agent, combining female-only tutors, home delivery mode and an area selection in a single flow
+Must
+FR-29.2
+The gender constraint within this pathway is enforced as an exclusion in application code and cannot be overridden by ranking, by the diagnostic agent, or by any model output
+Must
+FR-29.3
+Results restricted to tutors who have declared home tuition as an offered mode and who serve the selected or an adjacent area
+Must
+FR-29.4
+Service category selection covering academic tuition, personality grooming and mentoring, Quran and Islamiat, and spoken English, so that a family may seek combined academic and mentoring support in one engagement
+Must
+FR-29.5
+Tutors may be listed as offering combined academic and grooming support, displayed as distinct service categories on the profile
+Must
+FR-29.6
+Guardian-presence expectation captured on the booking: guardian present throughout, guardian present in the residence, or not required
+Must
+FR-29.7
+Where the student is a minor, guardian presence defaults to present throughout and must be actively changed by the parent
+Must
+FR-29.8
+Travel charge, where the tutor has set one for engagements outside their own area, is displayed transparently before booking and included in the agreed rate record
+Should
+FR-29.9
+The exact residential address is disclosed only after the tutor confirms the booking, and is stored encrypted (FR-2.8)
+Must
+6.29.2 Tutor-side safety — reciprocal provisions
+A female tutor travelling to an unfamiliar residence is exposed to risk, and that risk is not addressed by any existing platform in this market. The following provisions are hers to set and are enforced by the system, not merely advertised.
+ID
+Requirement
+Priority
+FR-29.10
+A tutor may restrict herself to students of a specified gender; the restriction is applied as a hard exclusion in search and in the diagnostic agent's tool result
+Must
+FR-29.11
+A tutor may require guardian presence as a condition of accepting any home engagement; bookings that do not meet this condition cannot be requested against her
+Must
+FR-29.12
+A tutor may restrict home tuition to a declared list of areas, and may decline all home engagements while remaining available for online or own-premises modes
+Must
+FR-29.13
+The area and general locality are visible to the tutor before she accepts a booking; the exact address is disclosed only on her confirmation
+Must
+FR-29.14
+A tutor may decline any request without stating a reason, and a decline made under a declared safety constraint is excluded from her confirmation-rate statistic
+Must
+FR-29.15
+Requesting families are subject to the same report-and-flag mechanism as tutors, with flags routed to the administrator queue
+Must
+FR-29.16
+A first-session safety prompt is presented to both parties, not only the family
+Should
+Design note — safety is two-directional
+FR-29.14 deserves particular attention. If a tutor's confirmation rate were penalised for declining engagements that breach her own declared safety conditions, the platform would be quietly pressuring her to accept them. Excluding those declines from the statistic removes that pressure. This is a small clause with a real effect, and it exists because the specification treats the visiting tutor as a person at risk rather than as supply to be optimised.
+6.30 Short-term and single-session engagements
+This module implements §2.6. The market's inability to sell an hour is a genuine failure of supply, not a gap in demand.
+ID
+Requirement
+Priority
+FR-30.1
+Three engagement types supported as first-class concepts: monthly ongoing, short-term package of a defined number of sessions, and single session
+Must
+FR-30.2
+Tutors declare which engagement types they accept, per subject offering
+Must
+FR-30.3
+Single-session bookings are priced from the tutor's hourly single-session rate (FR-5.7), which is displayed distinctly from the monthly rate
+Must
+FR-30.4
+A single-session booking requires a declared purpose: concept clarification, assessment or paper review, doubt-solving session, pre-examination revision, or diagnostic assessment
+Must
+FR-30.5
+The declared purpose and the specific topics are passed to the tutor with the request, so that she may prepare or decline on the basis of fit
+Must
+FR-30.6
+Single-session bookings carry no monthly commitment and no obligation on either party to continue
+Must
+FR-30.7
+Engagement type is a search filter, allowing a family to find tutors who accept single sessions
+Must
+FR-30.8
+Same-day and next-72-hour single-session requests supported where the tutor has matching availability
+Must
+FR-30.9
+A single session may be converted into an ongoing monthly engagement by mutual agreement, preserving the session history and any review already given
+Should
+FR-30.10
+Short-term packages record the number of sessions purchased and sessions consumed, visible to both parties
+Should
+FR-30.11
+Reviews are permitted against a completed single session, with the credibility weighting reflecting the single-session basis (FR-9.5)
+Must
+FR-30.12
+Single-session engagements integrate with examination countdown mode, surfacing revision-purpose sessions as examinations approach
+Should
+Rationale
+A student who does not understand one topic needs one hour. The market sells months. That mismatch means a large volume of small, well-defined, genuinely urgent need goes entirely unserved — the student either struggles alone or a family commits to an arrangement it did not want. FR-30.4 is what makes the short session workable in practice: because the purpose and topics travel with the request, the tutor arrives prepared for a specific question rather than improvising, which is the difference between a useful hour and a wasted one. FR-30.11 is a deliberate consistency decision — a single session is a real engagement and earns a real review, weighted honestly for what it was.
+6.31 Payment transparency and fraud prevention
+This module implements the transparency requirement in §2.3. Its boundary is stated first, because the boundary is the most important thing about it.
+Scope boundary — stated before the requirements
+Ustaad.com records what was agreed and what both parties confirm was paid. It does not process payments, hold funds, act as an escrow, or move money in any form. Settlement remains directly between the family and the tutor. Every requirement below is a record-keeping and transparency requirement. This boundary is repeated in the project README and in the application interface itself, so that no user can form the impression that the platform guarantees or handles their money.
+ID
+Requirement
+Priority
+FR-31.1
+Every booking records the agreed rate, rate type and engagement type at the moment of confirmation; the record is immutable thereafter
+Must
+FR-31.2
+Where a travel charge applies it is recorded as a separate line on the agreed rate record
+Must
+FR-31.3
+Payment status per booking or per monthly cycle: pending, marked paid by family, confirmed received by tutor, or disputed
+Must
+FR-31.4
+A payment is treated as settled only when both parties have acknowledged it; a single-party claim is displayed as unconfirmed
+Must
+FR-31.5
+Either party may raise a dispute against a payment record, stating a reason
+Must
+FR-31.6
+Disputes route to the administrator queue with the full engagement record attached: agreed rate, session history, completion status, and both parties' acknowledgements
+Must
+FR-31.7
+Administrator resolution of a dispute is recorded with actor, timestamp and written reasoning in the immutable audit log
+Must
+FR-31.8
+A downloadable engagement statement per family and per tutor, listing sessions, agreed rates and acknowledged payments over a selected period
+Should
+FR-31.9
+Repeated unresolved disputes against a single account are surfaced to the administrator as a pattern indicator
+Should
+FR-31.10
+The interface states plainly, at every point where payment is discussed, that Ustaad.com does not process or hold payments
+Must
+FR-31.11
+Payment records are visible only to the two parties to the engagement and to administrators
+Must
+FR-31.12
+Payment acknowledgement history contributes to neither the tutor's public ranking nor her public statistics, and is used only for dispute resolution and pattern detection
+Must
+Rationale — why a record is worth building even without a payment gateway
+The informal market's core payment failure is not the absence of a gateway; families and tutors transact in cash perfectly well. The failure is that nothing records what was agreed, so a disagreement becomes an argument with no evidence on either side, and the party with less standing loses. A dual-acknowledgement record with an administrator dispute path resolves most of that at very low technical cost. FR-31.12 is deliberate: allowing payment history to affect public ranking would create an incentive for tutors to pressure families over acknowledgements, which would corrupt the record the module exists to protect.
+6.32 Platform feedback and product improvement
+This module is distinct from §6.9. A review in §6.9 is feedback about a tutor; this module is feedback about Ustaad.com itself — the search that returned nothing useful, the AI output that was wrong, the Urdu view that broke a layout, the verification step that could not be completed. It is the only channel through which the platform hears from a user who would otherwise simply leave, and it is therefore specified as a module with a queue and a disposition, not as a contact form.
+ID
+Requirement
+Priority
+FR-32.1
+A feedback entry point is present on every page for every role, reachable in one action and without leaving the current page
+Must
+FR-32.2
+A submission captures a category — defect, usability difficulty, incorrect AI output, missing feature, content or safety concern, other — free-text detail, and an optional one-to-five satisfaction rating
+Must
+FR-32.3
+Urdu script, Roman Urdu and mixed-language text are accepted and stored unchanged; feedback is never machine-translated, consistent with decision 13
+Must
+FR-32.4
+The originating page path, interface language, role and application version are captured automatically, so that a report can be reproduced without interrogating the reporter
+Must
+FR-32.5
+An optional screenshot or document may be attached — PNG, JPG or PDF, single file, maximum 5 MB — stored in the private bucket and referenced by signed URL
+Should
+FR-32.6
+A visitor holding no account may submit anonymously, subject to rate limiting; an anonymous record carries no identity fields at all
+Should
+FR-32.7
+Every submission enters an administrator queue with a status of new, triaged, actioned or declined, and an internal disposition note; status changes are written to the audit log
+Must
+FR-32.8
+A submission carrying a safety concern is escalated in the queue and handled exactly as FR-9.8 requires: never shown publicly, and never disclosed to the tutor concerned in a form that identifies the reporter
+Must
+FR-32.9
+On submission the user receives an in-application acknowledgement, and an email notification is dispatched to the platform mailbox through EmailJS (FR-33.6), so that feedback is seen without an administrator having to log in
+Must
+FR-32.10
+Feedback is never displayed on any public surface, is not visible to tutors, and never contributes to ranking or to any published statistic
+Must
+
+Rationale
+Two separate records are kept for two separate purposes. A tutor review answers the question "should I hire this person"; platform feedback answers "is this product working". Merging them would corrupt both: a complaint about a broken Urdu layout would depress a tutor's rating, and a genuine concern about a tutor would be triaged as a defect and closed. FR-32.4 exists because the most common reason a defect report is unusable is that nobody can reproduce it; capturing the page, language and role automatically costs the reporter nothing and removes most of that difficulty. FR-32.10 is what makes candour possible — a user who suspects their complaint will be shown to the tutor writes nothing.
+
+6.33 Volunteer tutor programme
+Not every qualified person teaches for a fee. University students, retired teachers and working professionals will give a limited number of hours without charge, and the informal market has no way to find them, no way to verify them, and no way to hold them to any standard. A formal volunteer channel serves two purposes: it reaches students whose families cannot pay at any rate, and it directs willing supply at the restricted-mobility pathway in §6.29, where verified female home tutors are scarcest. A volunteer is verified on exactly the same basis as a paid tutor under §6.6. The fee is what differs, not the standard.
+ID
+Requirement
+Priority
+FR-33.1
+A volunteer application form is publicly reachable without an account, linked from the site footer and from the tutor onboarding path
+Must
+FR-33.2
+The form captures name, contact number, email address, city and area, subjects and levels offered, weekly hours available, delivery mode — home visit, online or a community venue — gender, and a short statement of motivation
+Must
+FR-33.3
+A supporting document may be attached as a PDF — curriculum vitae, degree or transcript — single file, maximum 5 MB, validated by both extension and MIME type; optional at submission and mandatory before approval
+Must
+FR-33.4
+The attached PDF is stored in the private Supabase Storage bucket, never in the repository and never in a public path, and is opened by an administrator through a short-lived signed URL
+Must
+FR-33.5
+Client-side validation with Zod before dispatch, with field-level error messages; the form is fully usable in both the English and the Urdu view
+Must
+FR-33.6
+On successful submission the form dispatches an email to the platform mailbox through EmailJS, carrying every submitted field and the signed link to the attached document, so that the team is notified by mail without polling a dashboard
+Must
+FR-33.7
+An acknowledgement email is sent to the applicant in the same dispatch, stating what happens next and the expected response window
+Should
+FR-33.8
+The EmailJS service identifier, template identifier and public key are held in environment variables; the endpoint is rate-limited, and a honeypot field with a minimum time-on-form check rejects automated submissions
+Must
+FR-33.9
+Every submission is written to the volunteer_applications table before the email is dispatched, and the dispatch outcome is recorded against the row, so that a mail failure can never lose an application
+Must
+FR-33.10
+An approved volunteer is converted to a standard tutor account carrying a volunteer flag, is verified under §6.6 against CNIC and academic documents on the same basis as any paid tutor, and appears in search with a Volunteer designation and a zero rate; the flag never substitutes for verification
+Must
+FR-33.11
+Volunteer availability is capped at the declared weekly hours and the cap is enforced at booking (§6.8), so that a volunteer cannot be over-committed
+Should
+
+Why the database write and the mail dispatch are both required, in that order
+EmailJS dispatches mail from the browser using a public key. It is free, it needs no mail server, and it is the right tool for notifying a small team. It is not a system of record. A monthly quota reached, a template renamed, or a blocked request would silently discard an application if the email were the only artefact — and the applicant would never know, because from the browser the submission appeared to succeed.
+FR-33.9 therefore fixes the order: the row is written first and the email is a notification of a record that already exists. FR-33.8 states the security position plainly — a public key is designed to be public, but it is still an open send endpoint, so rate limiting and a honeypot are requirements rather than refinements. FR-33.10 is the load-bearing rule of the module: goodwill is not a substitute for verification, and a volunteer entering a family home is verified exactly as a paid tutor is.
+
+
+
+7. Artificial Intelligence Specification
+7.1 Component summary
+#
+Component
+Type
+Trigger
+Calls per invocation
+1
+Diagnostic intake (Agent 1)
+Multi-turn agent, one read-only tool
+Family begins guided intake
+≈7
+2
+Competency verification (Agent 2)
+Multi-turn adaptive agent
+Tutor registration or appeal
+≈5
+3
+Review intelligence
+Single-shot classifier
+Review submitted
+1 (cached)
+4
+Ranking explanation
+Single-shot narrator
+User requests an explanation
+1 (cached)
+5
+Study plan
+Single-shot sequencer
+User requests a plan
+1 (cached)
+
+7.2 Architectural principle
+The model classifies, narrates and sequences. The application code computes, validates and enforces.
+Every numeric or binding output visible to a user — tutor ranking, per-topic scores, normalised hourly rates, credibility weights, rate benchmarks, reliability statistics, group compositions, session counts, dates, and every hard constraint — is produced by deterministic functions operating on stored structured signals. The model never emits a score, a price, a ranking, a date, or a constraint decision.
+
+The enforcement points are specific and testable:
+Requirement
+Enforcement mechanism
+FR-10.12, FR-16.4, FR-29.2
+Hard constraints — gender, budget, area, engagement type — filtered in application code after the tool call, never delegated to model judgment
+FR-22.4
+Narration prompt forbidden from introducing any figure not present in the supplied breakdown
+FR-26.2
+Prerequisite ordering validated in code after generation; the plan is regenerated on violation
+FR-26.4
+All session-count and date arithmetic performed in code
+FR-23.7
+Group matching is constraint satisfaction, not model judgment
+FR-7.5, FR-17.7, FR-19.6, FR-24.7
+Ranking, reliability statistics, rate benchmarks and demand aggregation are all deterministic
+
+The consequences are that rankings are reproducible across runs, auditable against stored signals, explainable to a user, and unaffected by model non-determinism or by substitution of one provider for another. Where a decision could affect a family's safety or a tutor's livelihood, that decision is made by code whose behaviour can be inspected and tested.
+7.3 Prompt management
+Prompts are versioned Markdown files held under a prompts directory and loaded at runtime rather than embedded in source code:
+/prompts
+    diagnostic-intake.v1.md
+    competency-verification.v1.md
+    review-intelligence.v1.md
+    ranking-explanation.v1.md
+    study-plan.v1.md
+Every AI output row persists the model identifier and the prompt version that produced it. This gives per-record provenance, allows a prompt revision to be evaluated against prior output, and makes the README's disclosure of the prompt instructions verifiable rather than merely asserted.
+7.4 Cost-control design
+The platform is designed to operate within a permanent free inference tier. This is an architectural constraint, addressed architecturally.
+Technique
+Effect
+Static curriculum data injected into the prompt rather than fetched by tool call
+Approximately halves the call count in Agent 1
+A single dynamic tool, invoked once at conclusion
+One tool call per session instead of roughly six
+JSON decision contract in place of native function calling
+One model call per user turn, and no provider lock-in
+Hard turn caps enforced in application code
+Bounded worst case per session
+SHA-256 content-hash cache on review analysis
+Repeated input costs zero tokens
+Score-hash cache on ranking explanations
+Regenerated only when the underlying score changes
+Gap-map and target-date cache on study plans
+Identical requests cost zero tokens
+Demonstration path replays stored sessions
+Zero live calls on the assessed path
+Multi-provider adapter with automatic failover
+A rate limit on one provider is not an outage
+
+Estimated total consumption across development, testing and the assessment window is under eight hundred requests — several times within a single provider's daily free allowance.
+7.5 Model providers
+Role
+Provider and model
+Basis
+Primary
+Google AI Studio — Gemini Flash
+Permanent free tier, no credit card required, multimodal capability available for future document parsing
+Fallback
+Groq — Llama 3.3 70B
+Free tier, low latency, text-only
+
+Both are reached through a single internal adapter interface; provider selection is an environment variable. Because the agents use a JSON decision contract rather than native function calling, substituting a provider requires no change to prompt or application logic.
+Data-handling disclosure — required README content
+Free-tier inference providers may use submitted prompts to improve their models. All demonstration data on Ustaad.com is synthetic. A production deployment would require a paid or self-hosted inference tier, because the platform processes information concerning minors and, in the restricted-mobility pathway, information about which households a female tutor visits. This constraint is documented rather than ignored, and the mitigation — that no real user data is submitted during this project — is stated explicitly.
+
+
+8. Non-Functional Requirements
+ID
+Requirement
+NFR-1
+Search results return within 500 milliseconds against a 500-tutor dataset, using indexed SQL with no model involvement
+NFR-2
+Agent turn latency under 3 seconds at the 95th percentile; demonstration replay is instantaneous
+NFR-3
+Passwords hashed with bcrypt at a cost factor of 10 or above
+NFR-4
+All secrets held in environment variables; .env files listed in .gitignore from the first commit; no credential is ever committed to the repository
+NFR-5
+All AI calls execute server-side only; no API key is reachable from the browser bundle
+NFR-6
+Every mutating endpoint validates role and resource ownership server-side; client-side guards serve user experience only and are never relied upon
+NFR-7
+Input validation on all endpoints using a shared schema library; parameterised queries throughout; no string-concatenated SQL anywhere
+NFR-8
+Responsive from a 320-pixel viewport; installable as a Progressive Web App with manifest, icons and service worker, satisfying the Android requirement from a single codebase
+NFR-9
+Verification documents held in private storage; access exclusively through short-lived signed URLs scoped to administrators; every access logged
+NFR-10
+CNIC numbers are never stored in a searchable column; a salted hash is stored for duplicate detection and the image is stored separately
+NFR-11
+Graceful degradation: every AI-dependent path has a working non-AI fallback
+NFR-12
+Deployment triggered by git push, with no manual build steps
+NFR-13
+Public repository, opened and verified in a private browsing session before submission
+NFR-14
+The database persists across redeployments and serverless cold starts
+NFR-15
+Derived statistics — reliability, benchmarks, scores — are materialised and cached, never computed per request at page load
+NFR-16
+Aggregate views suppress any cohort below the re-identification threshold defined for that view
+NFR-17
+Right-to-left layout must not break component alignment; both language settings verified before submission
+NFR-18
+Residential addresses stored encrypted at rest and disclosed only to the two parties to a confirmed booking
+NFR-19
+The immutable audit log is append-only at the query layer; no application path issues an update or delete against it
+
+
+9. Data Model
+Tables and columns introduced by version 3.0 are annotated. The model is expressed in terms common to SQLite and PostgreSQL, so that it holds across both stages of the database decision in §10.
+9.1 Reference data — static, seeded, read-only
+provinces        (id, name, code)
+cities           (id, province_id, name)
+areas            (id, city_id, name)
+area_adjacency   (area_id, adjacent_area_id)
+ 
+boards           (id, name, code)
+levels           (id, name, sort_order)
+subjects         (id, name)
+topics           (id, subject_id, level_id, name, sort_order)
+topic_prereqs    (topic_id, prereq_topic_id)          -- directed graph
+exam_windows     (id, board_id, level_id, series_name, start_date, end_date)
+service_types    (id, name, is_academic)              -- v3: grooming, Quran, spoken English
+i18n_strings     (key, lang, value)
+9.2 Identity
+users            (id, role, email, password_hash, name, phone,
+                  province_id, city_id, area_id, status,
+                  lang_preference, created_at, updated_at)
+ 
+student_profiles (id, parent_user_id, name, level_id, board_id,
+                  school_name, gender, gender_preference,
+                  budget_min, budget_max, budget_type,
+                  group_ok, max_group_size,
+                  guardian_presence_default,           -- v3: FR-29.7
+                  notes, archived_at)
+                  -- minors hold NO user account (SEC-1)
+9.3 Tutor
+tutor_profiles   (id, user_id, bio, gender, years_experience, photo_url,
+                  public_slug, offers_trial, trial_rate,
+                  group_willing, group_min, group_max,
+                  accepts_monthly, accepts_short_term,   -- v3: FR-30.2
+                  accepts_single_session,                -- v3: FR-30.2
+                  student_gender_restriction,            -- v3: FR-29.10
+                  requires_guardian_present,             -- v3: FR-29.11
+                  home_tuition_areas_json,               -- v3: FR-29.12
+                  accepts_home_tuition,                  -- v3: FR-29.12
+                  verification_status, identity_verified_at,
+                  identity_verified_by, artefacts_checked_json,  -- v3: FR-6.5/6.6
+                  approved_by, rejection_reason)
+ 
+tutor_services   (tutor_id, service_type_id)             -- v3: FR-4.8, FR-29.5
+tutor_qualifications (id, tutor_id, degree, institution, year,
+                      document_url, verified)
+tutor_boards     (tutor_id, board_id)
+tutor_areas      (tutor_id, area_id)
+ 
+tutor_topics     (id, tutor_id, subject_id, topic_id, level_id, board_id,
+                  verification_status, verified_score, verified_at,
+                  expires_at, appeal_count)
+ 
+tutor_rates      (id, tutor_id, subject_id, level_id, mode, rate_type,
+                  amount, sessions_per_week, session_duration_mins,
+                  group_size, is_negotiable, travel_charge,
+                  single_session_hourly,                 -- v3: FR-5.7
+                  normalized_hourly)                     -- computed in code
+ 
+tutor_documents  (id, tutor_id, doc_type, storage_key, cnic_hash,
+                  uploaded_at, reviewed_at, reviewed_by, access_log_json)
+ 
+availability     (id, tutor_id, weekday, start_time, end_time, active)
+availability_exceptions (id, tutor_id, date, reason)
+9.4 Derived and materialised — written by application code only
+tutor_scores     (tutor_id, topic_id, composite_score, dimension_scores_json,
+                  review_count, weighted_review_count, score_hash, computed_at)
+ 
+tutor_reliability (tutor_id, median_response_mins, confirmation_rate,
+                   completed_count, no_show_count, cancellation_rate,
+                   safety_declines_excluded,             -- v3: FR-29.14
+                   booking_basis, computed_at)
+ 
+rate_benchmarks  (id, subject_id, level_id, area_id, mode, median_hourly,
+                  cohort_size, verified_count, computed_at)
+9.5 Booking and engagement
+bookings         (id, tutor_id, requester_user_id, student_profile_id,
+                  subject_id, level_id, board_id, topics_json,
+                  service_type_id,                      -- v3: FR-29.4
+                  engagement_type,                      -- v3: FR-30.1
+                  session_purpose,                      -- v3: FR-30.4
+                  package_sessions_total,               -- v3: FR-30.10
+                  package_sessions_used,                -- v3: FR-30.10
+                  slot_start, slot_end, mode, agreed_rate, rate_type,
+                  travel_charge_agreed,                 -- v3: FR-31.2
+                  address_encrypted, guardian_presence, -- v3: FR-29.6
+                  is_trial, group_id,
+                  status, status_changed_by, status_changed_at,
+                  requested_at, responded_at,
+                  decline_under_safety_constraint,      -- v3: FR-29.14
+                  created_at)
+ 
+session_notes    (id, booking_id, tutor_id, topics_covered_json,
+                  mastery_ratings_json, note, created_at)
+ 
+trial_fit_checks (id, booking_id UNIQUE, submitted_by, communication,
+                  punctuality, engagement, pace, continue_decision,
+                  note, created_at)   -- PRIVATE: requester + admin only
+9.6 Payment transparency — new in version 3.0
+payment_records  (id, booking_id, cycle_label, agreed_amount,
+                  travel_charge, rate_type, engagement_type,
+                  family_marked_paid_at, tutor_confirmed_at,
+                  status, created_at)
+                  -- status: pending | family_marked | settled | disputed
+                  -- IMMUTABLE agreed_amount after confirmation (FR-31.1)
+ 
+payment_disputes (id, payment_record_id, raised_by, reason, detail,
+                  status, resolved_by, resolution_reason, resolved_at)
+9.7 Group matching
+group_requests   (id, student_profile_id, subject_id, level_id, board_id,
+                  topics_json, area_id, area_flex, gender_preference,
+                  max_group_size, budget_max, availability_json,
+                  status, expires_at, created_at)
+ 
+group_proposals  (id, tutor_id, subject_id, level_id, area_id,
+                  per_head_rate, proposed_at, status, confirmed_at)
+ 
+group_members    (proposal_id, group_request_id, student_profile_id,
+                  confirmed_at, declined_at)
+9.8 Feedback and AI sessions
+reviews          (id, booking_id UNIQUE, tutor_id, reviewer_user_id,
+                  reviewer_role, rating, text, created_at)
+ 
+review_analyses  (id, review_id, content_hash, dimensions_json,
+                  credibility_json, topics_mentioned_json,
+                  safety_concern_flag, model, prompt_version, created_at)
+ 
+agent_sessions   (id, type, user_id, student_profile_id, goal,
+                  transcript_json, scratchpad_json, status, turn_count,
+                  model, prompt_version, is_demo_seed,
+                  created_at, completed_at)
+ 
+diagnostics      (id, agent_session_id, student_profile_id, subject_id,
+                  gap_map_json, insufficient_info_json,
+                  matched_tutor_ids_json, created_at)
+ 
+verification_attempts (id, agent_session_id, tutor_id, topic_id,
+                       items_json, responses_json, verdict, score,
+                       reasoning, is_appeal, admin_override,
+                       override_reason, created_at)
+ 
+ranking_explanations (id, tutor_id, topic_id, score_hash, breakdown_json,
+                      narration, lang, model, prompt_version, created_at)
+ 
+study_plans      (id, diagnostic_id, student_profile_id, target_date,
+                  plan_json, prereq_validated, model, prompt_version,
+                  created_at)
+ 
+unmet_demand     (id, subject_id, topic_ids_json, level_id, board_id,
+                  area_id, gender_preference, budget_max, reason,
+                  created_at)   -- NO requester identity stored (FR-24.2)
+9.9 Organisation and moderation
+org_profiles     (id, user_id, org_name, org_type, description, website,
+                  approved_at, approved_by)
+vacancies        (id, org_id, subject_id, level_id, board_id, mode,
+                  rate_offered, rate_type, area_id, description,
+                  status, created_at)
+vacancy_interests (id, vacancy_id, tutor_id, status, created_at)
+ 
+flags            (id, target_type, target_id, reporter_user_id, reason,
+                  detail, status, resolved_by, resolved_at)
+admin_actions    (id, admin_user_id, action, target_type, target_id,
+                  detail_json, created_at)               -- append-only
+
+Design notes on the model
+The tutor_scores, tutor_reliability and rate_benchmarks tables are materialised and written exclusively by deterministic code, so search queries hit indexed SQL with no model involvement. The score_hash column keys the ranking-explanation cache. The unmet_demand table deliberately holds no requester reference. The trial_fit_checks and payment_records tables are access-restricted at the query layer and are never joined into any public profile response. The admin_actions table is append-only, which is what makes the verification chain of custody in §6.6 meaningful rather than decorative.
+9.10 Platform feedback and volunteer applications — new in version 4.0
+platform_feedback (id, user_id NULL, role, category, detail,
+                   satisfaction_rating, page_path, locale, app_version,
+                   attachment_path, safety_concern_flag, status,
+                   disposition_note, triaged_by, mail_dispatch_status,
+                   created_at)
+  -- status: new | triaged | actioned | declined
+  -- user_id NULL for anonymous submissions (FR-32.6)
+  -- PRIVATE: administrators only; never public, never tutor-visible (FR-32.10)
+ 
+volunteer_applications (id, full_name, email, phone, city_id, area_id,
+                        gender, subjects_json, levels_json, weekly_hours,
+                        delivery_modes_json, motivation, document_path,
+                        status, mail_dispatch_status, reviewed_by,
+                        review_note, converted_tutor_id, created_at)
+  -- status: received | contacted | verified | active | declined | withdrawn
+  -- document_path points into the private bucket only (FR-33.4)
+  -- row is written BEFORE the EmailJS dispatch (FR-33.9)
+
+
+10. Technology Stack
+10.1 Selected stack
+Layer
+Technology
+Justification
+Frontend framework
+React 18 with Vite, JavaScript
+Fast hot module replacement, minimal configuration
+Styling
+Tailwind CSS
+Utility-first; logical properties give right-to-left support for the Urdu view
+Interface primitives
+shadcn/ui (optional)
+Accessible components, finished appearance without design overhead
+Routing
+React Router v6
+Standard for this stack
+Client state
+TanStack Query with React Context
+Server-state caching; the comparison tray held in Context
+Internationalisation
+i18next with react-i18next
+Dictionary-driven and right-to-left aware
+QR generation
+qrcode (client-side)
+No external service dependency
+Charts
+Recharts
+Progress ledger and mastery-over-time visualisation
+Backend runtime
+Node.js with Express
+As specified for the project
+Validation
+Zod
+Schema shared between client and server
+Authentication
+bcrypt with JSON Web Tokens in httpOnly cookies
+No third-party identity dependency
+Database
+SQLite local file in development; Supabase Postgres in production
+See §10.2
+Database client
+better-sqlite3 locally; postgres.js against Supabase
+Selected by one environment variable; no other file is aware of the difference
+Query layer
+Drizzle ORM
+One schema definition, two dialects, with migration tooling for the move to Postgres
+File storage
+Supabase Storage, private bucket
+Same Supabase project as the production database; signed URLs; holds CNIC images, academic documents and volunteer CVs
+Transactional email
+EmailJS
+Free tier; delivers volunteer applications and platform feedback to the team mailbox with no mail server to operate (§6.33)
+AI — primary
+Google AI Studio, Gemini Flash
+Permanent free tier, no card, multimodal
+AI — fallback
+Groq, Llama 3.3 70B
+Free tier, low latency
+Frontend hosting
+Netlify or Vercel
+Free tier, deployment triggered by git push
+API hosting
+Netlify or Vercel Functions
+Free tier, co-located with the frontend
+Repository
+GitHub, public
+Assignment requirement
+
+10.2 Database decision — SQLite now, Supabase on deployment
+The requirement is a database that is free, does not delay the start of development, and persists across redeployments and serverless cold starts once the application is live. Those halves of the requirement are best served by two different things, so the decision is staged rather than single: development runs against a local SQLite file, and the schema is migrated to a hosted Supabase Postgres instance at the point of deployment to Netlify.
+Why a local SQLite file cannot be used in production
+Serverless hosting platforms provide an ephemeral filesystem. A .db file committed to the repository becomes a read-only build artefact: write operations either fail outright or land in a temporary directory that is discarded on the next request, and every redeployment resets the database to whatever was last committed. A tutor could register, and the record would be gone within minutes.
+There is a second and more serious objection. If writes did persist into the repository, the platform would be committing user data — phone numbers, CNIC references, minors' names, and residential areas — to a public GitHub repository. That is a direct violation of the assignment's prohibition on committing sensitive data, and it is unacceptable independently of the assignment. The database must live outside the repository regardless of the technical question.
+The staged decision — SQLite in development, Supabase in production
+Development begins against a local SQLite file, because it requires no account, no network and no provisioning, and because the schema is reshaped hourly in the first days of the build when a hosted instance would only slow that churn down. Nothing in §6 depends on the database being remote. At the point of deployment to Netlify the same schema is migrated to a hosted Supabase Postgres instance, and the deployed application points at it through a single environment variable. Supabase is selected for production because the project already depends on Supabase Storage for CNIC images, academic documents and volunteer CVs (§10.1, FR-33.4): consolidating the database into the same project means one account, one dashboard and one set of credentials rather than two providers. The free tier — on the order of 500 MB of database and 1 GB of file storage at the time of writing, though providers revise these figures and the current allowance should be confirmed at signup — exceeds this project's requirements comfortably, and the built-in connection pooler suits a serverless host that opens database connections unpredictably.
+// server/db.js — the only file aware of the environment difference
+import { createClient } from '@libsql/client';
+ 
+export const db = createClient(
+  process.env.TURSO_URL
+    ? { url: process.env.TURSO_URL, authToken: process.env.TURSO_TOKEN }
+    : { url: 'file:local.db' }        // local development
+);
+10.3 Alternatives considered
+Option
+Free tier
+Assessment
+Supabase (PostgreSQL)
+Yes, permanent — approximately 500 MB database and 1 GB file storage, no card
+Selected for production. One account covers both the database and the private document bucket the project already requires
+Local SQLite file (development)
+Free — no account required
+Selected for development. No provisioning, no network, and free schema churn while the model is still changing daily; migrated to Supabase at deployment
+Turso (SQLite / libSQL)
+Yes, generous
+The strongest alternative: hosted SQLite, so no dialect migration at all. Retained as the documented fallback if the Postgres migration proves disruptive
+Neon (PostgreSQL)
+Yes, permanent
+Viable Postgres alternative. Not selected because its monthly compute allowance suspends rather than throttles, and it provides no file storage
+Render PostgreSQL
+Expires
+Rejected. Free instances are deleted after approximately 30 days, which would fail after submission rather than before it — the genuine trap in this category
+Local SQLite file on serverless hosting
+—
+Rejected. No write persistence, and user data would be committed to a public repository
+
+Turso and Cloudflare D1 remain viable if the SQLite dialect must be preserved end to end. Supabase is selected for production because the project already stores identity documents in Supabase Storage, and consolidating the database into the same project removes a second provider from the deployment. Development continues on a local SQLite file until the deployment window, on the understanding that the file is never the production database and never enters the repository.
+10.4 Satisfying the Android requirement
+The project brief calls for web and Android delivery. Building two native codebases is not achievable within the timeline alongside a five-component AI layer, and attempting it would compromise both.
+The resolution is a single installable Progressive Web App with a manifest, icon set, service worker and offline shell. On Android it installs to the home screen, launches full-screen with a splash screen, and is indistinguishable from a native application in normal use. One codebase, one deployment, both platforms served. This is documented in the README as a deliberate architectural decision with its rationale, rather than presented as a substitution.
+
+
+11. Security, Privacy and Safety Design
+This section is a required chapter of the project README, not an appendix to it. The platform matches adults to children in private homes and records financial agreements; the safety design is a primary deliverable.
+ID
+Control
+SEC-1
+Under-18 learners hold no account. Parent accounts own student profiles; all activity is parent-mediated
+SEC-2
+No private tutor-to-student channel exists anywhere in the system. All coordination routes through the parent's contact, including within group tuition
+SEC-3
+Public profiles expose area only. Residential addresses are captured on confirmed bookings, stored encrypted, and visible solely to the two parties
+SEC-4
+The booking flow for minors prompts for a first session in a public setting or with a guardian present
+SEC-5
+Reviews require a completed booking and are therefore traceable to a real interaction
+SEC-6
+Verification badges state the specific artefact verified. Wording implying a background check that was not performed is prohibited
+SEC-7
+Verification documents held in private storage, served by short-lived signed URLs, scoped to administrators, with every access logged
+SEC-8
+CNIC numbers never held in a searchable column; a salted hash supports duplicate detection only
+SEC-9
+Safety-concern reviews route privately to the administrator queue, are never displayed publicly, and never trigger automatic notification to the tutor
+SEC-10
+Report and flag controls on all user-generated content, and on requesting families as well as tutors
+SEC-11
+Prompt-injection defence: review, biography and profile text are treated as data. Prompts instruct the model to disregard instructions embedded in user content
+SEC-12
+AI credentials server-side only; all inference routed through internal endpoints
+SEC-13
+Immutable, append-only administrator action log
+SEC-14
+Group participant identities limited to first name and area until the group confirms
+SEC-15
+Trial fit checks private to the requesting family and administrators; never surfaced on a public profile
+SEC-16
+Unmet demand records hold no requester identity and suppress cohorts below three
+SEC-17
+Rate benchmarks suppressed below a cohort size of four, preventing inference of an individual tutor's rate
+SEC-18
+Verification appeals with human override. An automated verdict affecting a person's livelihood is never final without a route to human review
+SEC-19
+Tutor-side safety constraints — student gender restriction, guardian-presence requirement, and area restriction — are enforced by the system, not merely displayed
+SEC-20
+A tutor's exact destination address is withheld until she confirms the booking; the locality is visible beforehand so that she can decide
+SEC-21
+Declines made under a declared safety constraint are excluded from a tutor's confirmation-rate statistic, removing any implicit pressure to accept them
+SEC-22
+Payment records are visible only to the two parties and administrators, and never contribute to public ranking or public statistics
+SEC-23
+The interface states plainly, wherever payment appears, that Ustaad.com does not process or hold funds
+SEC-24
+Volunteer application attachments are written to the private document bucket, are never publicly addressable, and are retrievable by an administrator only through a short-lived signed URL
+SEC-25
+The EmailJS service identifier, template identifier and public key are the only mail credentials present in client code; no private key, mail password or SMTP credential exists anywhere in the deployed bundle or the repository
+SEC-26
+Platform feedback is never displayed publicly, is never attributed to its reporter in any tutor-facing communication, and never influences ranking
+
+On SEC-19 to SEC-21
+These three controls exist because the platform's primary use case sends a woman alone to an address she has not seen, arranged through an application. Most platforms in this category treat safety as a property owed to the paying customer. On Ustaad.com the tutor is equally exposed and is treated accordingly: she sets the conditions, the system enforces them rather than advertising them, and she is not penalised in her public statistics for holding to them.
+
+
+12. Deployment Architecture
+GitHub (public repository)
+     |  push to main
+     +--------------> Netlify / Vercel  ---->  React PWA (static, bilingual)
+     |                                              |
+     |                                        fetch /api/*
+     |                                              v
+     +--------------> Serverless Functions (Express handlers)
+                              |
+        +---------------------+----------------+----------+-----------+
+        v                     v                v          v           v
+  Supabase Postgres   Supabase Storage   Gemini Flash  Groq       EmailJS
+  user data           private documents  primary AI    fallback   mail out
+
+All credentials are held in host environment variables. Reference data — locations and adjacency, subjects, topics, prerequisites, boards, examination windows, service types and interface strings — is committed to the repository as seed files, since it is static and contains no user information. All user data resides exclusively in the hosted Supabase database; all identity documents reside exclusively in private object storage.
+
+
+13. Assignment Compliance Matrix
+Brief requirement
+Met
+Evidence
+1. Original idea addressing a real problem
+Yes
+§2 — restricted-mobility home tuition, platform-owned verification against fraud, assessed per-topic competency, diagnosed gap-map matching, single-session engagements, group pooling, rate transparency, outcome ledger. §2.10 names existing platforms and states fifteen points of difference
+2. Complete, functional, end-to-end application
+Yes
+§6 — every requirement marked Must is implemented and demonstrable. §4.2 and §4.3 document exclusions and deferrals with rationale rather than leaving unfinished shells
+3. AI feature driven by self-authored instructions
+Yes
+§7 — five components. Prompts versioned in a prompts directory, reproduced in full in the README, with model and prompt version persisted against every AI-produced record
+4. Freedom in tooling
+Yes
+§10 — stack selected and justified layer by layer
+5. Public GitHub repository
+Yes
+NFR-13 private-browsing verification before submission; NFR-4 no committed credentials
+6. Live public URL that works
+Yes
+§12 deployment triggered by git push; §14 the live URL is working from day one; FR-15 guest browsing with no signup wall and five one-click demonstrations
+7a. Name, function, problem and audience
+Yes
+README sections drawn from §1 and §2 of this document
+7b. Clickable live URL
+Yes
+README header
+7c. Features list
+Yes
+§6, filtered to shipped Must items only
+7d. AI feature and the instructions behind it
+Yes
+§7 together with the verbatim prompt files
+7e. Tools, services and models used
+Yes
+§10, including free-tier limits and the data-handling disclosure in §7.5
+7f. Three or more screenshots
+Yes
+Five demonstration scenarios (FR-15.2 to FR-15.6), plus comparison tray, administrator dashboard, progress ledger, and the Urdu interface
+7g. How to run the project
+Yes
+README setup section with an example environment file and a seed command
+
+13.1 Alignment with the marking criteria
+Criterion
+Approach
+IDEA
+The restricted-mobility home tuition pathway addresses a real barrier to girls' education that no existing platform in this market serves, and it is the platform's primary use case rather than a feature. Platform-owned verification, single-session engagements, group pooling and the unmet-demand reframing are each unclaimed in this market. The differentiation table is stated at the top of the README rather than left implicit
+COMPLETION
+Only what ships is claimed. The Must set is independently a complete application. Should items either ship or move to §4.3; Could items are never listed as features. Phase gating in §14 protects this
+DEPLOYMENT
+The live URL is working on day one, before any interesting code exists. Guest browsing, published read-only credentials, zero-latency demonstration replay, no signup wall, and no cold-start delay on the assessed path
+REPORTING
+The deterministic-versus-model split, the two-directional safety design, the payment-scope boundary stated plainly, the free-tier disclosure, the appeal-fairness reasoning, and the documented exclusions all provide substantive material for a report rather than padding
+
+
+14. Implementation Plan
+Phases are gated. No phase begins until the previous phase's exit criterion passes. Phases 1 to 4 constitute a complete, deployed, gradeable application on their own; Phase 5 is expendable by design.
+14.1 Phase 1 — Foundation (days 1–2)
+Day
+Deliverable
+Exit criterion
+1
+Repository initialised; .gitignore covering environment files; blank page deployed live; local SQLite database created; schema migrated; reference data seeded including locations, adjacency, curriculum, prerequisites, boards, examination windows and service types; authentication and five roles; PWA manifest
+The live URL responds and login works for all five roles
+2
+Tutor profile creation and editing; rate table with normalisation and single-session rates; search with all filters including the hard gender constraint; tutor detail page; public slug, Open Graph tags and QR code; guest browsing
+A visitor can run a female-only home-tuition search and open a shareable profile, with no AI involved
+
+14.2 Phase 2 — Core transactions (days 3–4)
+Day
+Deliverable
+Exit criterion
+3
+Availability templates; slot booking; three engagement types; lifecycle transitions; conflict prevention; trial flagging; guardian-presence capture; administrator verification queue with document viewer; identity approval recording artefacts checked and approving administrator
+A full booking cycle completes for both a monthly and a single-session engagement, and an administrator approves a tutor with the verification record written
+4
+Reviews gated on completed bookings; review-intelligence prompt, route and content-hash cache; deterministic ranking engine; score materialisation; reliability statistics; rate benchmarks; payment records with dual acknowledgement; per-topic display
+A review changes search ordering traceably; reliability and benchmark figures render from seeded data; a payment reaches settled status only on both acknowledgements
+
+14.3 Phase 3 — AI layer (days 5–6)
+Day
+Deliverable
+Exit criterion
+5
+Agent 1 with the JSON decision contract; session persistence; curriculum injection; the search tool; code-enforced hard constraints; turn caps; reasoning trace interface; unmet-demand logging; fallback path
+A full intake conversation produces a gap map and a shortlist that respects a female-only constraint, verifiable by inspecting the shortlist
+6
+Agent 2 competency verification; badges with expiry; appeal flow with administrator override; CNIC duplicate detection; ranking explanation with score-hash cache
+A tutor fails one topic, appeals, and an administrator can override the verdict with a written reason
+
+14.4 Phase 4 — Differentiators (days 7–9)
+Day
+Deliverable
+Exit criterion
+7
+Restricted-mobility home tuition pathway as a landing entry point; tutor-side safety constraints with system enforcement; service categories including grooming; guardian-presence defaults
+A female tutor can restrict herself to female students and require guardian presence, and a non-conforming booking cannot be requested against her
+8
+Comparison tray; trial fit-check flow; progress ledger with mastery charts; session notes; payment dispute flow with administrator resolution
+Three tutors compare side by side; a completed trial produces a private fit check; a dispute reaches administrator resolution with reasoning logged
+9
+Group tuition matching — opt-in, pooling algorithm, proposal flow, linked bookings; unmet demand board
+Three seeded requests pool into a confirmed group at the reduced per-head rate
+
+14.5 Phase 5 — Breadth (days 10–11, Should items)
+Day
+Deliverable
+Exit criterion
+10
+Organisation module — profile, search, vacancies, interest expression; flag queue; administrator dashboard with all counts; taxonomy management
+Every Must requirement is demonstrable end to end
+11
+Bilingual interface — string extraction, toggle, right-to-left layout; examination countdown mode; study-plan generation with prerequisite validation
+The Urdu view renders without layout breakage; a study plan validates against the prerequisite graph
+
+14.6 Phase 6 — Presentation (day 12)
+Day
+Deliverable
+Exit criterion
+12
+Seed 25 or more tutors with varied genders, service categories, engagement types, review histories, verification states, pricing models and group willingness; seed booking and payment history so derived statistics are non-empty; record five demonstration sessions as seeded replay rows; README; screenshots in both languages; private-browsing repository check; guest credentials; Supabase project provisioned and the schema migrated from SQLite to Postgres with environment variables set on Netlify; final deployment verification against the hosted database
+A stranger opens the URL and reaches meaningful AI output within ninety seconds
+
+Two non-negotiable rules
+First: the live URL must work before any interesting code is written. Deployment failures discovered late are the most common cause of project failure in this category — more common than defective code. Second: if day nine arrives with Phase 3 incomplete, Phase 5 is dropped in full and its items move to §4.3. Under no circumstances is a Must requirement shipped in a partial state in order to accommodate a Should requirement.
+
+
+15. Risks and Mitigations
+Risk
+Impact
+Mitigation
+Scope overrun
+High
+Phase gating in §14. Phases 1 to 4 are independently complete and gradeable; Phase 5 is expendable by design and its loss costs nothing that is claimed
+AI provider rate limit during assessment
+High
+The demonstration path replays stored sessions, making zero live calls. Multi-provider failover. Manual search fallback on every AI-dependent path
+Free-tier terms change mid-project
+Medium
+Provider adapter behind a single interface; database and inference providers independently swappable without touching application logic
+Model violates a hard constraint such as gender or budget
+High
+Constraints enforced in application code on the tool result and never delegated to model judgment (FR-10.12, FR-16.4, FR-29.2). This is verified as an explicit success criterion
+Agent conversations run long or drift off-task
+Medium
+Hard caps enforced in code rather than in the prompt; insufficient-information is a valid terminal state
+Empty application at review time
+High
+Twenty-five or more seeded tutors plus seeded booking and payment history so that every derived statistic is non-empty on first view
+Assessor encounters a login wall
+High
+Guest browsing, published read-only credentials for every role, and a no-login demonstration path
+Model non-determinism affecting rankings
+Medium
+Rankings computed deterministically; model output is classification and narration only
+Data loss on redeployment
+High
+Hosted database persistence, addressed on day one
+Right-to-left layout breakage
+Medium
+Logical CSS properties throughout; both language settings verified before submission
+Group matching produces no match in the demonstration
+Medium
+Three compatible requests seeded specifically to pool
+Small-cohort statistics enabling re-identification
+Medium
+Suppression thresholds on reliability statistics, rate benchmarks and unmet demand
+Payment transparency misread as payment processing
+Medium
+The boundary is stated in the interface at every point where payment appears (FR-31.10), in the README, and in §2.3 and §4.2 of this document
+Safety features present as decoration rather than enforcement
+High
+Tutor-side constraints are enforced at the query layer so that non-conforming bookings cannot be created, and this is an explicit exit criterion for day seven
+
+
+16. Success Criteria
+The project is successful if every one of the following is demonstrably true on the deployed application.
+#
+Criterion
+1
+A first-time, unauthenticated visitor reaches meaningful AI output within ninety seconds of opening the URL
+2
+Every feature listed in the README demonstrably works. Nothing listed is a stub
+3
+A female-only home tuition search in a specified area returns only female tutors offering home delivery in that area or an adjacent one, with zero violations in the result set
+4
+A gender-constrained diagnostic intake session returns zero violating tutors, verifiable by inspecting the shortlist against the constraint
+5
+A tutor who has restricted herself to female students and requires guardian presence cannot have a non-conforming booking created against her
+6
+The diagnostic agent, given a vague description, produces a gap map specifically different from the parent's stated symptom, demonstrating diagnosis rather than paraphrase
+7
+A competency assessment produces a partial pass, with the badge withheld for the failed topic only, and a visible appeal path
+8
+An administrator can override a failed verdict with a written reason, and the override is visible in the audit log
+9
+Every approved tutor displays a verification record naming the artefacts checked and the date of verification
+10
+Review intelligence flags a five-star review as contradictory on the basis of its text, and a content-free review as generic and down-weighted
+11
+The ranking explanation narrates a breakdown containing no figure absent from the underlying signal table
+12
+A single hourly session can be booked with a declared purpose, for a date within seventy-two hours, with no monthly commitment
+13
+A payment record reaches settled status only when both parties have acknowledged it, and a single-party claim displays as unconfirmed
+14
+Three compatible requests pool into a confirmed group at a reduced per-head rate
+15
+Search ranking is reproducible: identical data yields identical ordering across runs
+16
+The Urdu view renders every Must-path screen without layout breakage
+17
+The repository opens without authentication in a private browsing session, and contains no credentials anywhere in its history
+18
+Total infrastructure cost is zero
+
+
+17. Decisions Locked
+#
+Decision
+Rationale
+1
+Local SQLite in development, Supabase Postgres in production
+Development starts immediately with no provisioning, while the deployed application gets write persistence and keeps user data out of both the repository and the ephemeral filesystem; Supabase already holds the documents, so no second provider is introduced
+2
+Parent and Student are separate roles; minors hold no account
+A structural child-safety property rather than a policy that could be violated
+3
+Pricing is a table, monthly-primary, with mode, group, negotiable and single-session dimensions
+Matches how Pakistani tuition is actually contracted; an hourly-only model corrupts the data at source
+4
+The Organisation role is trimmed to search plus an interest-based vacancy board
+Approximately one day of work rather than four, while fully satisfying the stated use case
+5
+Board and syllabus is a first-class field
+A Sindh Board tutor and a Cambridge tutor are not interchangeable
+6
+A single installable PWA rather than separate web and Android builds
+One codebase serves both platforms within the available timeline
+7
+Agents use a JSON decision contract rather than native function calling
+Provider-agnostic, and one model call per user turn
+8
+Gender preference is a hard filter enforced in application code
+Market-critical, and foundational to the platform's primary use case
+9
+All derived statistics are materialised, never computed at request time
+Search remains under 500 milliseconds with no model involvement
+10
+Group matching is deterministic constraint satisfaction, not AI
+Reproducible, explainable and auditable — a family can be told why it was grouped
+11
+Trial fit checks are private to the requester and administrators
+A decision aid rather than a public judgment, which is what keeps them candid
+12
+Verification appeals include human override
+An automated verdict affecting a livelihood must not be final
+13
+User-generated content is never machine-translated
+Translating a reviewer's words would misrepresent them
+14
+Phase gating governs the build; Phase 5 is expendable
+Protects the completion criterion against scope overrun
+15
+Restricted-mobility home tuition is a primary pathway, not a filter
+It is the platform's core use case and the strongest contribution to its originality; for a significant group of students it is the only available route to supplementary education
+16
+Tutor-side safety constraints are system-enforced and statistically protected
+A woman travelling alone to an unfamiliar residence is exposed; the platform must not penalise her for holding to her own conditions
+17
+Verification is platform-owned, attributed and specific
+Chain of custody is the substantive answer to fraud; badge wording never implies a check that was not performed
+18
+Payment transparency without payment processing
+A dual-acknowledgement record with a dispute path solves the market's actual payment failure at low cost, without claiming a capability the project does not have
+19
+Three engagement types, including single hourly sessions
+A market whose smallest unit is thirty times the smallest need is failing a large volume of genuine demand
+20
+The platform accepts feedback about itself as a first-class module
+A product with no channel for hearing that it is failing has no mechanism for improvement; keeping it separate from tutor reviews protects the integrity of both records
+21
+Volunteer tutors are a supported supply channel, verified identically to paid tutors
+It reaches families who cannot pay at any rate and strengthens the thinnest part of supply in the primary use case; verifying volunteers on the same basis prevents goodwill from becoming a loophole in the platform’s central claim
+22
+Applications are persisted first and emailed second
+EmailJS is a notification channel, not a system of record; a quota or template failure must never discard an application that the applicant believes was received
+
+
+18. Closing Note on Scope
+This specification contains 219 functional requirements across 32 modules. That represents a realistic eleven to twelve day build for one person working full days.
+The phase gating in §14 exists precisely for this reason. Phases 1 to 4 produce a complete, deployed, AI-powered application that satisfies every requirement in the project brief, including the platform's primary restricted-mobility use case, platform-owned verification, single-session engagements, payment transparency and group matching. Everything in Phase 5 raises the originality and reporting marks, but none of it is required to score well, and all of it can be surrendered without weakening a single claim made in the README.
+
+The governing rule
+A feature is worth shipping only if it works completely, appears in the demonstration path, and can be described in one line in the README. Anything that fails those three tests costs marks under completion regardless of how good the idea is. Moving an unfinished feature into §4.3 as planned but not built is a stronger outcome than shipping it half-working — it reads as product judgment rather than as a gap.
+
+Prepared by Iqra — Ustaad.com — 26 July 2026 — Document version 4.0

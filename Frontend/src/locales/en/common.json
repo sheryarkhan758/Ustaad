@@ -1,0 +1,113 @@
+{
+  "brand": {
+    "name": "Ustaad",
+    "suffix": ".com"
+  },
+  "nav": {
+    "search": "Find a tutor",
+    "vacancies": "Vacancies",
+    "demo": "See it work",
+    "myBookings": "My bookings",
+    "myStudents": "My students",
+    "profile": "My profile",
+    "schedule": "Schedule",
+    "verification": "Verification",
+    "orgVacancies": "Our vacancies",
+    "dashboard": "Dashboard",
+    "verifications": "Verifications",
+    "reports": "Reports",
+    "open": "Open menu",
+    "close": "Close menu",
+    "primary": "Primary",
+    "tutorBookings": "Bookings",
+    "intake": "Find the gap",
+    "competency": "Topic assessments"
+  },
+  "action": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "retry": "Try again",
+    "dismiss": "Dismiss",
+    "clear": "Clear",
+    "compare": "Compare",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "learnMore": "Learn more"
+  },
+  "state": {
+    "loading": "Loading",
+    "loadingPage": "Loading page",
+    "checkingSession": "Checking your session",
+    "emptyTitle": "Nothing here yet",
+    "errorTitle": "That did not work",
+    "offline": "You are offline",
+    "genericError": "Something went wrong at our end. Nothing you entered has been lost.",
+    "networkError": "Could not reach Ustaad.com. Check your connection and try again — nothing you entered has been lost."
+  },
+  "field": {
+    "optional": "(optional)",
+    "required": "required"
+  },
+  "language": {
+    "switchTo": "Switch language to {{language}}",
+    "label": "Language"
+  },
+  "footer": {
+    "tagline": "Verified tutor discovery and home tuition for Pakistan. Every tutor’s identity is checked by the platform, and the record says exactly what was checked.",
+    "paymentBoundary": "Ustaad.com records what was agreed and what both parties confirm was paid. It does not process, hold or transfer money.",
+    "volunteer": "Volunteer as a tutor",
+    "reportProblem": "Report a problem with this site",
+    "styleguide": "Style guide",
+    "heading": "Footer"
+  },
+  "tray": {
+    "selected": "{{count}} of {{max}} selected to compare"
+  },
+  "install": {
+    "title": "Add Ustaad to your home screen",
+    "body": "Opens full screen and works without a connection.",
+    "notNow": "Not now",
+    "add": "Add"
+  },
+  "skipToContent": "Skip to content",
+  "notFound": {
+    "title": "That page is not here",
+    "body": "The link may be out of date, or the profile may have been withdrawn.",
+    "goHome": "Go home"
+  },
+  "form": {
+    "summaryTitle_one": "There is one problem with this form",
+    "summaryTitle_other": "There are {{count}} problems with this form"
+  },
+  "toast": {
+    "done": "Done",
+    "applicationSent": "Application sent",
+    "reportSent": "Report sent",
+    "accountCreated": "Account created",
+    "signedIn": "Signed in",
+    "signedOut": "Signed out",
+    "profileSaved": "Profile saved",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingCancelled": "Booking cancelled",
+    "reportResolved": "Report resolved",
+    "vacancyPosted": "Vacancy posted",
+    "interestSent": "Interest sent",
+    "studentAdded": "Student added"
+  },
+  "shell": {
+    "parent": "Parent account",
+    "student": "Student account",
+    "tutor": "Tutor account",
+    "organisation": "Organisation account",
+    "admin": "Administration"
+  },
+  "mode": {
+    "home": "At your home",
+    "online": "Online",
+    "own_place": "At the tutor's place"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "pendingVerifications": "فیصلے کے منتظر",
+    "documentsAwaitingReview": "دستاویزات جانچنی ہیں",
+    "pendingOrganisations": "منظوری کی منتظر تنظیمیں",
+    "openFlags": "کھلی رپورٹس",
+    "safetyConcernReviews": "حفاظتی خدشے والے تبصرے",
+    "openVerificationAppeals": "کھلی اپیلیں",
+    "expiringVerifications": "جلد ختم ہونے والے بیج",
+    "openDisputes": "کھلے تنازعات",
+    "newFeedback": "نئی رائے",
+    "newVolunteerApplications": "نئے رضاکار",
+    "unmetDemandGaps": "غیر پوری طلب",
+    "activeEngagements": "جاری معاہدے",
+    "usersByRole": "کردار کے لحاظ سے اکاؤنٹس"
+  },
+  "flags": {
+    "title": "رپورٹس",
+    "reason": "وجہ",
+    "reporter": "رپورٹ کرنے والا",
+    "target": "کس بارے میں",
+    "resolve": "نمٹائیں",
+    "resolveTitle": "اس رپورٹ کو نمٹائیں",
+    "resolveHint": "کم از کم 15 حروف۔ یہ آڈٹ لاگ میں لکھا جاتا ہے اور بعد میں تبدیل نہیں ہو سکتا۔",
+    "decision": "فیصلہ",
+    "actioned": "تصدیق ہوئی اور کارروائی کی گئی",
+    "dismissed": "مسترد",
+    "recorded": "رپورٹ ریکارڈ ہو گئی",
+    "inQueue": "یہ اب منتظم کی فہرست میں ہے۔",
+    "empty": {
+      "title": "جانچنے کے لیے کچھ نہیں",
+      "body": "رپورٹس آنے پر یہاں نظر آئیں گی۔"
+    }
+  },
+  "verifications": {
+    "title": "تصدیقات",
+    "queue": "فہرست",
+    "approve": "منظور کریں",
+    "reject": "مسترد کریں",
+    "requestInfo": "مزید معلومات طلب کریں",
+    "artefacts": "جانچی گئی دستاویزات",
+    "reasonRequired": "ہر فیصلے کے لیے تحریری وجہ لازمی ہے، منظوری کے لیے بھی۔"
+  }
+}
