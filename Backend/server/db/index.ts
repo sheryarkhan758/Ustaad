@@ -62,16 +62,56 @@ export type DbDialect = 'sqlite' | 'postgres';
  * person chose.
  */
 function resolvePostgresUrl(): string | undefined {
-  const explicit = process.env.SUPABASE_DB_URL?.trim();
+  const explicit = clean(process.env.SUPABASE_DB_URL, 'SUPABASE_DB_URL');
   if (explicit) return explicit;
 
-  const netlify = process.env.NETLIFY_DATABASE_URL?.trim();
+  const netlify = clean(process.env.NETLIFY_DATABASE_URL, 'NETLIFY_DATABASE_URL');
   if (netlify) return netlify;
 
-  const generic = process.env.DATABASE_URL?.trim();
+  const generic = clean(process.env.DATABASE_URL, 'DATABASE_URL', { quiet: true });
   if (generic && /^postgres(ql)?:\/\//i.test(generic)) return generic;
 
   return undefined;
+}
+
+/**
+ * Trim a connection string, drop quotes somebody pasted with it, and refuse a
+ * value the driver cannot parse — by name, in one sentence.
+ *
+ * A value pasted into a hosting dashboard arrives however the clipboard left
+ * it. Wrapping quotes or backticks survive `.trim()`, and postgres-js then
+ * fails inside `new URL()` with `TypeError: Invalid URL` — a message that names
+ * neither the variable nor the mistake, and which a visitor sees as a 502 on
+ * every page. Stripping the quotes fixes the common paste; anything still
+ * unparseable is reported here, where the name of the variable is known.
+ *
+ * **The value itself is never in the message.** It carries a database password
+ * (§2.2), and an error that echoed it would put that password in the function
+ * log and on the screen of whoever hit the page.
+ */
+function clean(raw: string | undefined, name: string, options: { quiet?: boolean } = {}): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed) return undefined;
+
+  const unquoted = /^(["'`])(.*)\1$/s.exec(trimmed)?.[2]?.trim() ?? trimmed;
+  if (!unquoted) return undefined;
+
+  // `DATABASE_URL` legitimately holds `file:./local.db` in development, so it
+  // is checked for the Postgres scheme by the caller instead of rejected here.
+  if (options.quiet) return unquoted;
+
+  try {
+    new URL(unquoted);
+  } catch {
+    throw new Error(
+      `${name} is set but is not a valid connection string, so no database can be opened. ` +
+        'Check it against the string in DEPLOY.md step 2: it starts with "postgresql://", ' +
+        'carries no surrounding quotes and no line break, and any of + ? # / @ in the ' +
+        'password must be percent-encoded (+ is %2B, ? is %3F). The value is not shown here ' +
+        'because it contains the database password.',
+    );
+  }
+  return unquoted;
 }
 
 /**
