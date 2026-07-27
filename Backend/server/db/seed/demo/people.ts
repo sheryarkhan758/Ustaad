@@ -966,6 +966,19 @@ export const DEMO_PARENTS: DemoParentSpec[] = [
     areaId: 'karachi-dha',
     students: [
       { key: 'ali', name: 'Ali Raza', dateOfBirth: '2011-06-30', levelId: 'matric', boardId: 'sindh-board' },
+      /*
+       * Matric, Sindh Board, DHA — the third student who makes a pooling
+       * demonstration possible. Two open requests cannot show §6.23 working:
+       * the solver needs three compatible ones before a family can be shown a
+       * group and told why it formed.
+       *
+       * Her brother is in the same household, which is why they share an area:
+       * Karachi's curated adjacency has no area neighbouring both Clifton and
+       * DHA, so a three-way group needs two of its members in one area, and two
+       * children of one family wanting the same help is the commonest way that
+       * actually happens.
+       */
+      { key: 'fatima-b', name: 'Fatima Raza', dateOfBirth: '2010-02-25', levelId: 'matric', boardId: 'sindh-board' },
     ],
   },
   {

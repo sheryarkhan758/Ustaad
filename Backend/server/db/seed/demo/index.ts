@@ -1161,7 +1161,7 @@ async function seedGroup(ctx: {
       genderPreference: 'female_only',
       maxGroupSize: 4,
       budgetMax: 900_000,
-      availabilityJson: toDbJson([{ weekday: 1, start: '16:00', end: '18:00' }])!,
+      availabilityJson: toDbJson([{ weekday: 1, startTime: '16:00', endTime: '18:00' }])!,
       status: 'proposed',
       createdAt: daysAgo(now, 40),
     });
@@ -1175,7 +1175,7 @@ async function seedGroup(ctx: {
     boardId: 'sindh-board',
     areaId: 'karachi-clifton',
     topicIdsJson: toDbJson(['math-matric-sindh-quadratic-equations'])!,
-    availabilityJson: toDbJson([{ weekday: 1, start: '16:00', end: '18:00' }])!,
+    availabilityJson: toDbJson([{ weekday: 1, startTime: '16:00', endTime: '18:00' }])!,
     genderPreference: 'female_only',
     groupKey: 'mathematics|matric|sindh-board|karachi-clifton|female_only',
     perHeadRate: 700_000,
@@ -1193,14 +1193,76 @@ async function seedGroup(ctx: {
       proposalId,
       groupRequestId: member.requestId,
       studentProfileId: studentIds.get(member.studentKey)!,
+      /*
+       * The shape `readExplanation` reads and `poolRequests` writes: prose for
+       * anything without a dictionary, and codes for the interface, which
+       * renders them in the reader's own language. An older seed wrote a third
+       * shape of its own invention, which read back as no explanation at all —
+       * the one thing this column exists to carry.
+       */
       explanationJson: toDbJson({
-        matchedOn: ['same subject, level and board', 'overlapping topic', 'adjacent areas with both families flexible', 'a shared Monday window'],
-        // Never names another family (§2.12, SEC-14).
-        genderNote: 'This group is female-only because at least one family requires it.',
+        reasons: [
+          'Same subject, level and examination board as the other family.',
+          '1 topic asked for by everyone in the group.',
+          'You marked yourself flexible on area, and one family is in an adjacent area.',
+          'A shared weekly window: Monday 16:00–18:00.',
+          'The group will be taught by a female tutor, because a member requires it. You stated no preference.',
+          'Group of 2, within the smallest maximum anyone set (4).',
+        ],
+        // Never names another family (§2.12, FR-23.8).
+        reasonCodes: [
+          { code: 'same_curriculum', params: { others: 1 } },
+          { code: 'shared_topics', params: { count: 1 } },
+          { code: 'adjacent_area', params: { count: 1 } },
+          { code: 'shared_window', params: { windows: '1|16:00|18:00' } },
+          { code: 'gender_other', params: { gender: 'female' } },
+          { code: 'within_cap', params: { size: 2, cap: 4 } },
+        ],
       })!,
       bookingId: null,
       confirmedAt: daysAgo(now, 33),
       declinedAt: null,
+    });
+  }
+
+  /*
+   * --- Three open requests that actually pool ---------------------------
+   *
+   * The confirmed group above shows the end state. It cannot show the part
+   * §6.23 exists to demonstrate — a family opening its screen, seeing which
+   * other requests its own matched with, and being told why (decision 10) —
+   * because a matched request has nothing left to pool.
+   *
+   * So these three are left open, on a different topic from the group above,
+   * and are deliberately compatible on every dimension the solver checks:
+   * same subject, level and board; the same topic; Karachi areas that are
+   * adjacent with all three families flexed; and one shared Tuesday window.
+   * `previewMatches` groups them on sight, and the reason it gives is
+   * computed rather than seeded.
+   */
+  const pooling: { studentKey: string; areaId: string }[] = [
+    { studentKey: 'zara', areaId: 'karachi-clifton' },
+    { studentKey: 'ali', areaId: 'karachi-dha' },
+    { studentKey: 'fatima-b', areaId: 'karachi-dha' },
+  ];
+
+  for (const member of pooling) {
+    await db.insert(groupRequests).values({
+      id: newId(),
+      studentProfileId: studentIds.get(member.studentKey)!,
+      subjectId: 'mathematics',
+      levelId: 'matric',
+      boardId: 'sindh-board',
+      topicsJson: toDbJson(['math-matric-sindh-factorisation'])!,
+      areaId: member.areaId,
+      // All three flexed. Area adjacency only pools when both sides did.
+      areaFlex: toDbBool(true),
+      genderPreference: member.studentKey === 'zara' ? 'female_only' : 'no_preference',
+      maxGroupSize: 3,
+      budgetMax: 900_000,
+      availabilityJson: toDbJson([{ weekday: 2, startTime: '16:00', endTime: '18:00' }])!,
+      status: 'open',
+      createdAt: daysAgo(now, 3),
     });
   }
 }
