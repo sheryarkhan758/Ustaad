@@ -152,3 +152,16 @@ Until they run, search still works but every derived statistic reads zero.
 | A `.node` binary error | `better-sqlite3` entered the Function bundle. It is listed in `external_node_modules` and must stay there. |
 | `Cannot find module @rollup/rollup-linux-x64-gnu` | npm's optional-dependency bug (npm/cli#4828). A lockfile resolved on Windows records only the win32 binary, so `npm ci` on Linux has nothing to install. `Frontend/package.json` declares the Linux binary as an **optionalDependency** to force a real lockfile entry — do not remove it. It is `optional` so a Windows install skips it rather than failing. |
 | `relation "..." does not exist` | Step 2 was skipped, or run against a different database than `SUPABASE_DB_URL` points at. |
+
+## If the site loads but every API call returns 502
+
+`SUPABASE_DB_URL` is not set on the deployment. Without it the function falls
+back to SQLite, which cannot work in a serverless runtime — the filesystem is
+ephemeral and `better-sqlite3` has no native binary for it. Before this was
+guarded, the symptom was a `GLIBC_2.38 not found` error naming a `.node` file
+and saying nothing about the real cause; the function now fails with a sentence
+that names the missing variable instead.
+
+Set it under **Site configuration → Environment variables**, then **Deploys →
+Trigger deploy → Clear cache and deploy site**. Setting a variable alone does
+not rebuild.

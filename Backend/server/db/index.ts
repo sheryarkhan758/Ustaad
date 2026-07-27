@@ -54,7 +54,37 @@ function sqlitePath(): string {
   return url.startsWith('file:') ? url.slice('file:'.length) : url;
 }
 
+/**
+ * Refuse SQLite where it cannot work — and say so in one sentence.
+ *
+ * A serverless function has an ephemeral filesystem and no compiler, so
+ * `better-sqlite3` there fails on a missing GLIBC symbol while loading its
+ * native binary. That error names a shared library and a `.node` file and
+ * says nothing whatsoever about the actual mistake, which is that
+ * `SUPABASE_DB_URL` was never set on the deployment.
+ *
+ * Detecting the platform rather than trusting `NODE_ENV`: `NETLIFY` and
+ * `AWS_LAMBDA_FUNCTION_NAME` are set by the runtime itself and cannot be
+ * forgotten the way an environment variable can.
+ */
+function assertSqliteIsUsableHere(): void {
+  const serverless = Boolean(
+    process.env.NETLIFY ?? process.env.AWS_LAMBDA_FUNCTION_NAME ?? process.env.LAMBDA_TASK_ROOT,
+  );
+  if (!serverless) return;
+
+  throw new Error(
+    'SUPABASE_DB_URL is not set, so the server tried to open a local SQLite ' +
+      'file — which cannot work in a serverless function: the filesystem is ' +
+      'ephemeral and the native driver has no binary for this runtime. Set ' +
+      'SUPABASE_DB_URL in the site environment variables and redeploy. See ' +
+      'DEPLOY.md step 3.',
+  );
+}
+
 function openSqlite() {
+  assertSqliteIsUsableHere();
+
   const connection = new BetterSqlite3(sqlitePath());
 
   // Connection settings, not schema or query semantics. SQLite ships with
