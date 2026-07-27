@@ -19,6 +19,7 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
 import { AppShell } from '../components/layout/AppShell';
+import { RouteError } from '../components/layout/RouteError';
 import { RoleShell } from '../components/layout/RoleShell';
 import { OPEN_NAVIGATION } from './access';
 import { RoleGuard } from './RoleGuard';
@@ -29,6 +30,12 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppShell />,
+    /*
+     * Without this, a thrown render error or a dead API gets React Router's
+     * developer screen — a stack trace addressed to whoever wrote the code,
+     * shown to a parent looking for a tutor. See `RouteError`.
+     */
+    errorElement: <RouteError />,
     children: [
       /* --- Public — no account required --------------------------------- */
       { index: true, ...page(() => import('../pages/public/Landing')) },

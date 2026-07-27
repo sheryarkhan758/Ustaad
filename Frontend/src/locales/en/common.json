@@ -109,5 +109,13 @@
     "home": "At your home",
     "online": "Online",
     "own_place": "At the tutor's place"
+  },
+  "routeError": {
+    "title": "This screen did not load",
+    "body": "Something went wrong rendering this page. Reloading usually clears it.",
+    "backendTitle": "The server is not responding",
+    "backendBody": "The site loaded but its backend is unreachable, so there is nothing to show yet. This is usually a deployment without a database behind it.",
+    "home": "Go to the home page",
+    "details": "Technical detail"
   }
 }
