@@ -43,10 +43,49 @@ import { guardAdminActionsWrites } from './runtime-guards';
 
 export type DbDialect = 'sqlite' | 'postgres';
 
-/** Set in production only.  Its presence *is* the switch. */
-const SUPABASE_DB_URL = process.env.SUPABASE_DB_URL;
+/**
+ * The Postgres connection string, from whichever variable the host provides.
+ *
+ * `SUPABASE_DB_URL` remains the documented name. The alternatives exist
+ * because a Postgres URL is a Postgres URL — a managed database provisioned
+ * from the Netlify UI sets `NETLIFY_DATABASE_URL` and cannot be told to call
+ * itself something else, and refusing to read it would mean the application
+ * could not use a database that is sitting right there and correctly
+ * configured.
+ *
+ * `DATABASE_URL` is accepted **only** when it names Postgres. In local
+ * development it holds `file:./local.db`, and treating that as a connection
+ * string would send the driver looking for a server that does not exist.
+ *
+ * Resolution order is deliberate: an explicitly-set `SUPABASE_DB_URL` wins, so
+ * a host that injects its own variable can never silently override the one a
+ * person chose.
+ */
+function resolvePostgresUrl(): string | undefined {
+  const explicit = process.env.SUPABASE_DB_URL?.trim();
+  if (explicit) return explicit;
 
-export const DB_DIALECT: DbDialect = SUPABASE_DB_URL ? 'postgres' : 'sqlite';
+  const netlify = process.env.NETLIFY_DATABASE_URL?.trim();
+  if (netlify) return netlify;
+
+  const generic = process.env.DATABASE_URL?.trim();
+  if (generic && /^postgres(ql)?:\/\//i.test(generic)) return generic;
+
+  return undefined;
+}
+
+/**
+ * Set in production only. Its presence *is* the switch.
+ *
+ * Exported so that everything which needs to know "is this a real database?"
+ * asks **this** rather than re-reading an environment variable. The demo seed
+ * guard depends on it: a check written against one variable name stops working
+ * the moment a second one is accepted, and that particular check is what keeps
+ * invented people with a published password out of production (FR-15.9).
+ */
+export const POSTGRES_URL: string | undefined = resolvePostgresUrl();
+
+export const DB_DIALECT: DbDialect = POSTGRES_URL ? 'postgres' : 'sqlite';
 
 /** `file:./local.db` → `./local.db`.  better-sqlite3 takes a bare path. */
 function sqlitePath(): string {
@@ -74,11 +113,12 @@ function assertSqliteIsUsableHere(): void {
   if (!serverless) return;
 
   throw new Error(
-    'SUPABASE_DB_URL is not set, so the server tried to open a local SQLite ' +
+    'No Postgres connection string is set, so the server tried to open a local SQLite ' +
       'file — which cannot work in a serverless function: the filesystem is ' +
       'ephemeral and the native driver has no binary for this runtime. Set ' +
-      'SUPABASE_DB_URL in the site environment variables and redeploy. See ' +
-      'DEPLOY.md step 3.',
+      'SUPABASE_DB_URL (or NETLIFY_DATABASE_URL, which a Netlify-provisioned ' +
+      'database sets for you) in the site environment variables and redeploy. ' +
+      'See DEPLOY.md step 3.',
   );
 }
 
@@ -114,7 +154,7 @@ function openPostgres(url: string) {
   >;
 }
 
-const rawDb = SUPABASE_DB_URL ? openPostgres(SUPABASE_DB_URL) : openSqlite();
+const rawDb = POSTGRES_URL ? openPostgres(POSTGRES_URL) : openSqlite();
 
 export const db = guardAdminActionsWrites(rawDb);
 

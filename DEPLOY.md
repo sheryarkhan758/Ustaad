@@ -13,7 +13,28 @@ running).
 
 ---
 
-## 1. Supabase — **[NEEDS YOU]**
+## 1. A database — **[NEEDS YOU]**
+
+Nothing on the deployed site works without one. The API returns 502 on every
+request and the interface renders its shell with no data, because the
+demonstration content lives in the database too.
+
+**Either** provider works — the application reads a Postgres URL from
+`SUPABASE_DB_URL`, `NETLIFY_DATABASE_URL` or a `postgres://`-shaped
+`DATABASE_URL`, in that order.
+
+### Option A — Netlify DB (fastest, no separate signup)
+
+In your Netlify project: **Project configuration → Database → Add database**.
+It provisions Postgres (Neon) and sets `NETLIFY_DATABASE_URL` on the site for
+you. Copy that value for step 2; you will need it locally to create the schema.
+
+There is no storage bucket with this option, so **tutor document upload will
+not work** — everything else does. Add Supabase later if you need it.
+
+### Option B — Supabase (database *and* the private document bucket)
+
+## 1b. Supabase — **[NEEDS YOU]**
 
 1. Create a project at <https://supabase.com>. Any region; pick the one nearest
    Pakistan for latency.

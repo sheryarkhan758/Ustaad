@@ -1387,11 +1387,22 @@ async function seedUnmetDemand(db: Executor, now: Date): Promise<void> {
  * ====================================================================== */
 
 async function main(): Promise<void> {
-  if (process.env.SUPABASE_DB_URL) {
+  /*
+   * Asks the driver what it actually resolved, **not** whether one particular
+   * variable is set. `server/db/index.ts` now accepts a Postgres URL from more
+   * than one name, and a guard written against a single name would have
+   * stopped firing the moment a second was added — silently, and in the one
+   * place where failing silently means seeding invented people with a
+   * published password into a live database (FR-15.9).
+   */
+  const { DB_DIALECT } = await import('../../index');
+
+  if (DB_DIALECT === 'postgres') {
     console.error(
-      '✗ Refusing to run. SUPABASE_DB_URL is set, so the configured database is production.\n' +
-        '  This seed writes invented people with a password published in the README.\n' +
-        '  Unset SUPABASE_DB_URL to seed the local SQLite file instead.',
+      '✗ Refusing to run. A Postgres connection string is set, so the configured\n' +
+        '  database is production. This seed writes invented people with a password\n' +
+        '  published in the README.\n' +
+        '  Unset SUPABASE_DB_URL / NETLIFY_DATABASE_URL to seed the local SQLite file.',
     );
     process.exitCode = 1;
     return;
