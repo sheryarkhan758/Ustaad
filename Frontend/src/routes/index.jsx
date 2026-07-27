@@ -111,6 +111,16 @@ export const router = createBrowserRouter([
                 ...page(() => import('../pages/booking/BookingDetail')),
               },
               { path: 'book/:slug', ...page(() => import('../pages/book/BookTutor')) },
+              { path: 'my/students', ...page(() => import('../pages/parent/Students')) },
+              /*
+               * The ledger hangs off the student, not off a booking: it is the
+               * record across every session anyone has taught them (§6.12).
+               */
+              {
+                path: 'my/students/:studentProfileId/progress',
+                ...page(() => import('../pages/parent/Progress')),
+              },
+              { path: 'my/groups', ...page(() => import('../pages/parent/Groups')) },
             ],
           },
         ],
@@ -138,6 +148,14 @@ export const router = createBrowserRouter([
                 path: 'tutor/bookings/:id',
                 ...page(() => import('../pages/booking/BookingDetail')),
               },
+              { path: 'tutor/groups', ...page(() => import('../pages/tutor/Groups')) },
+              /*
+               * The demand board is supply intelligence, so it lives in the
+               * tutor's own area rather than as a public page (§6.24). An
+               * organisation reads the same screen (FR-13.7) through its own
+               * route below.
+               */
+              { path: 'tutor/demand', ...page(() => import('../pages/demand/DemandBoard')) },
             ],
           },
         ],
@@ -152,6 +170,13 @@ export const router = createBrowserRouter([
             children: [
               { path: 'org/profile', ...page(() => import('../pages/organisation/Profile')) },
               { path: 'org/vacancies', ...page(() => import('../pages/organisation/Vacancies')) },
+              /*
+               * FR-13.7 — the same board a tutor reads, as hiring intelligence.
+               * The same component and the same endpoint: what makes a board
+               * carrying no requester identity safe to show a tutor makes it
+               * safe to show an academy, and one surface cannot drift from two.
+               */
+              { path: 'org/demand', ...page(() => import('../pages/demand/DemandBoard')) },
             ],
           },
         ],
@@ -196,14 +221,19 @@ export const NAV = [
 
   { to: '/my/bookings', labelKey: 'nav.myBookings', roles: ['parent', 'student'] },
   { to: '/my/students', labelKey: 'nav.myStudents', roles: ['parent'] },
+  { to: '/my/groups', labelKey: 'nav.myGroups', roles: ['parent', 'student'] },
 
   { to: '/tutor/profile', labelKey: 'nav.profile', roles: ['tutor'] },
   { to: '/tutor/bookings', labelKey: 'nav.tutorBookings', roles: ['tutor'] },
   { to: '/tutor/schedule', labelKey: 'nav.schedule', roles: ['tutor'] },
   { to: '/tutor/verification', labelKey: 'nav.verification', roles: ['tutor'] },
   { to: '/tutor/competency', labelKey: 'nav.competency', roles: ['tutor'] },
+  { to: '/tutor/groups', labelKey: 'nav.groupProposals', roles: ['tutor'] },
+  { to: '/tutor/demand', labelKey: 'nav.demand', roles: ['tutor'] },
 
   { to: '/org/vacancies', labelKey: 'nav.orgVacancies', roles: ['organisation'] },
+  { to: '/org/profile', labelKey: 'nav.orgProfile', roles: ['organisation'] },
+  { to: '/org/demand', labelKey: 'nav.demand', roles: ['organisation'] },
 
   { to: '/admin', labelKey: 'nav.dashboard', roles: ['admin'] },
   { to: '/admin/verifications', labelKey: 'nav.verifications', roles: ['admin'] },

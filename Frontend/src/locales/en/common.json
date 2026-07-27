@@ -21,7 +21,11 @@
     "primary": "Primary",
     "tutorBookings": "Bookings",
     "intake": "Find the gap",
-    "competency": "Topic assessments"
+    "competency": "Topic assessments",
+    "myGroups": "Group tuition",
+    "groupProposals": "Group proposals",
+    "demand": "Unmet demand",
+    "orgProfile": "Academy profile"
   },
   "action": {
     "save": "Save",
@@ -117,5 +121,14 @@
     "backendBody": "The site loaded but its backend is unreachable, so there is nothing to show yet. This is usually a deployment without a database behind it.",
     "home": "Go to the home page",
     "details": "Technical detail"
+  },
+  "weekday": {
+    "0": "Sunday",
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday"
   }
 }

@@ -15,7 +15,7 @@ import { Router, type Response } from 'express';
 import { z } from 'zod';
 
 import { createGroupRequestSchema, proposeGroupSchema } from '../../shared/group-matching';
-import { demandBoardQuerySchema } from '../../shared/unmet-demand';
+import { demandBoardQuerySchema, postDemandSchema } from '../../shared/unmet-demand';
 import { requireAuth, requireRole } from '../middleware/auth';
 import {
   createGroupRequest,
@@ -26,7 +26,7 @@ import {
   viewProposal,
   withdrawGroupRequest,
 } from '../services/group-matching';
-import { readDemandBoard, readSupplyGaps } from '../services/unmet-demand';
+import { readDemandBoard, readSupplyGaps, recordUnmetDemand } from '../services/unmet-demand';
 import {
   findGroupRequest,
   listOpenGroupRequestsForUser,
@@ -280,6 +280,36 @@ export function createDemandRouter(): Router {
       const parsed = demandBoardQuerySchema.safeParse(req.query);
       if (!parsed.success) return invalid(res, parsed.error);
       res.json(await readDemandBoard(req.db, parsed.data));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * `POST /api/demand` — a family posting a search that found nobody.
+   *
+   * FR-24.1 counts a search with zero matches as unmet demand, and the
+   * diagnostic agent was the only thing that could record one. A family that
+   * searched manually and found an empty page had the most useful signal on the
+   * platform and nowhere to put it.
+   *
+   * It is authenticated but records nothing about who called: `recordUnmetDemand`
+   * has no parameter for a user, so the identity cannot travel even by mistake
+   * (FR-24.2). The authentication is rate-limiting and abuse control, not
+   * attribution — a board anyone could post to anonymously is a board a
+   * competitor can shape.
+   */
+  router.post('/', requireAuth, requireRole('parent', 'student'), async (req, res, next) => {
+    try {
+      const parsed = postDemandSchema.safeParse(req.body);
+      if (!parsed.success) return invalid(res, parsed.error);
+
+      await recordUnmetDemand(req.db, { ...parsed.data, reason: 'no_matches' });
+
+      // No id comes back. A family cannot look their record up, amend it or
+      // delete it, because it is not theirs once written — it is one anonymous
+      // tally mark in a cohort, and an id would imply otherwise.
+      res.status(202).json({ recorded: true });
     } catch (error) {
       next(error);
     }

@@ -19,7 +19,11 @@
 import { and, eq, gte, inArray, lte, or } from 'drizzle-orm';
 
 import { fromDbBool, newId, nowIso, toDbBool } from '../../shared/db-values';
-import type { AvailabilityWindow, GroupCandidate } from '../../shared/group-matching';
+import type {
+  AvailabilityWindow,
+  GroupCandidate,
+  GroupReasonCode,
+} from '../../shared/group-matching';
 import {
   DEMAND_WINDOW_DAYS,
   cohortKeyOf,
@@ -264,6 +268,16 @@ export interface GroupMemberRecord {
   groupRequestId: string;
   studentProfileId: string;
   explanation: string[];
+  /**
+   * The same reasons as codes, for a client that has to say them in Urdu.
+   *
+   * Empty for a proposal written before codes existed — `explanation_json` held
+   * a bare array then, and a row that predates a field is not a corrupt row.
+   * The reader normalises both shapes rather than a migration rewriting stored
+   * explanations, because an explanation is a record of what a family was told
+   * at the time, and rewriting it would be editing that record.
+   */
+  reasonCodes: GroupReasonCode[];
   bookingId: string | null;
   confirmedAt: string | null;
   declinedAt: string | null;
@@ -307,12 +321,30 @@ function toProposalDomain(row: typeof groupProposals.$inferSelect): GroupProposa
   };
 }
 
+/**
+ * `explanation_json` in either shape it has ever held.
+ *
+ * Written as `string[]` before reason codes existed and as
+ * `{ reasons, reasonCodes }` after. Both are read here so that neither a
+ * migration nor a second column is needed, and — more to the point — so that a
+ * proposal made last week still shows the family the sentences it was actually
+ * shown when it was made.
+ */
+function readExplanation(json: string): { explanation: string[]; reasonCodes: GroupReasonCode[] } {
+  const parsed = JSON.parse(json) as unknown;
+
+  if (Array.isArray(parsed)) return { explanation: parsed as string[], reasonCodes: [] };
+
+  const object = parsed as { reasons?: string[]; reasonCodes?: GroupReasonCode[] };
+  return { explanation: object.reasons ?? [], reasonCodes: object.reasonCodes ?? [] };
+}
+
 function toMemberDomain(row: typeof groupMembers.$inferSelect): GroupMemberRecord {
   return {
     proposalId: row.proposalId,
     groupRequestId: row.groupRequestId,
     studentProfileId: row.studentProfileId,
-    explanation: JSON.parse(row.explanationJson) as string[],
+    ...readExplanation(row.explanationJson),
     bookingId: row.bookingId,
     confirmedAt: row.confirmedAt,
     declinedAt: row.declinedAt,
@@ -322,7 +354,12 @@ function toMemberDomain(row: typeof groupMembers.$inferSelect): GroupMemberRecor
 export async function insertProposal(
   db: Executor,
   input: Omit<GroupProposalRecord, 'status' | 'tutorAcceptedAt' | 'confirmedAt' | 'proposedAt'> & {
-    members: { groupRequestId: string; studentProfileId: string; explanation: string[] }[];
+    members: {
+      groupRequestId: string;
+      studentProfileId: string;
+      explanation: string[];
+      reasonCodes: GroupReasonCode[];
+    }[];
   },
 ): Promise<void> {
   await db.insert(groupProposals).values({
@@ -347,7 +384,10 @@ export async function insertProposal(
       proposalId: input.id,
       groupRequestId: member.groupRequestId,
       studentProfileId: member.studentProfileId,
-      explanationJson: JSON.stringify(member.explanation),
+      explanationJson: JSON.stringify({
+        reasons: member.explanation,
+        reasonCodes: member.reasonCodes,
+      }),
       bookingId: null,
       confirmedAt: null,
       declinedAt: null,

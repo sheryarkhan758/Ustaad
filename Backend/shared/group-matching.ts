@@ -269,11 +269,40 @@ export function pairFailures(
  * The grouping
  * ---------------------------------------------------------------------- */
 
+/**
+ * One reason, as data rather than as a sentence.
+ *
+ * `reasons` below is English prose assembled here, and prose assembled in the
+ * solver is prose the Urdu view cannot render. Decision 10 says a family is
+ * entitled to know why it was grouped; that entitlement does not stop at the
+ * language toggle, and §6.27 keeps every interface string in the dictionary
+ * rather than in the code that computes things.
+ *
+ * So each reason also travels as a code and its numbers, and the client renders
+ * it through i18next. The solver acquires no language, and the prose stays for
+ * callers that have no dictionary — the API, a log line, a test.
+ */
+export interface GroupReasonCode {
+  code:
+    | 'same_curriculum'
+    | 'shared_topics'
+    | 'same_area'
+    | 'adjacent_area'
+    | 'shared_window'
+    | 'gender_own'
+    | 'gender_other'
+    | 'within_cap';
+  /** Interpolation values. Never a name, never an id — counts and times only. */
+  params: Record<string, string | number>;
+}
+
 export interface GroupMemberExplanation {
   requestId: string;
   studentProfileId: string;
   /** Everything that had to agree for this member to be here. */
   reasons: string[];
+  /** The same list, as codes the interface can translate. Same order. */
+  reasonCodes: GroupReasonCode[];
 }
 
 export interface CandidateGroup {
@@ -422,7 +451,7 @@ function buildGroup(
       .map((member) => ({
         requestId: member.requestId,
         studentProfileId: member.studentProfileId,
-        reasons: explain(member, members, sharedAvailability, genderPreference, adjacency),
+        ...explain(member, members, sharedAvailability, genderPreference, adjacency),
       }))
       .sort((a, b) => a.requestId.localeCompare(b.requestId)),
   };
@@ -441,10 +470,13 @@ function explain(
   sharedAvailability: AvailabilityWindow[],
   genderPreference: GenderPreference,
   adjacency: AdjacencyMap,
-): string[] {
+): { reasons: string[]; reasonCodes: GroupReasonCode[] } {
   const others = members.filter((m) => m.requestId !== member.requestId);
   const reasons: string[] = [
     `Same subject, level and examination board as the other ${others.length === 1 ? 'family' : `${others.length} families`}.`,
+  ];
+  const reasonCodes: GroupReasonCode[] = [
+    { code: 'same_curriculum', params: { others: others.length } },
   ];
 
   const sharedTopics = members.reduce<string[]>(
@@ -454,10 +486,12 @@ function explain(
   reasons.push(
     `${sharedTopics.length} topic${sharedTopics.length === 1 ? '' : 's'} asked for by everyone in the group.`,
   );
+  reasonCodes.push({ code: 'shared_topics', params: { count: sharedTopics.length } });
 
   const sameArea = others.every((o) => o.areaId === member.areaId);
   if (sameArea) {
     reasons.push('Everyone is in the same area.');
+    reasonCodes.push({ code: 'same_area', params: {} });
   } else {
     const neighbours = others.filter(
       (o) => o.areaId !== member.areaId && adjacency.get(member.areaId)?.has(o.areaId) === true,
@@ -465,13 +499,27 @@ function explain(
     reasons.push(
       `You marked yourself flexible on area, and ${neighbours.length === 1 ? 'one family is' : `${neighbours.length} families are`} in an adjacent area.`,
     );
+    reasonCodes.push({ code: 'adjacent_area', params: { count: neighbours.length } });
   }
 
-  reasons.push(
-    `A shared weekly window: ${sharedAvailability
-      .map((w) => `${WEEKDAY_NAMES[w.weekday]} ${w.startTime}–${w.endTime}`)
-      .join(', ')}.`,
-  );
+  const window = sharedAvailability
+    .map((w) => `${WEEKDAY_NAMES[w.weekday]} ${w.startTime}–${w.endTime}`)
+    .join(', ');
+  reasons.push(`A shared weekly window: ${window}.`);
+  /*
+   * The weekday is a number, not `WEEKDAY_NAMES[w.weekday]`. The client has its
+   * own names for the days in both languages; sending "Tuesday" would put an
+   * English word inside an Urdu sentence, which is the failure this whole
+   * change exists to avoid.
+   */
+  reasonCodes.push({
+    code: 'shared_window',
+    params: {
+      windows: sharedAvailability
+        .map((w) => `${w.weekday}|${w.startTime}|${w.endTime}`)
+        .join(','),
+    },
+  });
 
   if (genderPreference !== 'no_preference') {
     const own = member.genderPreference === genderPreference;
@@ -482,12 +530,17 @@ function explain(
           // exactly this ground before anything is confirmed.
           `The group will be taught by a ${genderPreference === 'female_only' ? 'female' : 'male'} tutor, because a member requires it. You stated no preference.`,
     );
+    reasonCodes.push({
+      code: own ? 'gender_own' : 'gender_other',
+      params: { gender: genderPreference === 'female_only' ? 'female' : 'male' },
+    });
   }
 
   const cap = Math.min(...members.map((m) => m.maxGroupSize));
   reasons.push(`Group of ${members.length}, within the smallest maximum anyone set (${cap}).`);
+  reasonCodes.push({ code: 'within_cap', params: { size: members.length, cap } });
 
-  return reasons;
+  return { reasons, reasonCodes };
 }
 
 export const WEEKDAY_NAMES = [

@@ -42,6 +42,10 @@ import enAdmin from '../locales/en/admin.json';
 import enFeedback from '../locales/en/feedback.json';
 import enVolunteer from '../locales/en/volunteer.json';
 import enHomeTuition from '../locales/en/homeTuition.json';
+import enProgress from '../locales/en/progress.json';
+import enDemand from '../locales/en/demand.json';
+import enGroups from '../locales/en/groups.json';
+import enOrganisation from '../locales/en/organisation.json';
 
 import urCommon from '../locales/ur/common.json';
 import urAuth from '../locales/ur/auth.json';
@@ -54,6 +58,10 @@ import urAdmin from '../locales/ur/admin.json';
 import urFeedback from '../locales/ur/feedback.json';
 import urVolunteer from '../locales/ur/volunteer.json';
 import urHomeTuition from '../locales/ur/homeTuition.json';
+import urProgress from '../locales/ur/progress.json';
+import urDemand from '../locales/ur/demand.json';
+import urGroups from '../locales/ur/groups.json';
+import urOrganisation from '../locales/ur/organisation.json';
 
 export const LOCALES = {
   en: { label: 'English', nativeLabel: 'English', dir: 'ltr' },
@@ -74,6 +82,10 @@ export const NAMESPACES = [
   'feedback',
   'volunteer',
   'homeTuition',
+  'groups',
+  'demand',
+  'progress',
+  'organisation',
 ];
 
 const STORAGE_KEY = 'ustaad.lang';
@@ -139,6 +151,10 @@ i18next.use(initReactI18next).init({
       feedback: enFeedback,
       volunteer: enVolunteer,
       homeTuition: enHomeTuition,
+      progress: enProgress,
+      demand: enDemand,
+      groups: enGroups,
+      organisation: enOrganisation,
     },
     ur: {
       common: urCommon,
@@ -152,6 +168,10 @@ i18next.use(initReactI18next).init({
       feedback: urFeedback,
       volunteer: urVolunteer,
       homeTuition: urHomeTuition,
+      progress: urProgress,
+      demand: urDemand,
+      groups: urGroups,
+      organisation: urOrganisation,
     },
   },
   lng: initial,

@@ -56,17 +56,29 @@ export function NoResults({ query, onWiden }) {
   const canWiden = Boolean(query.areaId) && !query.includeAdjacentAreas;
   const adjacentCount = adjacent.data?.length ?? 0;
 
+  /*
+   * `POST /api/demand` — FR-24.1's other half.
+   *
+   * This button previously posted to `/ai/intake/unmet-demand`, which does not
+   * exist and never did: only the diagnostic agent could record demand, so a
+   * family who searched manually and found nothing had the most useful signal
+   * on the platform and no way to send it. The route now exists and takes no
+   * field identifying the caller (FR-24.2).
+   *
+   * `reason` is not sent. The server sets `no_matches` itself, because this
+   * button is only reachable from a search that returned nothing — a caller
+   * choosing its own reason could mislabel the board.
+   */
   const postDemand = useMutation({
     mutationFn: () =>
-      api.post('/ai/intake/unmet-demand', {
+      api.post('/demand', {
         subjectId: query.subjectId,
-        levelId: query.levelId,
-        boardId: query.boardId,
+        levelId: query.levelId ?? null,
+        boardId: query.boardId ?? null,
         topicIds: query.topicIds ?? [],
-        areaId: query.areaId,
-        genderPreference: query.genderPreference,
-        budgetMax: query.maxHourlyRate ?? null,
-        reason: 'no_matches',
+        areaId: query.areaId ?? null,
+        genderPreference: query.genderPreference ?? 'no_preference',
+        budgetMaxPaisa: query.maxHourlyRate ?? null,
       }),
   });
 

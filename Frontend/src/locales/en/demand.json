@@ -1,0 +1,38 @@
+{
+  "board": {
+    "title": "Unmet demand",
+    "intro": "Searches over the last thirty days that found nobody. It is what families asked for and could not get — supply intelligence you cannot obtain anywhere else, and information this platform would otherwise have discarded.",
+    "windowNote": "Fixed thirty-day window. It cannot be widened or narrowed, because two overlapping windows subtract to a single family's search.",
+    "totalInWindow": "{{count}} unmet search in the window",
+    "totalInWindow_other": "{{count}} unmet searches in the window",
+    "suppressed": "{{count}} smaller group is not shown",
+    "suppressed_other": "{{count}} smaller groups are not shown",
+    "suppressedWhy": "A group is shown only once at least three separate searches share it. Below that, a count could identify the household that made it.",
+    "empty": "Nothing unmet in the last thirty days.",
+    "emptyBody": "Either every search found a tutor, or the groups that did not are each below the threshold at which a count can safely be published.",
+    "noIdentity": "These are counts. No family, student or contact is recorded against them, and none can be reached from here.",
+    "cohortCount": "{{count}} family searched for this",
+    "cohortCount_other": "{{count}} families searched for this",
+    "topics": "Topics named by at least three of them",
+    "budgets": "Budgets stated",
+    "reasons": "How the search failed",
+    "reason": {
+      "no_matches": "No tutor matched",
+      "insufficient_information": "The intake could not narrow it down"
+    },
+    "anyLevel": "Any level",
+    "anyBoard": "Any board",
+    "anyArea": "Any area",
+    "filters": "Narrow the board",
+    "filterNote": "Filters choose which groups to show. They never split one, so a filter cannot be used to get beneath the threshold.",
+    "clear": "Clear filters"
+  },
+  "post": {
+    "heading": "Nobody matched this search",
+    "body": "Post it to the unmet demand board. Tutors read the board when deciding what to offer, and a subject nobody teaches in your area is exactly what they are looking for.",
+    "privacy": "Only the subject, level, board, area, gender preference and a budget band are recorded. Nothing identifies you, and no tutor can reply to it — this is a count, not a request.",
+    "action": "Post to the demand board",
+    "done": "Posted. Thank you — it is now one entry in the count for your area.",
+    "failed": "That did not post. Nothing was recorded."
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "family": {
+    "title": "Group tuition",
+    "intro": "Three students learning the same topics at the same level, taught together at a lower cost each. Nothing is arranged until every family and the tutor has agreed separately.",
+    "openTitle": "Your open requests",
+    "empty": "You have no group requests open.",
+    "emptyBody": "A group request says which topics, which area and how large a group you would accept. It is matched against other open requests, and you see who it matched with before anything is proposed.",
+    "status": {
+      "open": "Waiting for enough compatible requests",
+      "proposed": "Proposed to a tutor",
+      "matched": "Matched",
+      "expired": "Expired",
+      "cancelled": "Withdrawn"
+    },
+    "expiresOn": "Held until {{date}}",
+    "expiryNote": "A request that finds nobody in seven days expires rather than waiting indefinitely.",
+    "withdraw": "Withdraw this request"
+  },
+  "pooling": {
+    "heading": "What it matched with",
+    "none": "Nothing yet.",
+    "noneBody": "No other open request currently agrees on subject, level, board, topics, area and a weekly time. Nothing is wrong with your request — there is simply nobody compatible open right now.",
+    "sizeNow": "{{count}} request pooled so far",
+    "sizeNow_other": "{{count}} requests pooled so far",
+    "membersHeading": "Who is in it",
+    "memberLine": "{{name}}, {{area}}",
+    "identityNote": "First name and area only, until every family has agreed.",
+    "sharedTopics": "Topics everyone asked for",
+    "sharedWindow": "The weekly time everyone can make"
+  },
+  "why": {
+    "heading": "Why these requests are grouped",
+    "body": "The grouping is worked out by rule, not by a recommendation engine. Every condition below had to hold, and any one of them failing would have left the group unformed.",
+    "same_curriculum": "Same subject, level and examination board as the other family.",
+    "same_curriculum_other": "Same subject, level and examination board as the other {{others}} families.",
+    "shared_topics": "{{count}} topic asked for by everyone in the group.",
+    "shared_topics_other": "{{count}} topics asked for by everyone in the group.",
+    "same_area": "Everyone is in the same area.",
+    "adjacent_area": "You marked yourself flexible on area, and one family is in an adjacent area.",
+    "adjacent_area_other": "You marked yourself flexible on area, and {{count}} families are in an adjacent area.",
+    "shared_window": "A shared weekly window: {{windows}}.",
+    "gender_own": "The group will be taught by a {{gender}} tutor, as you required.",
+    "gender_other": "The group will be taught by a {{gender}} tutor, because a member requires it. You stated no preference.",
+    "within_cap": "Group of {{size}}, within the smallest maximum anyone set ({{cap}}).",
+    "gender": {
+      "female": "female",
+      "male": "male"
+    }
+  },
+  "proposal": {
+    "title": "Group proposal",
+    "heading": "What it would cost each family",
+    "perHead": "Per student, per month",
+    "individual": "Individually, with this tutor",
+    "saving": "{{amount}} less per month than one-to-one",
+    "noComparison": "This tutor has not published an individual monthly rate to compare against.",
+    "rateNote": "Ustaad.com records what is agreed. It does not take payment or hold funds.",
+    "membersHeading": "The families",
+    "awaiting": "Waiting to hear",
+    "confirmed": "Agreed",
+    "declined": "Declined",
+    "everyoneMust": "The group forms only when every family and the tutor has agreed. Any one decline ends it, and nobody is charged for a group that did not form.",
+    "accept": "Agree to this group",
+    "decline": "Decline",
+    "accepted": "You have agreed. Waiting for the others.",
+    "declinedByYou": "You declined this group.",
+    "formed": "The group has formed. Each student keeps their own booking record.",
+    "empty": "No group proposals.",
+    "emptyBody": "A proposal appears here once a matched set of families asks a tutor to take them as a group."
+  },
+  "tutor": {
+    "title": "Group proposals",
+    "intro": "A set of families asking to be taught together. You accept or decline the group as a unit — there is no partial acceptance, because the per-head rate depends on the size.",
+    "size": "{{count}} student",
+    "size_other": "{{count}} students",
+    "perHeadEarn": "{{amount}} per student, per month",
+    "totalEarn": "{{amount}} a month in total",
+    "accept": "Accept this group",
+    "decline": "Decline",
+    "declineHint": "You may decline without giving a reason.",
+    "empty": "No group proposals waiting.",
+    "emptyBody": "Families who have matched with each other can propose a group to you. It arrives here.",
+    "responded": "Your answer has been recorded."
+  }
+}

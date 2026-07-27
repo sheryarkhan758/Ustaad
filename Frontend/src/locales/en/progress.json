@@ -1,0 +1,51 @@
+{
+  "title": "Progress",
+  "forStudent": "{{name}}",
+  "intro": "Every session your tutor recorded, and how mastery moved topic by topic. It is the tutor's own record, written after each session.",
+  "summary": {
+    "sessions": "Sessions recorded",
+    "topics": "Topics taught",
+    "gapsAddressed": "Gaps addressed",
+    "ofDiagnosed": "of {{count}} diagnosed"
+  },
+  "chart": {
+    "overTimeTitle": "Mastery over time",
+    "overTimeBody": "One line per topic. Each point is a rating your tutor gave at the end of a session, from 1 to 5.",
+    "byTopicTitle": "Where each topic stands now",
+    "byTopicBody": "The latest rating for every topic taught, with the first rating shown behind it so the movement is visible.",
+    "axisSession": "Session",
+    "axisMastery": "Mastery",
+    "first": "First",
+    "latest": "Latest",
+    "noData": "No session notes yet.",
+    "noDataBody": "A tutor records topics and a mastery rating after each completed session. Nothing appears here until the first one is written."
+  },
+  "topics": {
+    "heading": "Topic by topic",
+    "sessions": "{{count}} session",
+    "sessions_other": "{{count}} sessions",
+    "improved": "up {{change}} since the first session",
+    "unchanged": "unchanged since the first session",
+    "declined": "down {{change}} since the first session",
+    "stagnant": "No increase in three or more sessions",
+    "stagnantBody": "Worth raising with the tutor. It may be the right pace for a hard topic, and it may not — but it is the kind of thing that otherwise goes unnoticed for a term."
+  },
+  "gaps": {
+    "heading": "The gaps the diagnostic found",
+    "body": "What the intake identified at the start, against what has actually been taught since.",
+    "addressed": "Taught",
+    "notAddressed": "Not yet taught",
+    "none": "No diagnostic was run for this student, so there is nothing to compare against."
+  },
+  "sessions": {
+    "heading": "Session notes",
+    "body": "The tutor's own words, exactly as written.",
+    "on": "{{date}}",
+    "topicsCovered": "Topics covered",
+    "ratingFor": "{{topic}}: {{rating}} of 5",
+    "verifiedTutor": "Tutor checked by Ustaad.com: {{artefacts}}",
+    "verifiedOn": "on {{date}}",
+    "noNote": "No written note for this session."
+  },
+  "privacy": "This page is visible to you and to Ustaad.com administrators. It is not public, and no tutor can see another tutor's notes."
+}

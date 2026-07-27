@@ -1,0 +1,74 @@
+{
+  "profile": {
+    "title": "Academy profile",
+    "intro": "How your academy appears to tutors browsing vacancies. An administrator approves it before it is shown.",
+    "orgName": "Name",
+    "orgType": "Type",
+    "description": "About the academy",
+    "descriptionHint": "What you teach, who for, and anything a tutor deciding whether to work with you would want to know.",
+    "website": "Website",
+    "city": "City",
+    "area": "Area",
+    "areaHint": "Area is the finest location this platform records. There are no map pins anywhere in it.",
+    "contactEmail": "Contact email",
+    "contactPhone": "Contact phone",
+    "save": "Save profile",
+    "saved": "Profile saved.",
+    "status": {
+      "heading": "Approval",
+      "pending": "Waiting for an administrator to review this profile.",
+      "approved": "Approved. Your vacancies are visible to tutors.",
+      "rejected": "Not approved. The reason is below.",
+      "reason": "Reason given: {{reason}}"
+    },
+    "type": {
+      "academy": "Academy",
+      "school": "School",
+      "tuition_centre": "Tuition centre",
+      "other": "Other"
+    }
+  },
+  "vacancies": {
+    "title": "Vacancies",
+    "intro": "Post what you are hiring for. Tutors browse open vacancies and express interest in one action — there is no cover letter and no application form.",
+    "postHeading": "Post a vacancy",
+    "subject": "Subject",
+    "level": "Level",
+    "board": "Board",
+    "mode": "How it would be taught",
+    "rate": "Rate offered",
+    "rateHint": "Optional. A vacancy that says negotiable is a real vacancy, and a made-up figure is worse than none.",
+    "rateType": "Per",
+    "area": "Area",
+    "description": "Description",
+    "post": "Post vacancy",
+    "posted": "Vacancy posted.",
+    "openHeading": "Your vacancies",
+    "empty": "You have not posted a vacancy.",
+    "emptyBody": "A posted vacancy appears on the public board, where tutors can read it and express interest.",
+    "status": {
+      "open": "Open",
+      "filled": "Filled",
+      "closed": "Closed"
+    },
+    "close": "Close this vacancy",
+    "markFilled": "Mark as filled",
+    "reopen": "Reopen",
+    "statusNote": "Curriculum, rate and area cannot be edited after posting. A tutor who expressed interest read those terms, and rewriting them underneath her would change what she agreed to look at. Close it and post again instead.",
+    "interested": "{{count}} tutor expressed interest",
+    "interested_other": "{{count}} tutors expressed interest",
+    "viewInterested": "See who is interested"
+  },
+  "interested": {
+    "heading": "Tutors who expressed interest",
+    "body": "Their public profile is the record. Contact whoever you want to, in whatever way you normally would — Ustaad.com does not manage hiring beyond this list.",
+    "expressedOn": "Expressed interest on {{date}}",
+    "viewProfile": "See the verification record",
+    "empty": "Nobody has expressed interest yet.",
+    "emptyBody": "Tutors see this vacancy on the public board. Interest appears here as soon as somebody expresses it."
+  },
+  "search": {
+    "heading": "Find tutors",
+    "body": "The same search parents use, with the same verification detail on every result."
+  }
+}

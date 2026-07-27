@@ -188,6 +188,30 @@ export function suppressSmallCohorts(
   return { kept, suppressedCount: cohorts.length - kept.length };
 }
 
+/**
+ * A family posting its own failed search to the board — FR-24.1.
+ *
+ * FR-24.1 logs a search that returned nothing, and until now only the
+ * diagnostic agent could produce such a record. A family that searched
+ * manually, found nobody, and would like the gap recorded had no way to say so.
+ *
+ * **There is no field here for who is asking**, and that is the design rather
+ * than an omission: `recordUnmetDemand` takes no user id, no student profile id
+ * and no session id, so a caller cannot attach one by sending it. The budget is
+ * banded on the way in and the exact figure is discarded (FR-24.2).
+ */
+export const postDemandSchema = z.object({
+  subjectId: z.string().min(1),
+  topicIds: z.array(z.string().min(1)).max(20).default([]),
+  levelId: z.string().min(1).nullable().default(null),
+  boardId: z.string().min(1).nullable().default(null),
+  areaId: z.string().min(1).nullable().default(null),
+  genderPreference: z.enum(GENDER_PREFERENCES).default('no_preference'),
+  budgetMaxPaisa: z.number().int().positive().nullable().default(null),
+});
+
+export type PostDemandInput = z.infer<typeof postDemandSchema>;
+
 export const demandBoardQuerySchema = z.object({
   subjectId: z.string().min(1).optional(),
   areaId: z.string().min(1).optional(),

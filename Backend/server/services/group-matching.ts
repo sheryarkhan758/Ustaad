@@ -47,6 +47,7 @@ import {
   type AdjacencyMap,
   type CandidateGroup,
   type CreateGroupRequestInput,
+  type GroupReasonCode,
 } from '../../shared/group-matching';
 import { bookings } from '../db/schema/booking';
 import { tutorRates } from '../db/schema/tutor';
@@ -281,6 +282,8 @@ export interface ProposalView {
     firstName: string;
     areaId: string;
     explanation: string[];
+    /** The same reasons, translatable. Empty on a proposal made before codes. */
+    reasonCodes: GroupReasonCode[];
     confirmed: boolean;
     declined: boolean;
   }[];
@@ -408,7 +411,7 @@ export async function proposeGroupToTutor(
   }
 
   const proposalId = newId();
-  const explanationOf = new Map(group.explanations.map((e) => [e.requestId, e.reasons]));
+  const explanationOf = new Map(group.explanations.map((e) => [e.requestId, e]));
 
   await insertProposal(db, {
     id: proposalId,
@@ -425,7 +428,8 @@ export async function proposeGroupToTutor(
     members: requests.map((r) => ({
       groupRequestId: r.id,
       studentProfileId: r.studentProfileId,
-      explanation: explanationOf.get(r.id) ?? [],
+      explanation: explanationOf.get(r.id)?.reasons ?? [],
+      reasonCodes: explanationOf.get(r.id)?.reasonCodes ?? [],
     })),
   });
 
@@ -467,6 +471,7 @@ export async function viewProposal(
       firstName: nameOf.get(m.studentProfileId)?.fullName ?? nameOf.get(m.studentProfileId)?.firstName ?? '',
       areaId: areaOf.get(m.groupRequestId) ?? '',
       explanation: m.explanation,
+      reasonCodes: m.reasonCodes,
       confirmed: m.confirmedAt !== null,
       declined: m.declinedAt !== null,
     })),

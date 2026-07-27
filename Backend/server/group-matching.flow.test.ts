@@ -1015,3 +1015,116 @@ describe('proposal visibility over HTTP (FR-23.8, NFR-6)', () => {
     expect((await request(app).get('/api/demand/supply-gaps').set('Cookie', parent)).status).toBe(403);
   });
 });
+
+
+/* -------------------------------------------------------------------------
+ * 5. The reason a family is given, and the language it can be given in
+ * ---------------------------------------------------------------------- */
+
+describe('the grouping explains itself in a form the interface can translate', () => {
+  it('emits a code and its numbers beside every sentence', async () => {
+    const a = await makeRequest('why-a');
+    await makeRequest('why-b');
+    await makeRequest('why-c');
+
+    const preview = await previewMatches(db, a.requestId);
+    const mine = preview.group?.explanations.find((e) => e.requestId === a.requestId);
+
+    expect(mine).toBeDefined();
+    // Same count, same order: the codes *are* the sentences, as data.
+    expect(mine!.reasonCodes).toHaveLength(mine!.reasons.length);
+
+    const codes = mine!.reasonCodes.map((r) => r.code);
+    expect(codes).toContain('same_curriculum');
+    expect(codes).toContain('shared_topics');
+    expect(codes).toContain('within_cap');
+
+    /*
+     * The weekday travels as a number. A code carrying "Tuesday" would put an
+     * English word inside an Urdu sentence, which is the whole reason these
+     * exist beside the prose rather than a dictionary being skipped.
+     */
+    const window = mine!.reasonCodes.find((r) => r.code === 'shared_window');
+    expect(String(window?.params.windows)).toMatch(/^\d\|\d{2}:\d{2}\|\d{2}:\d{2}/);
+
+    // Nothing in a code names anybody (FR-23.8).
+    const serialised = JSON.stringify(mine!.reasonCodes);
+    expect(serialised).not.toMatch(/why-[abc]/);
+  });
+
+  it('carries the codes onto a proposal, so the family sees the same reason twice', async () => {
+    const a = await makeRequest('carry-a');
+    const b = await makeRequest('carry-b');
+    const c = await makeRequest('carry-c');
+    const tutorId = await makeTutor({ slug: 'carry-tutor', gender: 'female' });
+
+    const proposed = await proposeGroupToTutor(db, {
+      tutorId,
+      memberRequestIds: [a.requestId, b.requestId, c.requestId],
+      requestedByUserId: a.userId,
+    });
+
+    for (const member of proposed.members) {
+      expect(member.reasonCodes.length).toBeGreaterThan(0);
+      expect(member.reasonCodes).toHaveLength(member.explanation.length);
+    }
+  });
+});
+
+/* -------------------------------------------------------------------------
+ * 6. A family posting its own failed search — FR-24.1
+ * ---------------------------------------------------------------------- */
+
+describe('a family can post a search that found nobody', () => {
+  const PASSWORD = 'a-sufficiently-long-password';
+
+  async function registerAs(role: 'parent' | 'tutor', email: string): Promise<string> {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email, password: PASSWORD, role, displayName: email });
+    expect(res.status).toBe(201);
+    const raw = res.headers['set-cookie'];
+    const list = Array.isArray(raw) ? raw : raw ? [raw as string] : [];
+    return list.map((c) => c.split(';')[0]).join('; ');
+  }
+
+  it('records it, and records nothing about who posted it', async () => {
+    const parent = await registerAs('parent', 'poster@example.test');
+
+    const res = await request(app)
+      .post('/api/demand')
+      .set('Cookie', parent)
+      .send({
+        subjectId: SUBJECT,
+        levelId: LEVEL,
+        boardId: BOARD,
+        areaId: CLIFTON,
+        topicIds: [T_QUADRATICS],
+        genderPreference: 'female_only',
+        budgetMaxPaisa: 63_500,
+      });
+
+    expect(res.status).toBe(202);
+    // No id comes back: the record is not the family's to look up or amend.
+    expect(res.body.id).toBeUndefined();
+
+    const rows = await db.select().from(unmetDemand);
+    expect(rows).toHaveLength(1);
+
+    const stored = JSON.stringify(rows[0]);
+    expect(stored).not.toContain('poster@example.test');
+    // Banded on the way in, never the figure they typed (FR-24.2).
+    expect(stored).not.toContain('63500');
+  });
+
+  it('is refused to a tutor, who would be posting demand for her own subject', async () => {
+    const tutor = await registerAs('tutor', 'demand-poster@example.test');
+
+    const res = await request(app)
+      .post('/api/demand')
+      .set('Cookie', tutor)
+      .send({ subjectId: SUBJECT });
+
+    expect(res.status).toBe(403);
+  });
+});
