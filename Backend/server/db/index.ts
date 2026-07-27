@@ -107,11 +107,35 @@ function clean(raw: string | undefined, name: string, options: { quiet?: boolean
       `${name} is set but is not a valid connection string, so no database can be opened. ` +
         'Check it against the string in DEPLOY.md step 2: it starts with "postgresql://", ' +
         'carries no surrounding quotes and no line break, and any of + ? # / @ in the ' +
-        'password must be percent-encoded (+ is %2B, ? is %3F). The value is not shown here ' +
-        'because it contains the database password.',
+        `password must be percent-encoded (+ is %2B, ? is %3F). ${describe(unquoted)} ` +
+        'The value itself is not shown: it contains the database password.',
     );
   }
   return unquoted;
+}
+
+/**
+ * What is wrong with the string, said without saying the string.
+ *
+ * Diagnosing a bad paste otherwise means asking somebody to read a secret back
+ * to you. These are structural facts — a length, a scheme, the presence of a
+ * character that cannot appear unencoded — and none of them narrows the
+ * password, because everything after the scheme is summarised rather than
+ * quoted. The three faults named are the three that actually happen: the
+ * dashboard's `[YOUR-PASSWORD]` placeholder left in place, a copied `psql`
+ * command rather than its argument, and a raw space.
+ */
+function describe(value: string): string {
+  const faults: string[] = [];
+  if (value.includes('[') || value.includes(']')) {
+    faults.push('it still contains [ ] — the dashboard placeholder was not replaced with the password');
+  }
+  if (/^psql\b/i.test(value)) faults.push('it begins "psql", so a whole command was pasted instead of the URL it takes');
+  if (/\s/.test(value)) faults.push('it contains a space');
+  if (!/^postgres(ql)?:\/\//i.test(value)) faults.push('it does not begin "postgresql://"');
+
+  const shape = `What is set is ${value.length} characters long`;
+  return faults.length > 0 ? `${shape}, and ${faults.join(', and ')}.` : `${shape}.`;
 }
 
 /**
