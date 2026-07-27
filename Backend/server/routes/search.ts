@@ -44,6 +44,18 @@ export function createSearchRouter(): Router {
           cityId: r.tutor.cityId,
           experienceYears: r.tutor.experienceYears,
           volunteer: r.tutor.volunteer,
+          /*
+           * What a result card shows beyond the ranking (§6.7). Loaded over
+           * the paged results only, from columns a job materialised — the
+           * client arranges these, it computes none of them (§2.8).
+           */
+          displayName: r.detail?.displayName ?? '',
+          bio: r.detail?.bio ?? null,
+          willingAreaIds: r.detail?.willingAreaIds ?? [],
+          verifiedArtefacts: r.detail?.verifiedArtefacts ?? [],
+          competency: r.detail?.competency ?? [],
+          reliability: r.detail?.reliability ?? null,
+          engagementTypes: r.detail?.engagementTypes ?? [],
           score: r.score,
           normalisedHourly: r.normalisedHourly,
           benchmarkMedian: r.benchmarkMedian,

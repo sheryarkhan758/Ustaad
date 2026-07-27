@@ -124,4 +124,5 @@ Until they run, search still works but every derived statistic reads zero.
 | `Cannot find module '@shared/...'` | The base is not the repository root, so the npm workspace link was never created. Clear any base override in the Netlify UI. |
 | `vite: not found` | `NPM_FLAGS = "--include=dev"` was dropped from `netlify.toml`. Netlify sets `NODE_ENV=production`, which skips devDependencies. |
 | A `.node` binary error | `better-sqlite3` entered the Function bundle. It is listed in `external_node_modules` and must stay there. |
+| `Cannot find module @rollup/rollup-linux-x64-gnu` | npm's optional-dependency bug (npm/cli#4828). A lockfile resolved on Windows records only the win32 binary, so `npm ci` on Linux has nothing to install. `Frontend/package.json` declares the Linux binary as an **optionalDependency** to force a real lockfile entry — do not remove it. It is `optional` so a Windows install skips it rather than failing. |
 | `relation "..." does not exist` | Step 2 was skipped, or run against a different database than `SUPABASE_DB_URL` points at. |

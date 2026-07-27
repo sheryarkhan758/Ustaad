@@ -151,18 +151,24 @@ describe('rate benchmarking suppresses a thin sample', () => {
  * `volunteerFlag` silently dropped the verification artefacts, and the failure
  * looked like a component bug.
  */
-const result = ({ tutor: tutorOverrides, ...overrides } = {}) => ({
-  tutor: {
-    id: 't1',
-    slug: 'ayesha-siddiqui',
-    displayName: 'Ayesha Siddiqui',
-    experienceYears: 9,
-    verifiedArtefacts: ['cnic', 'degree'],
-    competency: [{ topicId: 'quadratics', status: 'verified' }],
-    reliability: { confirmationRate: 0.94, completedSessions: 48 },
-    engagementTypes: ['monthly'],
-    ...tutorOverrides,
-  },
+/*
+ * The shape `GET /api/search` actually returns: **flat**, not a nested
+ * `tutor`. The fixture mirrored an object the endpoint never sent, which is
+ * exactly why the card crashed in the browser while these tests passed — a
+ * fixture that agrees with the component instead of with the server tests
+ * nothing about the seam between them.
+ */
+const result = (overrides = {}) => ({
+  tutorId: 't1',
+  slug: 'ayesha-siddiqui',
+  displayName: 'Ayesha Siddiqui',
+  experienceYears: 9,
+  volunteer: false,
+  willingAreaIds: ['karachi-clifton'],
+  verifiedArtefacts: ['cnic', 'degree'],
+  competency: [{ topicId: 'quadratics', status: 'verified' }],
+  reliability: { confirmationRate: 0.94, completedSessions: 48 },
+  engagementTypes: ['monthly'],
   normalisedHourly: 138500,
   benchmarkMedian: 130000,
   travelMinutes: 12,
@@ -181,7 +187,7 @@ describe('ResultCard', () => {
   it('shows an expired competency badge as expired rather than hiding it', () => {
     renderIn(
       <ResultCard
-        result={result({ tutor: { competency: [{ topicId: 'quadratics', status: 'expired' }] } })}
+        result={result({ competency: [{ topicId: 'quadratics', status: 'expired' }] })}
       />,
     );
 
@@ -200,7 +206,7 @@ describe('ResultCard', () => {
   });
 
   it('marks a volunteer without implying anything about verification', () => {
-    renderIn(<ResultCard result={result({ tutor: { volunteerFlag: true } })} />);
+    renderIn(<ResultCard result={result({ volunteer: true })} />);
 
     // FR-33.10 — the flag never substitutes for verification, so the itemised
     // check list is still there beside it.

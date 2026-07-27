@@ -27,7 +27,10 @@ import { and, eq, gte, inArray, isNull, lte, or, type SQL } from 'drizzle-orm';
 
 import { compareRanked, rankTutor, type RankingBreakdown } from '../../shared/ranking';
 import type { SearchQuery } from '../../shared/search';
+import { fromDbJsonArray } from '../../shared/db-values';
 import { areaAdjacency } from '../db/schema/reference';
+import { users } from '../db/schema/identity';
+import { verificationRecords } from '../db/schema/verification';
 import {
   rateBenchmarks,
   tutorReliability,
@@ -40,6 +43,7 @@ import {
   tutorProfiles,
   tutorRates,
   tutorSafetyConstraints,
+  tutorSubjectClaims,
 } from '../db/schema/tutor';
 import type { TutorGender } from '../db/schema/tutor';
 import type { Executor } from './_base';
@@ -63,6 +67,34 @@ const REQUIRED_GENDER: Record<string, TutorGender | null> = {
   no_preference: null,
 };
 
+/**
+ * What a result card shows beyond the ranking — §6.7, FR-7.x.
+ *
+ * Loaded by `hydrateResults` over the **paged** results only, in four bounded
+ * queries, so the cost is fixed by `limit` rather than by how many tutors
+ * matched. Every figure is read from a column a job materialised; nothing here
+ * is aggregated at request time (§2.8, NFR-1).
+ */
+export interface SearchResultDetail {
+  displayName: string;
+  bio: string | null;
+  /** Area ids she will travel to. Named by the client from reference data. */
+  willingAreaIds: string[];
+  /** Which identity artefacts an administrator checked (FR-6.5). */
+  verifiedArtefacts: string[];
+  /** Topics that passed an assessment, with the date and expiry (FR-11.6). */
+  competency: { topicId: string; verifiedAt: string | null; expiresOn: string | null }[];
+  /** Materialised by `server/jobs/tutor-reliability.ts` (§6.17). */
+  reliability: {
+    completedSessions: number;
+    confirmationRate: number | null;
+    onTimeRate: number | null;
+    completionRate: number | null;
+  } | null;
+  /** The engagement shapes she prices, derived from her rate rows (§6.30). */
+  engagementTypes: string[];
+}
+
 export interface SearchResult {
   tutor: TutorProfileRecord;
   score: number;
@@ -77,6 +109,8 @@ export interface SearchResult {
   /** Paisa. The published local median, or null below the SEC-17 cohort of 4. */
   benchmarkMedian: number | null;
   travelMinutes: number | null;
+  /** Present on returned results; absent while ranking. */
+  detail?: SearchResultDetail;
 }
 
 export interface SearchResponse {
@@ -344,12 +378,143 @@ export async function searchTutors(
 
   const page = results.slice(query.offset, query.offset + query.limit);
 
+  /* --- 5. Hydrate the page, and only the page --------------------------- */
+
+  const hydrated = await hydrateResults(db, page);
+
   return {
-    results: page,
+    results: hydrated,
     total: results.length,
     tookMs: Math.round(performance.now() - startedAt),
     appliedGenderPreference: query.genderPreference,
   };
+}
+
+/**
+ * Load what a result card displays, for one page of results.
+ *
+ * ── Why this runs after paging, not before ────────────────────────────────
+ * Ranking needs materialised **scores**; a card needs a name, a biography, a
+ * verification summary and a reliability record. Loading the second set for
+ * every candidate would mean five hundred tutors' worth of joins to render
+ * twenty cards. Running it over `page` fixes the cost at `limit` regardless of
+ * how many matched, which is what keeps the NFR-1 budget a property of the
+ * query rather than of the dataset.
+ *
+ * Four queries, each an `inArray` over at most `limit` ids — never a lookup
+ * per row.
+ *
+ * ── Nothing is computed here ──────────────────────────────────────────────
+ * Reliability is read from `tutor_reliability`, written by a job. Verification
+ * artefacts are read from the approved record an administrator signed. The
+ * engagement types are the distinct `rate_type` values she actually priced.
+ * The only arithmetic is `Math.max`, choosing the most recent of two dates
+ * (§2.8).
+ */
+async function hydrateResults(db: Executor, page: SearchResult[]): Promise<SearchResult[]> {
+  if (page.length === 0) return [];
+
+  const tutorIds = page.map((result) => result.tutor.id);
+  const userIds = page.map((result) => result.tutor.userId);
+
+  const [accounts, records, claims, rateRows, reliabilityRows] = await Promise.all([
+    db.select({ id: users.id, displayName: users.displayName })
+      .from(users)
+      .where(inArray(users.id, userIds)),
+
+    // Identity: the artefacts an administrator actually checked (FR-6.5).
+    db.select({
+      tutorId: verificationRecords.tutorId,
+      artefactsCheckedJson: verificationRecords.artefactsCheckedJson,
+      decidedAt: verificationRecords.decidedAt,
+    })
+      .from(verificationRecords)
+      .where(
+        and(
+          inArray(verificationRecords.tutorId, tutorIds),
+          eq(verificationRecords.track, 'identity'),
+          eq(verificationRecords.decision, 'approved'),
+        ),
+      ),
+
+    // Competency: per topic, never per subject (FR-11.6).
+    db.select({
+      tutorId: tutorSubjectClaims.tutorId,
+      topicIdsJson: tutorSubjectClaims.topicIdsJson,
+      verifiedAt: tutorSubjectClaims.verifiedAt,
+      expiresOn: tutorSubjectClaims.expiresOn,
+    })
+      .from(tutorSubjectClaims)
+      .where(
+        and(
+          inArray(tutorSubjectClaims.tutorId, tutorIds),
+          eq(tutorSubjectClaims.claimStatus, 'verified'),
+        ),
+      ),
+
+    db.select({ tutorId: tutorRates.tutorId, rateType: tutorRates.rateType })
+      .from(tutorRates)
+      .where(inArray(tutorRates.tutorId, tutorIds)),
+
+    db.select().from(tutorReliability).where(inArray(tutorReliability.tutorId, tutorIds)),
+  ]);
+
+  const nameByUser = new Map(accounts.map((row) => [row.id, row.displayName]));
+
+  // The most recent approval wins: an artefact list from an older record would
+  // understate what has since been checked.
+  const artefactsByTutor = new Map<string, { at: string; artefacts: string[] }>();
+  for (const row of records) {
+    const current = artefactsByTutor.get(row.tutorId);
+    if (!current || row.decidedAt > current.at) {
+      artefactsByTutor.set(row.tutorId, {
+        at: row.decidedAt,
+        artefacts: fromDbJsonArray(row.artefactsCheckedJson),
+      });
+    }
+  }
+
+  const competencyByTutor = new Map<string, SearchResultDetail['competency']>();
+  for (const row of claims) {
+    const list = competencyByTutor.get(row.tutorId) ?? [];
+    for (const topicId of fromDbJsonArray(row.topicIdsJson)) {
+      list.push({ topicId, verifiedAt: row.verifiedAt, expiresOn: row.expiresOn });
+    }
+    competencyByTutor.set(row.tutorId, list);
+  }
+
+  const engagementByTutor = new Map<string, Set<string>>();
+  for (const row of rateRows) {
+    const set = engagementByTutor.get(row.tutorId) ?? new Set<string>();
+    set.add(row.rateType);
+    engagementByTutor.set(row.tutorId, set);
+  }
+
+  const reliabilityByTutor = new Map(reliabilityRows.map((row) => [row.tutorId, row]));
+
+  return page.map((result) => {
+    const reliability = reliabilityByTutor.get(result.tutor.id);
+
+    return {
+      ...result,
+      detail: {
+        displayName: nameByUser.get(result.tutor.userId) ?? '',
+        bio: result.tutor.bio,
+        willingAreaIds: result.tutor.willingAreaIds,
+        verifiedArtefacts: artefactsByTutor.get(result.tutor.id)?.artefacts ?? [],
+        competency: competencyByTutor.get(result.tutor.id) ?? [],
+        reliability: reliability
+          ? {
+              completedSessions: reliability.completedCount,
+              confirmationRate: reliability.confirmationRate,
+              onTimeRate: reliability.onTimeRate,
+              completionRate: reliability.completionRate,
+            }
+          : null,
+        engagementTypes: [...(engagementByTutor.get(result.tutor.id) ?? [])],
+      },
+    };
+  });
 }
 
 /* -------------------------------------------------------------------------

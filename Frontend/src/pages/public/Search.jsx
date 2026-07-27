@@ -35,6 +35,7 @@ import { ResultCard, ResultCardSkeleton } from '../../components/search/ResultCa
 import { useComparisonTray } from '../../context/ComparisonTrayContext';
 import { api } from '../../lib/api';
 import { keys } from '../../lib/queryClient';
+import { useAreas } from '../../lib/reference';
 
 const PAGE_SIZE = 20;
 
@@ -92,6 +93,12 @@ export default function Search() {
     },
     [query, setParams],
   );
+
+  /*
+   * Area names for the cards, cached indefinitely as reference data. Fetched
+   * once here rather than per card, so twenty results share one lookup.
+   */
+  const areas = useAreas(query.cityId);
 
   const results = useQuery({
     queryKey: keys.search(query),
@@ -318,7 +325,7 @@ export default function Search() {
                 }`}
               >
                 {data.results.map((result) => (
-                  <ResultCard key={result.tutor.id} result={result} />
+                  <ResultCard key={result.tutorId} result={result} areas={areas.data ?? []} />
                 ))}
               </div>
 

@@ -42,9 +42,9 @@ const ARTEFACT_KEY = {
   transcript: 'card.artefact.transcript',
 };
 
-function VerificationLine({ tutor }) {
+function VerificationLine({ result }) {
   const { t } = useTranslation('search');
-  const artefacts = tutor.verifiedArtefacts ?? [];
+  const artefacts = result.verifiedArtefacts ?? [];
 
   if (artefacts.length === 0) {
     // Every tutor in a result set has passed identity verification — the
@@ -68,10 +68,10 @@ function VerificationLine({ tutor }) {
   );
 }
 
-function CompetencyLine({ tutor, topics }) {
+function CompetencyLine({ result, topics }) {
   const { t } = useTranslation('search');
   const localName = useLocalName();
-  const verdicts = tutor.competency ?? [];
+  const verdicts = result.competency ?? [];
 
   if (verdicts.length === 0) return null;
 
@@ -96,17 +96,28 @@ function CompetencyLine({ tutor, topics }) {
   );
 }
 
-export function ResultCard({ result, topics }) {
+export function ResultCard({ result, topics, areas = [] }) {
   const { t } = useTranslation(['search', 'booking', 'common']);
   const fmt = useFormat();
   const localName = useLocalName();
   const tray = useComparisonTray();
 
-  const { tutor, normalisedHourly, benchmarkMedian, travelMinutes } = result;
-  const inTray = tray.has(tutor.id);
+  /*
+   * The search response is **flat** — `tutorId`, `slug`, `displayName` and the
+   * rest sit at the top level of a result rather than under a nested `tutor`.
+   * Naming the pieces here once, rather than reaching through an object shape
+   * the endpoint does not send, is what keeps this card and
+   * `GET /api/search` in step.
+   */
+  const { normalisedHourly, benchmarkMedian, travelMinutes } = result;
+  const tutorId = result.tutorId;
+  const inTray = tray.has(tutorId);
 
-  const area = tutor.area ?? null;
-  const areaName = area ? localName(area) : null;
+  // Area is the finest granularity this product has, and a card shows the
+  // first area she travels to — never a street, never a distance (SEC-3).
+  const areaId = result.willingAreaIds?.[0] ?? null;
+  const areaRow = areaId ? (areas ?? []).find((row) => row.id === areaId) : null;
+  const areaName = areaRow ? localName(areaRow) : null;
 
   return (
     <Card interactive as="article">
@@ -115,10 +126,10 @@ export function ResultCard({ result, topics }) {
           <div className="min-w-0">
             <h3 className="font-display text-subtitle text-ink">
               <Link
-                to={`/tutors/${tutor.slug}`}
+                to={`/tutors/${result.slug}`}
                 className="hover:text-verdigris-deep hover:underline underline-offset-2"
               >
-                {tutor.displayName}
+                {result.displayName}
               </Link>
             </h3>
 
@@ -130,25 +141,25 @@ export function ResultCard({ result, topics }) {
                   {t('card.travelMinutes', { minutes: travelMinutes })}
                 </span>
               ) : null}
-              {tutor.experienceYears ? (
+              {result.experienceYears ? (
                 <span className="tnum">
-                  {t('card.experience', { count: tutor.experienceYears })}
+                  {t('card.experience', { count: result.experienceYears })}
                 </span>
               ) : null}
             </p>
           </div>
 
           {/* FR-33.10 — the flag never substitutes for verification. */}
-          {tutor.volunteerFlag ? <Badge tone="settled">{t('card.volunteer')}</Badge> : null}
+          {result.volunteer ? <Badge tone="settled">{t('card.volunteer')}</Badge> : null}
         </div>
 
-        <VerificationLine tutor={tutor} />
-        <CompetencyLine tutor={tutor} topics={topics} />
+        <VerificationLine result={result} />
+        <CompetencyLine result={result} topics={topics} />
 
-        {tutor.bio ? (
+        {result.bio ? (
           // Verbatim, never translated (§2.10). `line-clamp` truncates the
           // display without touching the stored text.
-          <UserText className="line-clamp-2 text-small text-slate">{tutor.bio}</UserText>
+          <UserText className="line-clamp-2 text-small text-slate">{result.bio}</UserText>
         ) : null}
 
         {/* --- Rate, against the local benchmark ------------------------ */}
@@ -170,22 +181,22 @@ export function ResultCard({ result, topics }) {
         </div>
 
         {/* --- Reliability, from tutor_reliability ----------------------- */}
-        {tutor.reliability ? (
+        {result.reliability ? (
           <dl className="flex flex-wrap gap-x-5 gap-y-1 text-caption">
-            {tutor.reliability.confirmationRate !== null &&
-            tutor.reliability.confirmationRate !== undefined ? (
+            {result.reliability.confirmationRate !== null &&
+            result.reliability.confirmationRate !== undefined ? (
               <div>
                 <dt className="inline text-slate">{t('card.confirmationRate')} </dt>
                 <dd className="inline font-mono tnum text-ink">
-                  {fmt.percent(tutor.reliability.confirmationRate)}
+                  {fmt.percent(result.reliability.confirmationRate)}
                 </dd>
               </div>
             ) : null}
-            {tutor.reliability.completedSessions ? (
+            {result.reliability.completedSessions ? (
               <div>
                 <dt className="inline text-slate">{t('card.completedSessions')} </dt>
                 <dd className="inline font-mono tnum text-ink">
-                  {fmt.number(tutor.reliability.completedSessions)}
+                  {fmt.number(result.reliability.completedSessions)}
                 </dd>
               </div>
             ) : null}
@@ -193,9 +204,9 @@ export function ResultCard({ result, topics }) {
         ) : null}
 
         {/* --- Engagement types offered ---------------------------------- */}
-        {(tutor.engagementTypes ?? []).length > 0 ? (
+        {(result.engagementTypes ?? []).length > 0 ? (
           <ul className="flex flex-wrap gap-1.5">
-            {tutor.engagementTypes.map((type) => (
+            {result.engagementTypes.map((type) => (
               <li key={type}>
                 <Badge tone="neutral">{t(`booking:engagement.${type}`)}</Badge>
               </li>
@@ -211,10 +222,10 @@ export function ResultCard({ result, topics }) {
             aria-pressed={inTray}
             onClick={() =>
               tray.toggle({
-                tutorId: tutor.id,
-                slug: tutor.slug,
-                displayName: tutor.displayName,
-                areaId: tutor.areaId ?? null,
+                tutorId,
+                slug: result.slug,
+                displayName: result.displayName,
+                areaId,
               })
             }
           >
@@ -222,7 +233,7 @@ export function ResultCard({ result, topics }) {
           </Button>
 
           <Link
-            to={`/tutors/${tutor.slug}`}
+            to={`/tutors/${result.slug}`}
             className="inline-flex min-h-tap items-center rounded-control border border-slate-line px-4 text-small font-medium text-ink hover:bg-paper"
           >
             {t('card.viewProfile')}
