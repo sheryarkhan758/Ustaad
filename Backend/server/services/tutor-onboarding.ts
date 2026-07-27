@@ -17,9 +17,11 @@
 
 import { resolveUniqueSlug } from '../../shared/slug';
 import { normaliseHourlyAmount } from '../../shared/rates';
-import type { TeachingMode } from '../../shared/rates';
+import { checkEngagementAgainstConstraints as checkEngagement } from '../../shared/tutor-onboarding';
 import type {
   AvailabilitySlotInput,
+  ProposedEngagement,
+  PublishedSafetyConstraints,
   SafetyConstraintsInput,
   SubjectClaimInput,
   TutorProfileCreateInput,
@@ -288,12 +290,12 @@ export async function saveSafetyConstraints(
  * declined to answer — the default is permissive because the platform must not
  * invent a restriction on someone's behalf, in the same way it never pre-sets a
  * family's gender filter (FR-16.6).
+ *
+ * The shape is `PublishedSafetyConstraints` from `/shared`, and deliberately so:
+ * this is the same object the public profile hands the browser, so the rule that
+ * runs here and the rule that runs in the booking form cannot diverge.
  */
-export interface TutorConstraints {
-  femaleStudentsOnly: boolean;
-  guardianPresenceRequired: boolean;
-  restrictedAreaIds: ReadonlySet<string>;
-}
+export type TutorConstraints = PublishedSafetyConstraints;
 
 export async function resolveTutorConstraints(
   db: Executor,
@@ -303,68 +305,22 @@ export async function resolveTutorConstraints(
   return {
     femaleStudentsOnly: saved?.femaleStudentsOnly ?? false,
     guardianPresenceRequired: saved?.guardianPresenceRequired ?? false,
-    restrictedAreaIds: new Set(saved?.restrictedAreaIds ?? []),
+    restrictedAreaIds: saved?.restrictedAreaIds ?? [],
   };
 }
 
-export interface ProposedEngagement {
-  studentGender: 'female' | 'male' | 'other' | null;
-  areaId: string | null;
-  guardianPresenceOffered: boolean;
-  mode: TeachingMode;
-}
-
-export interface ConstraintViolation {
-  constraint: 'female_students_only' | 'guardian_presence_required' | 'restricted_area';
-  message: string;
-}
-
-/**
- * Check a proposed booking against the tutor's declared conditions.
+/*
+ * The rule itself now lives in `shared/tutor-onboarding.ts`, and is re-exported
+ * here so every existing caller keeps its import.
  *
- * Called by the booking engine **before** a request reaches her, so that a
- * booking she would have to decline on safety grounds is never created. That
- * matters beyond tidiness: SEC-21 excludes safety declines from her
- * confirmation-rate statistic precisely so she is not penalised for them, and
- * the cleanest way to honour that is for the decline not to be necessary.
- *
- * Returns violations rather than throwing, so the caller can decide between
- * refusing the booking and hiding the tutor from the result set.
+ * It moved because the booking form has to run it too. A family should learn
+ * that a tutor requires a guardian present while they can still answer the
+ * question, not by having a completed form refused — and the only way for the
+ * form's rule and the engine's rule to be the same rule is for there to be one
+ * of them (§3, "pure logic shared with the client").
  */
-export function checkEngagementAgainstConstraints(
-  constraints: TutorConstraints,
-  engagement: ProposedEngagement,
-): ConstraintViolation[] {
-  const violations: ConstraintViolation[] = [];
-
-  if (constraints.femaleStudentsOnly && engagement.studentGender !== 'female') {
-    violations.push({
-      constraint: 'female_students_only',
-      message: 'This tutor teaches female students only.',
-    });
-  }
-
-  if (constraints.guardianPresenceRequired && !engagement.guardianPresenceOffered) {
-    violations.push({
-      constraint: 'guardian_presence_required',
-      message: 'This tutor requires a guardian to be present during the session.',
-    });
-  }
-
-  // Only relevant when she would have to travel.
-  if (
-    engagement.mode === 'home' &&
-    engagement.areaId !== null &&
-    constraints.restrictedAreaIds.has(engagement.areaId)
-  ) {
-    violations.push({
-      constraint: 'restricted_area',
-      message: 'This tutor does not travel to that area.',
-    });
-  }
-
-  return violations;
-}
+export type { ConstraintViolation, ProposedEngagement } from '../../shared/tutor-onboarding';
+export { checkEngagementAgainstConstraints } from '../../shared/tutor-onboarding';
 
 /** @throws {OnboardingError} when any declared condition is not met. */
 export async function assertBookingSatisfiesTutorConstraints(
@@ -373,7 +329,7 @@ export async function assertBookingSatisfiesTutorConstraints(
   engagement: ProposedEngagement,
 ): Promise<void> {
   const constraints = await resolveTutorConstraints(db, tutorId);
-  const violations = checkEngagementAgainstConstraints(constraints, engagement);
+  const violations = checkEngagement(constraints, engagement);
 
   if (violations.length > 0) {
     throw new OnboardingError(

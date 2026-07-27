@@ -45,6 +45,20 @@ export default function Landing() {
               >
                 Describe the difficulty
               </Link>
+              {/*
+                The home-tuition pathway, beside the diagnostic rather than
+                below it — FR-29.1 places them together, and decision 15 is that
+                this is the platform's primary case, not a refinement of search.
+                Same weight as the button next to it, because for the families
+                it serves it is not an alternative route to the same thing: it
+                is the only route to any of it (§2.1).
+              */}
+              <Link
+                to="/home-tuition"
+                className="inline-flex min-h-tap-lg items-center justify-center rounded-control bg-verdigris px-5 text-small font-medium text-white hover:bg-verdigris-deep"
+              >
+                Home tuition, female tutor
+              </Link>
               <Link
                 to="/search"
                 className="inline-flex min-h-tap items-center justify-center rounded-control border border-white/25 px-5 text-small font-medium text-white hover:bg-white/10"

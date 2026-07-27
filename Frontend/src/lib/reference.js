@@ -41,7 +41,25 @@ export const referenceKeys = {
   boards: ['reference', 'boards'],
   topics: (subjectId, levelId, boardId) => ['reference', 'topics', subjectId, levelId, boardId],
   prerequisites: (ids) => ['reference', 'prerequisites', [...ids].sort().join(',')],
+  serviceTypes: ['reference', 'service-types'],
 };
+
+/**
+ * The kinds of engagement a family can ask for — FR-29.4.
+ *
+ * Academic tuition, personality grooming and mentoring, Quran and Islamiat,
+ * spoken English, and the shorter shapes §6.30 adds. These are categories of
+ * arrangement rather than subjects: a family arranging home tuition commonly
+ * wants school work and mentoring from the same visit, and the informal market
+ * not offering that reliably is part of what §2.1 describes.
+ */
+export function useServiceTypes() {
+  return useQuery({
+    queryKey: referenceKeys.serviceTypes,
+    queryFn: async () => (await api.get('/reference/service-types')).items,
+    ...STATIC,
+  });
+}
 
 /* -------------------------------------------------------------------------
  * Location

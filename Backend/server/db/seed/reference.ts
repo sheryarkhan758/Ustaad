@@ -1019,6 +1019,26 @@ export const SERVICE_TYPES = [
     nameUr: 'جانچ اور پرچے کی معاونت',
     sortOrder: 5,
   },
+  /*
+   * The four categories FR-29.4 names, so that a family arranging home tuition
+   * can ask for academic work and mentoring in one engagement rather than
+   * hiring twice. `academic-tuition` above is the first of them; these are the
+   * other three.
+   *
+   * They are engagement categories, not subjects. Quran and Islamiat appears
+   * here rather than in `SUBJECTS` because a family books it as a kind of
+   * arrangement — often alongside school work, with the same tutor, in the same
+   * visit — and the curriculum tables are for the school syllabus a topic graph
+   * can be built over.
+   */
+  {
+    id: 'grooming-mentoring',
+    name: 'Personality Grooming and Mentoring',
+    nameUr: 'شخصیت سازی اور رہنمائی',
+    sortOrder: 6,
+  },
+  { id: 'quran-islamiat', name: 'Quran and Islamiat', nameUr: 'قرآن اور اسلامیات', sortOrder: 7 },
+  { id: 'spoken-english', name: 'Spoken English', nameUr: 'انگریزی بول چال', sortOrder: 8 },
 ] as const;
 
 /* =========================================================================
@@ -1201,7 +1221,19 @@ export async function seedReference(db: Db): Promise<void> {
   await db.delete(subjects);
   await db.delete(levels);
   await db.delete(boards);
-  await db.delete(serviceTypes);
+  /*
+   * `service_types` is **not** cleared, and that is the difference between this
+   * table and the ones above it.
+   *
+   * `bookings.service_type_id` references it (FR-29.4), so on any database that
+   * has bookings the delete fails on a foreign key and takes the whole seed
+   * down with it — which is exactly what happens when this is re-run to pick up
+   * a new category. The rows are added below instead, by difference.
+   *
+   * The tables above have the same exposure in principle and are left as they
+   * are: changing them is a larger piece of work than this one needs, and doing
+   * it halfway would leave a seed that looks idempotent and is not.
+   */
   await db.delete(i18nStrings);
 
   await db.insert(provinces).values([...PROVINCES]);
@@ -1215,7 +1247,18 @@ export async function seedReference(db: Db): Promise<void> {
   await db.insert(topics).values(TOPICS);
   await db.insert(topicPrerequisites).values(PREREQUISITE_ROWS);
 
-  await db.insert(serviceTypes).values([...SERVICE_TYPES]);
+  /*
+   * Added by difference rather than replaced, for the reason given above the
+   * deletes. The comparison is done here in TypeScript rather than with an
+   * upsert clause: `ON CONFLICT` is spelled and behaves differently enough
+   * between the two engines that PORTABILITY.md would rather this file did not
+   * depend on it, and reading eight rows to compare them costs nothing.
+   */
+  const existingServiceTypes = await db.select({ id: serviceTypes.id }).from(serviceTypes);
+  const known = new Set(existingServiceTypes.map((row) => row.id));
+  const missing = SERVICE_TYPES.filter((service) => !known.has(service.id));
+  if (missing.length > 0) await db.insert(serviceTypes).values([...missing]);
+
   await db.insert(i18nStrings).values(I18N_STRINGS);
 }
 

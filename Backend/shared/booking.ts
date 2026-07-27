@@ -45,6 +45,20 @@ const base = z.object({
   levelId: z.string().min(1),
   boardId: z.string().min(1),
   mode: z.enum(TEACHING_MODES),
+  /**
+   * Which kind of engagement this is — FR-29.4.
+   *
+   * Academic tuition, personality grooming and mentoring, Quran and Islamiat,
+   * spoken English. A family arranging home tuition frequently wants academic
+   * work *and* mentoring from the same visit, and the informal market's failure
+   * to offer that reliably is part of what §2.1 describes. Recording it on the
+   * booking is what lets the tutor prepare for the engagement she was actually
+   * asked for.
+   *
+   * Optional: the ordinary academic booking made from a tutor's profile does
+   * not need to answer a question the pathway asks explicitly.
+   */
+  serviceTypeId: z.string().min(1).optional(),
   areaId: z.string().min(1).nullable().default(null),
   /** ISO-8601 UTC. Must match a free slot from the tutor's template. */
   slotStart: isoInstant,

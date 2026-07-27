@@ -23,6 +23,8 @@ import {
 import type { RateType, TeachingMode } from '../../shared/rates';
 import { bookings, sessionNotes, trialFitChecks } from '../db/schema/booking';
 import type { EngagementType } from '../db/schema/booking';
+import { studentProfiles } from '../db/schema/identity';
+import { areas } from '../db/schema/reference';
 import { type Executor, NotFoundError } from './_base';
 
 export interface BookingRecord {
@@ -469,4 +471,94 @@ export async function findTrialFitCheckForBooking(
 
 export async function deleteTrialFitCheck(db: Executor, id: string): Promise<void> {
   await db.delete(trialFitChecks).where(eq(trialFitChecks.id, id));
+}
+
+/* -------------------------------------------------------------------------
+ * The pre-acceptance view — FR-29.13
+ * ---------------------------------------------------------------------- */
+
+/**
+ * What a tutor may see about an engagement **before** she confirms it.
+ *
+ * A woman deciding whether to travel alone to a stranger's house needs four
+ * facts to decide at all: where — to the area, not the doorstep — who she would
+ * be teaching, whether an adult will be in the residence, and when. §6.29.2
+ * gives her all four before she commits, and the exact address only on her
+ * confirmation (SEC-20, FR-29.9).
+ *
+ * **This selects no address column, and there is none to omit by mistake.**
+ * The ciphertext is reachable only through `findBookingAddressCiphertext`,
+ * which this file does not call; a future edit that wanted to add the street
+ * here would have to import that function deliberately, which is the point.
+ */
+export interface EngagementPreview {
+  bookingId: string;
+  mode: TeachingMode;
+  /** Null for an online engagement, where there is nowhere to travel to. */
+  areaId: string | null;
+  areaName: string | null;
+  areaNameUr: string | null;
+  cityId: string | null;
+  /** Null when the family did not record one. Never inferred. */
+  studentGender: 'female' | 'male' | 'other' | null;
+  /** Whether the student is a minor, which is why a guardian question exists. */
+  studentIsMinor: boolean;
+  guardianPresenceRequired: boolean;
+  slotStart: Date | null;
+  slotEnd: Date | null;
+  travelChargeAgreed: number;
+  status: BookingStatus;
+}
+
+export async function findEngagementPreview(
+  db: Executor,
+  bookingId: string,
+): Promise<EngagementPreview | null> {
+  const rows = await db
+    .select({
+      id: bookings.id,
+      mode: bookings.mode,
+      areaId: bookings.areaId,
+      guardianPresenceRequired: bookings.guardianPresenceRequired,
+      slotStart: bookings.slotStart,
+      slotEnd: bookings.slotEnd,
+      travelChargeAgreed: bookings.travelChargeAgreed,
+      status: bookings.status,
+      studentGender: studentProfiles.gender,
+      studentParentUserId: studentProfiles.parentUserId,
+    })
+    .from(bookings)
+    .innerJoin(studentProfiles, eq(studentProfiles.id, bookings.studentProfileId))
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return null;
+
+  const areaRows = row.areaId
+    ? await db
+        .select({ id: areas.id, name: areas.name, nameUr: areas.nameUr, cityId: areas.cityId })
+        .from(areas)
+        .where(eq(areas.id, row.areaId))
+        .limit(1)
+    : [];
+  const area = areaRows[0];
+
+  return {
+    bookingId: row.id,
+    mode: row.mode,
+    areaId: row.areaId,
+    areaName: area?.name ?? null,
+    areaNameUr: area?.nameUr ?? null,
+    cityId: area?.cityId ?? null,
+    studentGender: row.studentGender,
+    // A minor is a profile owned by a parent — §2.3. There is no age arithmetic
+    // here and no date of birth in the payload; the ownership is the fact.
+    studentIsMinor: row.studentParentUserId !== null,
+    guardianPresenceRequired: fromDbBool(row.guardianPresenceRequired),
+    slotStart: row.slotStart ? fromDbTimestamp(row.slotStart) : null,
+    slotEnd: row.slotEnd ? fromDbTimestamp(row.slotEnd) : null,
+    travelChargeAgreed: row.travelChargeAgreed,
+    status: row.status,
+  };
 }

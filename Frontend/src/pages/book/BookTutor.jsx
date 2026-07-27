@@ -24,10 +24,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { createBookingSchema, SESSION_PURPOSES } from '@shared/booking';
+// The engine's own rule, not a copy of it — see `violations` below.
+import { checkEngagementAgainstConstraints } from '@shared/tutor-onboarding';
 
 import { AddressDisclosure, GuardianPresenceNotice } from '../../components/booking/SafetyAndDisclosure';
 import { PaymentBoundaryNotice } from '../../components/payments/PaymentBoundaryNotice';
@@ -59,6 +61,16 @@ export default function BookTutor() {
   const navigate = useNavigate();
   const toast = useToast();
   const fmt = useFormat();
+
+  /**
+   * What the home-tuition pathway established, if the family came that way.
+   *
+   * Carried in navigation state rather than the query string: it is context for
+   * this form, not an address anybody should be able to construct or share, and
+   * a family who reloads mid-form falls back to answering here — which is the
+   * ordinary path, not a broken one.
+   */
+  const pathway = useLocation().state ?? null;
 
   const requested = params.get('engagementType');
   const [engagementType, setEngagementType] = useState(
@@ -125,7 +137,67 @@ export default function BookTutor() {
     setSlot(null);
   }, [mode]);
 
+
   const claim = claims.find((c) => c.id === claimId) ?? claims[0] ?? null;
+  const student = (students.data ?? []).find((s) => s.id === studentProfileId) ?? null;
+
+  /**
+   * Guardian presence starts on for a minor — FR-29.7.
+   *
+   * The default is the protective answer and the parent has to actively change
+   * it, rather than the form starting at "not required" and relying on somebody
+   * noticing a checkbox. It is set when the student is chosen, not pinned: a
+   * default that could not be changed would be the platform overriding a
+   * parent's judgement about their own child, which is a different thing from
+   * choosing the safer starting point on their behalf.
+   */
+  useEffect(() => {
+    if (student?.parentOwned) setGuardianAcknowledged(true);
+  }, [student?.id, student?.parentOwned]);
+
+  /* --- Her conditions, applied here rather than reported later — FR-29.11 -- */
+
+  /**
+   * The violations this request currently carries, if any.
+   *
+   * `checkEngagementAgainstConstraints` is the **same function the booking
+   * engine runs** (`shared/tutor-onboarding.js`), not a copy of its rules. That
+   * is the whole point: a UI that reimplemented these would eventually block
+   * something the server allows, or worse, let through a request she would have
+   * to decline — and SEC-21 exists precisely so she is never put in that
+   * position.
+   *
+   * Evaluated only once a student is chosen. Before that there is no engagement
+   * to check, and showing "this tutor teaches female students only" as an error
+   * against an empty form reads as a rejection of the family.
+   */
+  const violations = useMemo(() => {
+    if (!safety || !student) return [];
+    return checkEngagementAgainstConstraints(
+      {
+        femaleStudentsOnly: safety.femaleStudentsOnly ?? false,
+        guardianPresenceRequired: safety.guardianPresenceRequired ?? false,
+        restrictedAreaIds: safety.restrictedAreaIds ?? [],
+      },
+      {
+        studentGender: student.gender ?? null,
+        areaId: slot?.areaId ?? null,
+        guardianPresenceOffered: guardianAcknowledged,
+        mode: mode ?? slot?.mode ?? 'home',
+      },
+    );
+  }, [safety, student, slot, guardianAcknowledged, mode]);
+
+  /*
+   * A violation that the family cannot resolve on this form is a different
+   * thing from one they can. Her gender restriction and her area restriction
+   * are facts about this pairing — no answer on this page changes them — so the
+   * request is blocked outright. The guardian condition is a question they have
+   * not answered yet, so it disables the button without being phrased as a
+   * refusal.
+   */
+  const blocking = violations.filter((v) => v.constraint !== 'guardian_presence_required');
+  const canRequest = violations.length === 0;
 
   /* --- Submit ------------------------------------------------------------ */
 
@@ -161,6 +233,17 @@ export default function BookTutor() {
     setErrors({});
     setFormError(null);
 
+    /*
+     * The disabled button is the courtesy; this is the rule. A disabled control
+     * is a hint to a person, not a guarantee — it can be cleared from a console
+     * in a second — and the request must be impossible from this form rather
+     * than merely discouraged (FR-29.11). The server checks it a third time.
+     */
+    if (violations.length > 0) {
+      setFormError(t(`safety.violation.${violations[0].constraint}`));
+      return;
+    }
+
     const common = {
       tutorId: tutor.id,
       studentProfileId,
@@ -173,6 +256,10 @@ export default function BookTutor() {
       slotEnd: slot?.endsAt ?? '',
       guardianPresenceAcknowledged: guardianAcknowledged,
       isTrial,
+      // Set when the family arrived through the home-tuition pathway, which
+      // asked which kind of engagement this is (FR-29.4). Absent otherwise —
+      // an academic booking made from a profile answers no such question.
+      ...(pathway?.serviceTypeId ? { serviceTypeId: pathway.serviceTypeId } : {}),
       ...(address.trim() ? { address: address.trim() } : {}),
     };
 
@@ -529,8 +616,43 @@ export default function BookTutor() {
 
         <PaymentBoundaryNotice />
 
+        {/*
+          A condition this form cannot satisfy — FR-29.11.
+
+          Shown as a statement of her terms, in her voice, not as an error the
+          family committed. They have not done anything wrong; this pairing does
+          not meet a condition she set, and the honest thing is to say which one
+          and stop, rather than to accept a request that would reach her as one
+          she has to decline.
+        */}
+        {blocking.length > 0 ? (
+          <section
+            role="status"
+            aria-labelledby="cannot-request-heading"
+            className="rounded-control border border-seal/35 bg-seal-soft px-4 py-3"
+          >
+            <h2
+              id="cannot-request-heading"
+              className="text-caption font-semibold uppercase tracking-wide text-seal-deep"
+            >
+              {t('safety.cannotRequestHeading')}
+            </h2>
+            <ul className="mt-2 space-y-1 text-small text-ink">
+              {blocking.map((violation) => (
+                <li key={violation.constraint}>{t(`safety.violation.${violation.constraint}`)}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-caption text-slate">{t('safety.cannotRequestBody')}</p>
+          </section>
+        ) : null}
+
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" variant="accent" loading={create.isPending}>
+          <Button
+            type="submit"
+            variant="accent"
+            loading={create.isPending}
+            disabled={!canRequest}
+          >
             {t('request.submit')}
           </Button>
           <Button as={Link} to={`/t/${slug}`} variant="ghost">

@@ -211,6 +211,9 @@ export async function createBookingRequest(
     levelId: input.levelId,
     boardId: input.boardId,
     topicIdsJson: JSON.stringify(input.topicIds),
+    // FR-29.4. Null where the family did not say, which an academic booking
+    // made straight from a profile never does.
+    serviceTypeId: input.serviceTypeId ?? null,
     mode: input.mode,
     areaId: input.areaId,
     // Sealed here; the plaintext never reaches a column (SEC-3, NFR-18).

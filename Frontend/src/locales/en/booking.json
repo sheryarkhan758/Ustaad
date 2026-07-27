@@ -118,7 +118,41 @@
     "enforcedNote": "Ustaad.com enforces these — a request that does not meet them is refused rather than passed on. Declines she makes under her own conditions do not count against her statistics.",
     "acknowledgeLabel": "A parent or guardian will be present for every session",
     "acknowledgeHint": "The request cannot be sent without this.",
-    "refused": "This tutor requires a guardian present. Tick the box above to continue, or choose a tutor who does not set this condition."
+    "refused": "This tutor requires a guardian present. Tick the box above to continue, or choose a tutor who does not set this condition.",
+    "cannotRequestHeading": "This request cannot be sent",
+    "cannotRequestBody": "Nothing on this form can change it. Her conditions are hers to set, and Ustaad.com applies them rather than passing the request on for her to refuse.",
+    "violation": {
+      "female_students_only": "She teaches female students only, and the student chosen is not recorded as female.",
+      "guardian_presence_required": "She requires a parent or guardian present during the session.",
+      "restricted_area": "She does not travel to the area this session would be in."
+    }
+  },
+  "engagement": {
+    "heading": "What you are being asked to accept",
+    "body": "Everything that decides whether this engagement suits you, before you answer.",
+    "caption": "The engagement, before confirmation",
+    "where": "Area",
+    "areaUnknown": "No area recorded",
+    "student": "Student",
+    "genderNotRecorded": "Gender not recorded",
+    "minor": "under 18",
+    "gender": {
+      "female": "Female student",
+      "male": "Male student",
+      "other": "Student"
+    },
+    "guardian": "Guardian",
+    "guardianYes": "A guardian will be present.",
+    "guardianNo": "No guardian presence recorded.",
+    "when": "When",
+    "travelCharge": "Travel charge",
+    "addressAfter": "The exact address is shown only after you confirm. Until then it is not sent to this page at all.",
+    "declaredHeading": "Your conditions, applied by the system",
+    "declaredFemaleOnly": "You teach female students only.",
+    "declaredGuardian": "You require a guardian present for a home engagement.",
+    "declaredAreas": "You have areas you do not travel to.",
+    "declaredEnforced": "A request that does not meet these never reaches you — it is refused when it is made.",
+    "declineFree": "You may decline without giving a reason. A decline you make under a condition you have declared is excluded from your confirmation rate."
   },
   "trial": {
     "flagLabel": "Make this a trial session",

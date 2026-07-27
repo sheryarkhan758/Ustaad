@@ -82,6 +82,16 @@ export interface SearchResultDetail {
   willingAreaIds: string[];
   /** Which identity artefacts an administrator checked (FR-6.5). */
   verifiedArtefacts: string[];
+  /**
+   * When that approval was signed — ISO-8601, null if no record came back.
+   *
+   * The artefact list without a date is half a claim. §2.3 puts the weight on
+   * the record being *timestamped and attributed*, and the home-tuition pathway
+   * (§6.29.1) is where that matters most: the family is deciding who comes into
+   * the house, and "CNIC and degree checked, 14 March 2026" is a different
+   * statement from "verified".
+   */
+  verifiedAt: string | null;
   /** Topics that passed an assessment, with the date and expiry (FR-11.6). */
   competency: { topicId: string; verifiedAt: string | null; expiresOn: string | null }[];
   /** Materialised by `server/jobs/tutor-reliability.ts` (§6.17). */
@@ -502,6 +512,7 @@ async function hydrateResults(db: Executor, page: SearchResult[]): Promise<Searc
         bio: result.tutor.bio,
         willingAreaIds: result.tutor.willingAreaIds,
         verifiedArtefacts: artefactsByTutor.get(result.tutor.id)?.artefacts ?? [],
+        verifiedAt: artefactsByTutor.get(result.tutor.id)?.at ?? null,
         competency: competencyByTutor.get(result.tutor.id) ?? [],
         reliability: reliability
           ? {

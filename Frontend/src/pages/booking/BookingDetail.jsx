@@ -25,6 +25,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { AddressDisclosure } from '../../components/booking/SafetyAndDisclosure';
 import { BookingActions } from '../../components/booking/BookingActions';
+import { EngagementReview } from '../../components/booking/EngagementReview';
 import { FitCheckForm, FitCheckSummary } from '../../components/booking/FitCheck';
 import { PaymentLedger } from '../../components/payments/PaymentLedger';
 import { Badge, Card, CardBody, ErrorState, SkeletonCard, Table, Td, Th } from '../../components/ui/Card';
@@ -50,6 +51,25 @@ export default function BookingDetail() {
     queryKey: ['payments', 'booking', id],
     queryFn: () => api.get(`/payments/bookings/${id}`),
     enabled: Boolean(id),
+  });
+
+  /*
+   * What she decides on — FR-29.13. Fetched for the tutor only, and only while
+   * the request is still hers to answer: once it is confirmed the booking
+   * record itself carries these facts alongside the address, and a second panel
+   * repeating them would be noise.
+   */
+  const engagement = useQuery({
+    queryKey: ['booking', id, 'engagement'],
+    queryFn: async () => (await api.get(`/bookings/${id}/engagement`))?.engagement ?? null,
+    enabled: Boolean(id) && viewerParty === 'tutor',
+  });
+
+  /* Her own declared conditions, to show as applied rather than merely held. */
+  const safety = useQuery({
+    queryKey: ['tutor', 'safety'],
+    queryFn: async () => (await api.get('/tutors/safety'))?.safety ?? null,
+    enabled: viewerParty === 'tutor',
   });
 
   /*
@@ -153,6 +173,17 @@ export default function BookingDetail() {
           ) : null}
         </tbody>
       </Table>
+
+      {/*
+        --- Her decision, before she makes it (§6.29.2) --------------------
+
+        Placed above the lifecycle actions on purpose: the accept and decline
+        buttons are three inches below, and the facts she needs to use them
+        should not be something she has to scroll back up for.
+      */}
+      {viewerParty === 'tutor' && record.status === 'requested' ? (
+        <EngagementReview engagement={engagement.data} safety={safety.data} />
+      ) : null}
 
       {/* --- What each side sees, said to both (SEC-20) -------------------- */}
       {record.mode === 'home' ? (

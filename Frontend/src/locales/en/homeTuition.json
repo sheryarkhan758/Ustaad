@@ -1,0 +1,69 @@
+{
+  "entry": {
+    "title": "Home tuition with a verified female tutor",
+    "body": "Where travelling to a tuition centre is not an option, this arranges the alternative: a female tutor, verified by Ustaad.com, teaching at your home in your area.",
+    "action": "Arrange home tuition"
+  },
+  "page": {
+    "title": "Home tuition with a verified female tutor",
+    "intro": "Three questions. Every tutor you are shown is female, teaches at the student's home, travels to your area, and has been verified by an administrator against her CNIC and academic documents.",
+    "fixedHeading": "Set for this pathway",
+    "fixedGender": "Female tutors only. This is applied as an exclusion, not a preference — a male tutor cannot appear in these results.",
+    "fixedMode": "Teaching at the student's home.",
+    "fixedArea": "Your area, and areas next to it."
+  },
+  "steps": {
+    "of": "Step {{current}} of {{total}}",
+    "area": "Where",
+    "need": "What is needed",
+    "conditions": "Conditions",
+    "results": "Tutors",
+    "next": "Continue",
+    "back": "Back",
+    "edit": "Change"
+  },
+  "area": {
+    "heading": "Where would the tutor be coming to?",
+    "body": "Areas next to the one you choose are included, because a tutor one area over is usually a shorter journey than one across the same district.",
+    "nearbyNote": "Nearby areas are decided by a curated list, not by distance on a map.",
+    "adjacentCount": "{{count}} nearby area is included",
+    "adjacentCount_other": "{{count}} nearby areas are included"
+  },
+  "need": {
+    "heading": "What kind of support is needed?",
+    "body": "Families often want school work and personal mentoring from the same visit. Say which, and it is recorded on the request so the tutor knows what she is being asked for.",
+    "academicHeading": "Which subject, level and board?",
+    "academicOptional": "Optional. Leaving it blank shows every tutor who travels to your area.",
+    "carriedNote": "The category is recorded on your request. It does not narrow the list below, because tutors are not yet asked to register their categories separately."
+  },
+  "conditions": {
+    "heading": "Under what conditions?",
+    "body": "A tutor sets her own conditions too, and the system applies both. Anything you set here is carried to the request.",
+    "guardianLabel": "A guardian will be",
+    "guardian": {
+      "throughout": "Present throughout the session",
+      "residence": "Present in the residence",
+      "not_required": "Not required"
+    },
+    "minorNote": "For a student under eighteen this starts at \"present throughout\" and only you can change it.",
+    "tutorMayRequire": "Some tutors require a guardian present as a condition of accepting a home engagement. Where she does, that condition applies whatever is chosen here."
+  },
+  "results": {
+    "heading": "Tutors who match",
+    "count": "{{count}} tutor",
+    "count_other": "{{count}} tutors",
+    "empty": "No tutor currently travels to this area under these conditions.",
+    "emptyBody": "Widening to the whole city, or choosing a different area, is usually the quickest change. Nothing here is a waiting list — an area with no tutor today may have one next month.",
+    "verificationHeading": "What Ustaad.com checked",
+    "verifiedOn": "Checked on {{date}}",
+    "verifiedBy": "Checked by an Ustaad.com administrator, who is named on her profile.",
+    "noPoliceCheck": "No police or background check is performed.",
+    "travelsTo": "Travels to",
+    "request": "Ask this tutor",
+    "seeRecord": "See the full verification record"
+  },
+  "reciprocal": {
+    "heading": "The tutor's side of this",
+    "body": "She is travelling alone to an address she has not seen. Before she accepts she is shown the area, the student's gender, whether a guardian will be present and the timing — and the exact address only once she has confirmed. Her own conditions are applied by the system, and a request that does not meet them cannot be sent to her."
+  }
+}

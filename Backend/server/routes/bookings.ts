@@ -25,6 +25,7 @@ import { requireAuth, requireRole } from '../middleware/auth';
 import {
   addSessionNote,
   addTrialFitCheck,
+  findEngagementPreview,
   findTrialFitCheckForBooking,
   getBookingOrThrow,
   listBookingsForRequester,
@@ -163,6 +164,36 @@ export function createBookingRouter(): Router {
       const party = await loadAsParty(req, res);
       if (!party) return;
       res.json({ booking: party.booking });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * `GET /api/bookings/:id/engagement` — what the tutor decides on. FR-29.13.
+   *
+   * Area, student, guardian and timing, and **never the street address**: she
+   * sees where in the city she would be travelling to before she commits, and
+   * the doorstep only once she has (SEC-20, FR-29.9). `findEngagementPreview`
+   * selects no address column, so this route has nothing to leak rather than a
+   * field it must remember to strip.
+   *
+   * Both parties may read it. For the family it is a restatement of what they
+   * submitted, which is worth showing them plainly — it is the basis on which
+   * she will answer.
+   */
+  router.get('/:id/engagement', requireAuth, async (req, res, next) => {
+    try {
+      const party = await loadAsParty(req, res);
+      if (!party) return;
+
+      const engagement = await findEngagementPreview(req.db, party.booking.id);
+      if (!engagement) {
+        res.status(404).json({ error: { code: 'not_found', message: 'No such booking.' } });
+        return;
+      }
+
+      res.json({ engagement });
     } catch (error) {
       next(error);
     }

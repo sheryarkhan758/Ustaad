@@ -1005,3 +1005,80 @@ describe('ownership', () => {
     expect(res.status).toBe(403);
   });
 });
+
+/* =========================================================================
+ * What the tutor decides on — §6.29.2, FR-29.13
+ * ====================================================================== */
+
+describe('the pre-acceptance view', () => {
+  /** A requested home booking carrying a street address. */
+  async function requestedEngagement() {
+    const tutor = await makeTutor('previewtutor@example.test');
+    const family = await makeFamily('previewfamily@example.test', 'female');
+
+    const created = await request(app)
+      .post('/api/bookings')
+      .set('Cookie', family.cookie)
+      .send({
+        ...baseBooking(tutor.tutorId, family.studentProfileId),
+        engagementType: 'single_session',
+        sessionPurpose: 'doubt_solving',
+        topicIds: ['math-matric-sindh-quadratic-equations'],
+        address: 'House 14, Street 7, Gulshan-e-Iqbal Block 5',
+        ...slot('16:00'),
+      });
+    expect(created.status).toBe(201);
+
+    return { tutor, family, bookingId: created.body.booking.id as string };
+  }
+
+  it('gives her the four facts she needs before she answers', async () => {
+    const { tutor, bookingId } = await requestedEngagement();
+
+    const res = await request(app)
+      .get(`/api/bookings/${bookingId}/engagement`)
+      .set('Cookie', tutor.cookie);
+
+    expect(res.status).toBe(200);
+    const engagement = res.body.engagement;
+
+    // Where — to the area, which is what decides the journey.
+    expect(engagement.areaId).toBe('karachi-gulshan-e-iqbal');
+    expect(engagement.areaName).toBeTruthy();
+    // Who, whether an adult will be there, and when.
+    expect(engagement.studentGender).toBe('female');
+    expect(engagement.studentIsMinor).toBe(true);
+    expect(engagement.guardianPresenceRequired).toBe(false);
+    expect(engagement.slotStart).toBeTruthy();
+  });
+
+  it('carries no address, in any field, while the request is unanswered', async () => {
+    const { tutor, bookingId } = await requestedEngagement();
+
+    const res = await request(app)
+      .get(`/api/bookings/${bookingId}/engagement`)
+      .set('Cookie', tutor.cookie);
+
+    /*
+     * Asserted over the serialised body rather than field by field, because the
+     * failure this guards against is a *new* field added later that happens to
+     * carry the street (SEC-20, FR-29.9). A test naming today's fields would
+     * pass through exactly that mistake.
+     */
+    const body = JSON.stringify(res.body);
+    expect(body).not.toContain('House 14');
+    expect(body).not.toContain('Street 7');
+    expect(body.toLowerCase()).not.toContain('address');
+  });
+
+  it('is refused to somebody who is neither party', async () => {
+    const { bookingId } = await requestedEngagement();
+    const stranger = await makeTutor('previewstranger@example.test');
+
+    const res = await request(app)
+      .get(`/api/bookings/${bookingId}/engagement`)
+      .set('Cookie', stranger.cookie);
+
+    expect(res.status).toBe(404);
+  });
+});

@@ -41,6 +41,7 @@ import enTutor from '../locales/en/tutor.json';
 import enAdmin from '../locales/en/admin.json';
 import enFeedback from '../locales/en/feedback.json';
 import enVolunteer from '../locales/en/volunteer.json';
+import enHomeTuition from '../locales/en/homeTuition.json';
 
 import urCommon from '../locales/ur/common.json';
 import urAuth from '../locales/ur/auth.json';
@@ -52,6 +53,7 @@ import urTutor from '../locales/ur/tutor.json';
 import urAdmin from '../locales/ur/admin.json';
 import urFeedback from '../locales/ur/feedback.json';
 import urVolunteer from '../locales/ur/volunteer.json';
+import urHomeTuition from '../locales/ur/homeTuition.json';
 
 export const LOCALES = {
   en: { label: 'English', nativeLabel: 'English', dir: 'ltr' },
@@ -71,6 +73,7 @@ export const NAMESPACES = [
   'admin',
   'feedback',
   'volunteer',
+  'homeTuition',
 ];
 
 const STORAGE_KEY = 'ustaad.lang';
@@ -135,6 +138,7 @@ i18next.use(initReactI18next).init({
       admin: enAdmin,
       feedback: enFeedback,
       volunteer: enVolunteer,
+      homeTuition: enHomeTuition,
     },
     ur: {
       common: urCommon,
@@ -147,6 +151,7 @@ i18next.use(initReactI18next).init({
       admin: urAdmin,
       feedback: urFeedback,
       volunteer: urVolunteer,
+      homeTuition: urHomeTuition,
     },
   },
   lng: initial,

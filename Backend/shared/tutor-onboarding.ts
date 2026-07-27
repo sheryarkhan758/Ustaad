@@ -15,7 +15,7 @@
 
 import { z } from 'zod';
 
-import { RATE_TYPES, TEACHING_MODES } from './rates';
+import { RATE_TYPES, TEACHING_MODES, type TeachingMode } from './rates';
 
 /* -------------------------------------------------------------------------
  * Profile — §6.4
@@ -182,6 +182,86 @@ export const safetyConstraintsSchema = z.object({
 });
 
 export type SafetyConstraintsInput = z.infer<typeof safetyConstraintsSchema>;
+
+/**
+ * The conditions as a family reads them off the public profile.
+ *
+ * The same three fields, named from the other side of the transaction. They are
+ * published deliberately: a condition the family cannot see is one they can
+ * only discover by having a request refused, and a refusal she never had to
+ * issue is the point of enforcing these at all (FR-29.11).
+ */
+export interface PublishedSafetyConstraints {
+  femaleStudentsOnly: boolean;
+  guardianPresenceRequired: boolean;
+  restrictedAreaIds: readonly string[];
+}
+
+export interface ProposedEngagement {
+  studentGender: 'female' | 'male' | 'other' | null;
+  areaId: string | null;
+  guardianPresenceOffered: boolean;
+  mode: TeachingMode;
+}
+
+export interface ConstraintViolation {
+  constraint: 'female_students_only' | 'guardian_presence_required' | 'restricted_area';
+  message: string;
+}
+
+/**
+ * Check a proposed booking against the tutor's declared conditions.
+ *
+ * **This lives in `/shared` so that both sides run the same function.** The
+ * booking engine calls it before a request is created, and the booking form
+ * calls it before the form can be submitted — so a family is told which
+ * condition applies while they can still change their answer, rather than
+ * meeting a 409 after filling the whole form in.
+ *
+ * The duplication that would otherwise be tempting is the danger: a UI copy of
+ * these rules that drifted would either block bookings the server allows, or
+ * let through requests she would have to decline. SEC-21 excludes safety
+ * declines from her confirmation-rate statistic precisely so she is not
+ * penalised for holding to her conditions; the cleanest way to honour that is
+ * for the decline never to be necessary.
+ *
+ * Returns violations rather than throwing, so a caller can choose between
+ * refusing the booking, disabling a control, and hiding the tutor entirely.
+ */
+export function checkEngagementAgainstConstraints(
+  constraints: PublishedSafetyConstraints,
+  engagement: ProposedEngagement,
+): ConstraintViolation[] {
+  const violations: ConstraintViolation[] = [];
+
+  if (constraints.femaleStudentsOnly && engagement.studentGender !== 'female') {
+    violations.push({
+      constraint: 'female_students_only',
+      message: 'This tutor teaches female students only.',
+    });
+  }
+
+  if (constraints.guardianPresenceRequired && !engagement.guardianPresenceOffered) {
+    violations.push({
+      constraint: 'guardian_presence_required',
+      message: 'This tutor requires a guardian to be present during the session.',
+    });
+  }
+
+  // Only relevant when she would have to travel.
+  if (
+    engagement.mode === 'home' &&
+    engagement.areaId !== null &&
+    constraints.restrictedAreaIds.includes(engagement.areaId)
+  ) {
+    violations.push({
+      constraint: 'restricted_area',
+      message: 'This tutor does not travel to that area.',
+    });
+  }
+
+  return violations;
+}
 
 /* -------------------------------------------------------------------------
  * Documents — SEC-7, NFR-9

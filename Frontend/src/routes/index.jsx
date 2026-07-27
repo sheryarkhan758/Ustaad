@@ -46,6 +46,13 @@ export const router = createBrowserRouter([
        * the manual-search fallback are reachable without signing in.
        */
       { path: 'intake', ...page(() => import('../pages/public/Intake')) },
+      /*
+       * The platform's primary use case gets its own route, not a query string
+       * on `/search` (§2.1, decision 15, FR-29.1). A link a family can be given
+       * over the phone — "go to ustaad.com/home-tuition" — is part of what
+       * makes it an entry point rather than a filter.
+       */
+      { path: 'home-tuition', ...page(() => import('../pages/public/HomeTuition')) },
       { path: 'search', ...page(() => import('../pages/public/Search')) },
       /*
        * `/t/:slug` is canonical — it is what the QR code encodes and what a
