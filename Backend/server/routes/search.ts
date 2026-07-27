@@ -53,6 +53,9 @@ export function createSearchRouter(): Router {
           bio: r.detail?.bio ?? null,
           willingAreaIds: r.detail?.willingAreaIds ?? [],
           verifiedArtefacts: r.detail?.verifiedArtefacts ?? [],
+          // The date the approval was signed. An artefact list without one is
+          // half a claim, and the home-tuition pathway leads with both (§2.3).
+          verifiedAt: r.detail?.verifiedAt ?? null,
           competency: r.detail?.competency ?? [],
           reliability: r.detail?.reliability ?? null,
           engagementTypes: r.detail?.engagementTypes ?? [],
