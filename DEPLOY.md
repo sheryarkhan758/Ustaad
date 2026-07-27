@@ -82,6 +82,32 @@ route with an explanation rather than an error (NFR-11), and the five recorded
 demonstration scenarios at `/demo` work regardless — they replay stored
 sessions and contact no provider at all.
 
+## 3b. Create the administrator — **[NEEDS YOU]**
+
+There is no administrator on a fresh deployment, and no way to register one:
+`REGISTERABLE_ROLES` is `parent | student | tutor | organisation`, and `admin`
+is absent **by construction** rather than by a check that could be forgotten
+(FR-1.5). `db:seed:demo` would create one, but it refuses to run against
+Supabase — deliberately, because it publishes a password (FR-15.9).
+
+So an administrator is created by somebody who already holds the database,
+which is the correct bar for an account that can approve verifications,
+resolve payment disputes and request the disclosure of a family's address:
+
+```bash
+cd Backend
+SUPABASE_DB_URL="postgresql://..." ADMIN_EMAIL="you@example.com" ADMIN_PASSWORD='choose-a-long-one' ADMIN_NAME="Your Name" npm run create-admin
+```
+
+**The password is read from the environment and never written to this
+repository.** Not as a CLI argument either — arguments land in shell history
+and in the process list. The script refuses a password under 12 characters,
+refuses the published demonstration password, and never prints it back.
+
+Re-running with an existing administrator email **resets that password** and
+bumps `tokenVersion`, signing out every session it had. That is the right
+behaviour for a credential you are resetting because it may be compromised.
+
 ## 4. Verify — after the first deploy
 
 ```bash
