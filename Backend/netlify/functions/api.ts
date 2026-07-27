@@ -17,8 +17,8 @@
  *    itself the moment two cold starts overlapped, and there is no lock to
  *    arbitrate that.
  *  · **No seeding.** `db:seed` is idempotent; `db:seed:demo` writes invented
- *    people with a published password and refuses to run against Postgres at
- *    all. Neither belongs in a request path.
+ *    people and, against a live database, demands a password the operator
+ *    chose. Neither belongs in a request path.
  *  · **No job scheduling.** `server/jobs/` are the only writers of the
  *    materialised tables (§2.8). A `setInterval` here would run once per warm
  *    container — that is N uncoordinated writers, not one scheduled job. They

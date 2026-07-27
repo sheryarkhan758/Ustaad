@@ -241,16 +241,21 @@ two runs of the same job write rows in a different order. **Every `orderBy` in t
 ends with a unique column** — usually `id` — so the total order is deterministic regardless
 of collation. Keep it that way when adding one.
 
-### Rule 12 — the demo seed never runs against Postgres, and `LIKE` is why it can afford to
+### Rule 12 — the one `LIKE` matches only what was written lower-cased
 
 `server/db/seed/demo/index.ts` uses `like(users.email, '%@demo.ustaad.test')` to find its own
 rows. That is case-insensitive on SQLite and case-sensitive on Postgres, which would make the
 seed silently fail to clean up.
 
-It is not fixed, because it does not need to be: the seed **refuses to run when
-`SUPABASE_DB_URL` is set** (it writes invented people with a published password). If that
-refusal is ever relaxed, this `LIKE` becomes a real bug — fix it then, or better, do not
-relax the refusal.
+This used to be tolerated rather than fixed: the seed refused to run against Postgres, so the
+divergence could not bite. That refusal is now narrower — a live run is permitted with an
+operator-chosen `DEMO_SEED_PASSWORD`, only the README's published password is refused
+(FR-15.9) — so the divergence is real and the rule is now enforced instead of avoided.
+
+**Every address the seed writes goes through `demoEmail()`, which lower-cases it.** The
+pattern is then an exact match on both engines. A demonstration address written any other way
+would be skipped by the sweep on Postgres and collide on the unique `users.email` on the next
+run, half-way through — so add addresses through that function and nowhere else.
 
 Application code has no other `LIKE`. Email lookups normalise to lower case in
 `server/repositories/users.ts` and compare with `eq`, which behaves identically on both.

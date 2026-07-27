@@ -50,8 +50,8 @@ the container serves.
 It deliberately does **not**:
 
 - **migrate** — two overlapping cold starts would race with no lock to arbitrate;
-- **seed** — `db:seed:demo` writes invented people with a published password and refuses
-  Postgres outright;
+- **seed** — `db:seed:demo` writes invented people, and against a live database demands a
+  password the operator chose rather than the published one;
 - **schedule jobs** — `server/jobs/` are the only writers of the materialised tables (§2.8).
   A `setInterval` here runs once per warm container, which is N uncoordinated writers rather
   than one scheduled job.
@@ -251,9 +251,11 @@ report **`SKIP` with the reason** and are listed separately at the end. A skippe
 printed a tick would be worse than no check.
 
 Note that production will have **no demonstration accounts** unless you deliberately seed
-them, and `db:seed:demo` refuses Postgres. Three checks will therefore skip on a clean
-production database. That is correct: production should not contain invented people with a
-password published in the README.
+them — `db:seed:demo` against a live database requires `DEMO_SEED_PASSWORD` and refuses the
+published one. Three checks will therefore skip on a clean production database. That is
+correct: what production must never contain is invented people holding a password published
+in the README. If you did seed them, export the same `DEMO_SEED_PASSWORD` here; the script
+reads it and the three checks then run.
 
 ### The repository history check **[NEEDS YOU]**
 

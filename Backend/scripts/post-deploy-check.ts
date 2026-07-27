@@ -26,7 +26,16 @@ if (!BASE) {
   process.exit(1);
 }
 
-const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'demo-ustaad-2026';
+/**
+ * The password the demonstration accounts were seeded with.
+ *
+ * A live database is seeded with an operator-chosen `DEMO_SEED_PASSWORD` rather
+ * than the published one (FR-15.9), so that variable is read here too: the
+ * checks that sign in would otherwise report FAIL against a deployment that is
+ * working exactly as intended.
+ */
+const DEMO_PASSWORD =
+  process.env.DEMO_PASSWORD ?? process.env.DEMO_SEED_PASSWORD ?? 'demo-ustaad-2026';
 
 /**
  * Whatever the endpoint returned.

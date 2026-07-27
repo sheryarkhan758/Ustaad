@@ -12,10 +12,14 @@
  * The materialisation jobs run last, so no derived statistic is empty.
  *
  * ── Two refusals, deliberately ─────────────────────────────────────────────
- *  1. **It will not run against Postgres.** `SUPABASE_DB_URL` being set means
- *     the configured database is production. Synthetic people with published
- *     passwords must never be written there, and a flag that says "I meant it"
- *     is exactly the flag someone sets at 2 a.m. So there is no flag.
+ *  1. **Against Postgres it will not use the published password.** A Postgres
+ *     connection string means the configured database is reachable from the
+ *     internet. The invented people may live there — a deployment nobody can
+ *     sign into demonstrates nothing — but the credential printed in the README
+ *     may not, so a live run requires `DEMO_SEED_PASSWORD` and rejects the
+ *     published one. What is forbidden is the *known password on an exposed
+ *     database*, and that is what the check tests, rather than an "I meant it"
+ *     flag that anyone can set at 2 a.m. without reading it (FR-15.9).
  *  2. **It clears demonstration data before writing.** Re-running must be
  *     idempotent or the second run collides on `users.email` and leaves the
  *     database half-populated. Reference data is left alone — this seed layers
@@ -64,6 +68,24 @@ import { DEMO_REVIEWS } from './reviews';
 
 /** Everything this seed writes carries an address in this domain. */
 const DEMO_EMAIL_SUFFIX = '%@demo.ustaad.test';
+
+/**
+ * Every demonstration address is lower-cased on the way in, without exception.
+ *
+ * `clearPreviousDemoData` finds its own rows with `LIKE '%@demo.ustaad.test'`,
+ * and `LIKE` is case-insensitive on SQLite but case-sensitive on Postgres
+ * (PORTABILITY rule 12). While this seed refused to run against Postgres that
+ * divergence could not bite; now that it may, one capital letter in an address
+ * would mean the sweep silently skips that row — and the next run collides on
+ * the unique `users.email` and dies half-way through.
+ *
+ * Normalising on write makes the pattern exact on both engines, which is the
+ * fix rule 12 asks for. It is also what `repositories/users.ts` does to every
+ * address a person types, so a demonstration account is stored like a real one.
+ */
+function demoEmail(address: string): string {
+  return address.trim().toLowerCase();
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -213,6 +235,8 @@ async function upsertDemoUser(
     createdAt: string;
   },
 ): Promise<string> {
+  const email = demoEmail(row.email);
+
   // Matched on **email**, not on the derived id. `users.email` is the unique
   // column, so it is the only key that reliably finds a row a previous run
   // wrote — including a run from before ids were derived, which would otherwise
@@ -220,11 +244,11 @@ async function upsertDemoUser(
   const existing = await db
     .select({ id: users.id })
     .from(users)
-    .where(eq(users.email, row.email))
+    .where(eq(users.email, email))
     .limit(1);
 
   const shared = {
-    email: row.email,
+    email,
     passwordHash: row.passwordHash,
     role: row.role,
     displayName: row.displayName,
@@ -240,17 +264,54 @@ async function upsertDemoUser(
     return existing[0].id;
   }
 
-  const id = demoUserId(row.email);
+  const id = demoUserId(email);
   await db.insert(users).values({ id, ...shared, createdAt: row.createdAt });
   return id;
 }
 
-export async function seedDemoData(db: Executor, now: Date = new Date()): Promise<DemoSeedResult> {
+/**
+ * The password every demonstration account gets.
+ *
+ * `DEMO_PASSWORD` is published in the README, which is exactly why it is safe
+ * for a local SQLite file and unsafe anywhere reachable from the internet. So
+ * a live database requires `DEMO_SEED_PASSWORD` to be supplied by whoever runs
+ * the seed: the demonstration *people* may exist in production, but the
+ * *published credential* never does (FR-15.9).
+ *
+ * Exported for `demo.flow.test.ts`. Since the blanket refusal was narrowed,
+ * this function is the whole of what keeps a published password off an
+ * internet-facing database, and a rule that load-bearing is tested directly
+ * rather than inferred from a script's exit code.
+ */
+export function demoPasswordFor(dialect: 'sqlite' | 'postgres'): string {
+  if (dialect === 'sqlite') return DEMO_PASSWORD;
+
+  const supplied = process.env.DEMO_SEED_PASSWORD?.trim();
+  if (!supplied || supplied.length < 12) {
+    throw new Error(
+      'Seeding demonstration people into a live database requires ' +
+        'DEMO_SEED_PASSWORD (at least 12 characters). The password published ' +
+        'in the README is deliberately not accepted here.',
+    );
+  }
+  // Case-insensitively, because `Demo-Ustaad-2026` is the published password to
+  // everyone except a string comparison.
+  if (supplied.toLowerCase() === DEMO_PASSWORD.toLowerCase()) {
+    throw new Error('DEMO_SEED_PASSWORD is the password published in the README. Choose another.');
+  }
+  return supplied;
+}
+
+export async function seedDemoData(
+  db: Executor,
+  now: Date = new Date(),
+  dialect: 'sqlite' | 'postgres' = 'sqlite',
+): Promise<DemoSeedResult> {
   await clearPreviousDemoData(db);
 
   // One hash, computed once. bcrypt at cost 12 takes ~250 ms; doing it per
   // account would add half a minute to a script whose whole promise is speed.
-  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  const passwordHash = await hashPassword(demoPasswordFor(dialect));
 
   /* --- Staff and organisation ---------------------------------------- */
 
@@ -1246,7 +1307,7 @@ async function seedPlatformData(ctx: {
     {
       id: newId(),
       fullName: 'Sidra Kamal',
-      email: 'sidra.kamal@demo.ustaad.test',
+      email: demoEmail('sidra.kamal@demo.ustaad.test'),
       phone: '03001234567',
       cityId: 'karachi',
       areaId: 'karachi-nazimabad',
@@ -1264,7 +1325,7 @@ async function seedPlatformData(ctx: {
     {
       id: newId(),
       fullName: 'Junaid Aslam',
-      email: 'junaid.aslam@demo.ustaad.test',
+      email: demoEmail('junaid.aslam@demo.ustaad.test'),
       phone: '03211234567',
       cityId: 'lahore',
       areaId: 'lahore-township',
@@ -1284,7 +1345,7 @@ async function seedPlatformData(ctx: {
     {
       id: newId(),
       fullName: 'Mehwish Raza',
-      email: 'mehwish.raza@demo.ustaad.test',
+      email: demoEmail('mehwish.raza@demo.ustaad.test'),
       phone: '03331234567',
       cityId: 'islamabad',
       areaId: 'islamabad-g-9',
@@ -1397,12 +1458,21 @@ async function main(): Promise<void> {
    */
   const { DB_DIALECT } = await import('../../index');
 
-  if (DB_DIALECT === 'postgres') {
+  /*
+   * Against a live database the seed runs **only** with an explicit
+   * DEMO_SEED_PASSWORD. The people are invented either way; what must never
+   * reach somewhere internet-facing is the credential published in the README
+   * (FR-15.9). Requiring the operator to choose one is the narrowest rule that
+   * permits a demonstrable deployment without permitting that.
+   */
+  if (DB_DIALECT === 'postgres' && !process.env.DEMO_SEED_PASSWORD) {
     console.error(
       '✗ Refusing to run. A Postgres connection string is set, so the configured\n' +
-        '  database is production. This seed writes invented people with a password\n' +
-        '  published in the README.\n' +
-        '  Unset SUPABASE_DB_URL / NETLIFY_DATABASE_URL to seed the local SQLite file.',
+        '  database is reachable from the internet, and this seed writes invented\n' +
+        '  people whose password is published in the README.\n\n' +
+        '  To seed them anyway, choose a password they will share:\n' +
+        "    DEMO_SEED_PASSWORD='...' npm run db:seed:demo\n\n" +
+        '  Or unset SUPABASE_DB_URL to seed the local SQLite file instead.',
     );
     process.exitCode = 1;
     return;
@@ -1411,7 +1481,7 @@ async function main(): Promise<void> {
   const { db } = await import('../../index');
   console.log('▸ seeding demonstration data (§6.15)');
 
-  const result = await seedDemoData(db as unknown as Executor);
+  const result = await seedDemoData(db as unknown as Executor, new Date(), DB_DIALECT);
 
   console.log(`  tutors                 ${result.tutors}`);
   console.log(`  parents                ${result.parents}`);

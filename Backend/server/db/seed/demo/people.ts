@@ -3,8 +3,9 @@
  *
  * **Every person here is invented.** No name, phone number, email address or
  * biography belongs to a real person, and none of this may ever be confused
- * with production data. `npm run db:seed:demo` refuses to run against a
- * configured Supabase database for that reason — see `index.ts`.
+ * with production data. Against a live database `npm run db:seed:demo` refuses
+ * the password published in the README and requires one the operator chooses,
+ * for that reason — see `index.ts`.
  *
  * ── Why the cohort is shaped the way it is ─────────────────────────────────
  * FR-15.8 asks for at least 25 tutors across at least four cities with varied

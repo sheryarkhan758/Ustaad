@@ -62,9 +62,27 @@ npm run db:seed        # reference data only: locations, subjects, topics, board
 boards, topics, prerequisite edges, exam windows. It contains no user
 information and is safe to run against production.
 
-**Do not run `db:seed:demo` against Supabase.** It writes invented people with
-a published password; it refuses to run when `SUPABASE_DB_URL` is set, and that
-refusal is deliberate (FR-15.9).
+### Demonstration people — optional, and never with the published password
+
+`db:seed:demo` writes 35 invented tutors, families, bookings, reviews and
+payments. A deployment nobody can sign into demonstrates nothing, so it may be
+run against Supabase — but only with a password you choose:
+
+```bash
+DEMO_SEED_PASSWORD='choose-a-long-one' npm run db:seed:demo
+```
+
+Without that variable it refuses, and it also refuses `demo-ustaad-2026` itself.
+The password published in the README protects nothing on a SQLite file on your
+laptop and everything on a database reachable from the internet; that
+distinction is the whole of FR-15.9, and it is what the check enforces. Note the
+password down — the seed never prints it, and it is the one that signs you in as
+`parent@demo.ustaad.test` and the rest. Keep `DEMO_SEED_PASSWORD` exported when
+you run `scripts/post-deploy-check.ts` (§5); it reads the same variable, and
+without it the sign-in checks fail against a deployment that is working.
+
+Re-running is safe: demonstration rows are cleared and rewritten, reference data
+is left alone, and the accounts keep their ids so the audit log stays valid.
 
 ## 3. Netlify — **[NEEDS YOU]**
 
@@ -108,8 +126,10 @@ sessions and contact no provider at all.
 There is no administrator on a fresh deployment, and no way to register one:
 `REGISTERABLE_ROLES` is `parent | student | tutor | organisation`, and `admin`
 is absent **by construction** rather than by a check that could be forgotten
-(FR-1.5). `db:seed:demo` would create one, but it refuses to run against
-Supabase — deliberately, because it publishes a password (FR-15.9).
+(FR-1.5). `db:seed:demo` creates a demonstration administrator, but only if you
+ran it with `DEMO_SEED_PASSWORD` (§2), and that account then shares one password
+with 40 invented people — which is not what should hold the account that can
+approve verifications.
 
 So an administrator is created by somebody who already holds the database,
 which is the correct bar for an account that can approve verifications,

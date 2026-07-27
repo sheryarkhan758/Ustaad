@@ -231,8 +231,7 @@ describe('the searchable predicate has one home', () => {
     'server/services/payment-records.ts',
     // The demonstration seed writes tutor profiles in every verification state
     // and reads them back to attach bookings and reviews (§6.15, FR-15.8). It
-    // is a script, never reachable from a request, and it refuses to run at all
-    // when SUPABASE_DB_URL is set.
+    // is a script, never reachable from a request.
     'server/db/seed/demo/index.ts',
     // The administrator dashboard counts profiles awaiting a decision (FR-14.3).
     // `countTutorProfilesIn` selects one column and returns an integer; there is

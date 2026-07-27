@@ -68,8 +68,10 @@ demo-ustaad-2026
 | **Administrator** | `admin@demo.ustaad.test` | The dashboard: pending verifications, an open flag, a safety-flagged review, an open appeal, a dispute under review, expiring badges. |
 
 These are synthetic accounts in a local SQLite file that never enters the repository. The
-password is published here because it protects nothing (FR-15.9). `npm run db:seed:demo`
-**refuses to run** when `SUPABASE_DB_URL` is set, so these people cannot reach production.
+password is published here because it protects nothing (FR-15.9) — on a file on your own
+machine. Against a Postgres database `npm run db:seed:demo` **refuses this password**: a
+live run requires `DEMO_SEED_PASSWORD`, at least 12 characters and not the one above, so
+the credential printed here never reaches anything internet-facing. See `DEPLOY.md` §2.
 
 ---
 
