@@ -191,7 +191,25 @@ export const router = createBrowserRouter([
             children: [
               { path: 'admin', ...page(() => import('../pages/admin/Dashboard')) },
               { path: 'admin/verifications', ...page(() => import('../pages/admin/Verifications')) },
+              /*
+               * One component serves the queue and one tutor's dossier. They
+               * are the same task at two depths — an administrator working a
+               * list opens a row, decides, and comes back — and splitting them
+               * across two files would duplicate the badge preview, which is
+               * the one thing that must not exist twice.
+               */
+              {
+                path: 'admin/verifications/:tutorId',
+                ...page(() => import('../pages/admin/Verifications')),
+              },
               { path: 'admin/flags', ...page(() => import('../pages/admin/Flags')) },
+              { path: 'admin/disputes', ...page(() => import('../pages/admin/Disputes')) },
+              { path: 'admin/feedback', ...page(() => import('../pages/admin/Feedback')) },
+              { path: 'admin/volunteers', ...page(() => import('../pages/admin/Volunteers')) },
+              { path: 'admin/appeals', ...page(() => import('../pages/admin/Appeals')) },
+              { path: 'admin/audit', ...page(() => import('../pages/admin/AuditLog')) },
+              /* The same board a tutor reads, as supply intelligence (FR-24.4). */
+              { path: 'admin/demand', ...page(() => import('../pages/demand/DemandBoard')) },
             ],
           },
         ],

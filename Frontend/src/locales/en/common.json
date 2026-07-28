@@ -25,7 +25,12 @@
     "myGroups": "Group tuition",
     "groupProposals": "Group proposals",
     "demand": "Unmet demand",
-    "orgProfile": "Academy profile"
+    "orgProfile": "Academy profile",
+    "appeals": "Appeals",
+    "disputes": "Disputes",
+    "feedback": "Feedback",
+    "volunteers": "Volunteers",
+    "audit": "Audit log"
   },
   "action": {
     "save": "Save",

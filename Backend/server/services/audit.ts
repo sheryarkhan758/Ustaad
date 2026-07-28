@@ -167,3 +167,49 @@ export async function readRecentActionsBy(
     .limit(limit);
   return rows.map(toDomain);
 }
+
+/**
+ * The whole log, newest first, narrowed — FR-14.2's viewer.
+ *
+ * ── Read-only, and structurally so ─────────────────────────────────────────
+ * This file exports `appendAdminAction` and three readers. There is no update
+ * and no delete anywhere in it, and §2.7 says a mistake is corrected by
+ * appending a corrective entry rather than by editing the record of the
+ * original one. A viewer that offered an edit control would be offering an
+ * operation the service cannot perform.
+ *
+ * ── Why the filters are these three ────────────────────────────────────────
+ * Actor, action and target type are the three questions somebody actually
+ * arrives with: what did this administrator do, who did this thing, and what
+ * happened to verifications this week. They narrow rows; none of them can
+ * reveal a row the caller could not already read, because the whole table is
+ * administrator-only.
+ *
+ * `detailJson` is returned as stored. `appendAdminAction` already refuses to
+ * write a forbidden key into it, so the redaction happened on the way in — the
+ * viewer does not need a second, weaker copy of that rule.
+ */
+export interface AuditQuery {
+  adminUserId?: string;
+  action?: string;
+  targetType?: string;
+  limit?: number;
+}
+
+export async function readAuditLog(db: AnyDb, query: AuditQuery = {}): Promise<AuditEntry[]> {
+  const conditions = [
+    query.adminUserId ? eq(adminActions.adminUserId, query.adminUserId) : undefined,
+    query.action ? eq(adminActions.action, query.action) : undefined,
+    query.targetType ? eq(adminActions.targetType, query.targetType) : undefined,
+  ].filter((condition) => condition !== undefined);
+
+  const rows = await db
+    .select()
+    .from(adminActions)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    // Newest first: an operations tool is read from the top.
+    .orderBy(desc(adminActions.createdAt))
+    .limit(Math.min(query.limit ?? 100, 500));
+
+  return rows.map(toDomain);
+}

@@ -40,10 +40,21 @@ const SHELL_NAV = {
     { to: '/org/profile', key: 'nav.profile' },
     { to: '/org/vacancies', key: 'nav.orgVacancies' },
   ],
+  /*
+   * Eight queues, in the order they are worked: decisions about people first,
+   * then the intake that feeds them, then the record. An operations tool is
+   * navigated dozens of times an hour, so every queue is one click from every
+   * other rather than nested behind the dashboard.
+   */
   admin: [
     { to: '/admin', key: 'nav.dashboard', end: true },
     { to: '/admin/verifications', key: 'nav.verifications' },
+    { to: '/admin/appeals', key: 'nav.appeals' },
     { to: '/admin/flags', key: 'nav.reports' },
+    { to: '/admin/disputes', key: 'nav.disputes' },
+    { to: '/admin/feedback', key: 'nav.feedback' },
+    { to: '/admin/volunteers', key: 'nav.volunteers' },
+    { to: '/admin/audit', key: 'nav.audit' },
   ],
 };
 

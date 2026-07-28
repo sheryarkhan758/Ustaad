@@ -12,6 +12,7 @@ import { FLAG_TARGET_TYPES, resolveFlagSchema } from '../../shared/moderation';
 import type { FlagTargetType } from '../../shared/moderation';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { getAdminDashboardCounts } from '../services/admin-dashboard';
+import { readAuditLog } from '../services/audit';
 import { listFlagHistory, listFlagQueue, resolveFlag } from '../services/flags';
 
 function invalid(res: Response, issues: { path: string; message: string }[]): void {
@@ -26,6 +27,28 @@ export function createAdminRouter(): Router {
   router.get('/dashboard', requireAuth, requireRole('admin'), async (req, res, next) => {
     try {
       res.json({ counts: await getAdminDashboardCounts(req.db) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * `GET /api/admin/audit` — the log, read-only (FR-14.2, NFR-19).
+   *
+   * There is no PATCH and no DELETE beside it, and there is nothing to write
+   * one against: `server/services/audit.ts` exports an append and three
+   * readers, so the append-only property the interface displays is a fact about
+   * the service rather than a claim the interface makes.
+   */
+  router.get('/audit', requireAuth, requireRole('admin'), async (req, res, next) => {
+    try {
+      const entries = await readAuditLog(req.db, {
+        adminUserId: req.query.adminUserId ? String(req.query.adminUserId) : undefined,
+        action: req.query.action ? String(req.query.action) : undefined,
+        targetType: req.query.targetType ? String(req.query.targetType) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
+      res.json({ entries, count: entries.length });
     } catch (error) {
       next(error);
     }

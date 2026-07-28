@@ -25,7 +25,12 @@
     "myGroups": "گروپ ٹیوشن",
     "groupProposals": "گروپ کی تجاویز",
     "demand": "غیر پوری طلب",
-    "orgProfile": "ادارے کا پروفائل"
+    "orgProfile": "ادارے کا پروفائل",
+    "appeals": "اپیلیں",
+    "disputes": "تنازعات",
+    "feedback": "آراء",
+    "volunteers": "رضاکار",
+    "audit": "آڈٹ لاگ"
   },
   "action": {
     "save": "محفوظ کریں",
