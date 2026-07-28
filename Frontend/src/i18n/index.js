@@ -15,12 +15,21 @@
  * testimony with paraphrase. `src/i18n/ugc.test.js` fails the build if a
  * user-content field is passed to `t()`.
  *
- * ── Why the resources are bundled rather than fetched ──────────────────────
+ * ── One language at a time, and never a raw key ────────────────────────────
  * `i18next-http-backend` would fetch each namespace on demand. On a patchy
  * connection that means a screen renders with raw keys visible until the
  * request lands — and the screens most likely to be opened on a bad connection
- * are the ones a parent needs most. Sixteen small JSON files compress to a few
- * kilobytes; they ship with the bundle.
+ * are the ones a parent needs most. So namespaces are never fetched per screen.
+ *
+ * But shipping **both** dictionaries to everybody was costing every reader the
+ * language they do not read: 112 kB of English and 140 kB of Urdu in the first
+ * load, on a connection where that is the difference between a usable first
+ * paint and a blank one.
+ *
+ * So a language is one chunk, loaded whole, and the reader's own language is
+ * awaited before the first render (`main.jsx`). Raw keys still never appear —
+ * the dictionary is complete before anything paints — and the other language
+ * arrives only if somebody actually uses the toggle.
  *
  * ── Numerals stay Western-Arabic in both views ─────────────────────────────
  * FR-27.6. `formatNumber` in `src/lib/format.js` pins the numbering system, so
@@ -31,37 +40,7 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import enCommon from '../locales/en/common.json';
-import enAuth from '../locales/en/auth.json';
-import enSearch from '../locales/en/search.json';
-import enAi from '../locales/en/ai.json';
-import enBooking from '../locales/en/booking.json';
-import enPayments from '../locales/en/payments.json';
-import enTutor from '../locales/en/tutor.json';
-import enAdmin from '../locales/en/admin.json';
-import enFeedback from '../locales/en/feedback.json';
-import enVolunteer from '../locales/en/volunteer.json';
-import enHomeTuition from '../locales/en/homeTuition.json';
-import enProgress from '../locales/en/progress.json';
-import enDemand from '../locales/en/demand.json';
-import enGroups from '../locales/en/groups.json';
-import enOrganisation from '../locales/en/organisation.json';
 
-import urCommon from '../locales/ur/common.json';
-import urAuth from '../locales/ur/auth.json';
-import urSearch from '../locales/ur/search.json';
-import urAi from '../locales/ur/ai.json';
-import urBooking from '../locales/ur/booking.json';
-import urPayments from '../locales/ur/payments.json';
-import urTutor from '../locales/ur/tutor.json';
-import urAdmin from '../locales/ur/admin.json';
-import urFeedback from '../locales/ur/feedback.json';
-import urVolunteer from '../locales/ur/volunteer.json';
-import urHomeTuition from '../locales/ur/homeTuition.json';
-import urProgress from '../locales/ur/progress.json';
-import urDemand from '../locales/ur/demand.json';
-import urGroups from '../locales/ur/groups.json';
-import urOrganisation from '../locales/ur/organisation.json';
 
 export const LOCALES = {
   en: { label: 'English', nativeLabel: 'English', dir: 'ltr' },
@@ -135,45 +114,43 @@ export function applyDocumentLanguage(lng) {
   root.setAttribute('dir', locale.dir);
 }
 
+/**
+ * Every namespace of one language, as a single chunk.
+ *
+ * `import.meta.glob` rather than fifteen dynamic imports: Vite collects the
+ * matching files at build time, so a language is one network request instead of
+ * fifteen, and adding a namespace needs no change here.
+ */
+const DICTIONARIES = import.meta.glob('../locales/*/*.json');
+
+/**
+ * Load one language and register it.
+ *
+ * Idempotent: i18next holds the bundles, so a second call for a language
+ * already present is a no-op and the toggle can be used freely.
+ */
+export async function loadLanguage(lng) {
+  if (i18next.hasResourceBundle(lng, 'common')) return;
+
+  const entries = Object.entries(DICTIONARIES).filter(([path]) =>
+    path.includes(`/locales/${lng}/`),
+  );
+
+  await Promise.all(
+    entries.map(async ([path, load]) => {
+      const namespace = path.split('/').pop().replace('.json', '');
+      const module = await load();
+      // `deep` and `overwrite` false: a namespace is loaded once, whole.
+      i18next.addResourceBundle(lng, namespace, module.default, false, false);
+    }),
+  );
+}
+
 const initial = detectLanguage();
 
 i18next.use(initReactI18next).init({
-  resources: {
-    en: {
-      common: enCommon,
-      auth: enAuth,
-      search: enSearch,
-      ai: enAi,
-      booking: enBooking,
-      payments: enPayments,
-      tutor: enTutor,
-      admin: enAdmin,
-      feedback: enFeedback,
-      volunteer: enVolunteer,
-      homeTuition: enHomeTuition,
-      progress: enProgress,
-      demand: enDemand,
-      groups: enGroups,
-      organisation: enOrganisation,
-    },
-    ur: {
-      common: urCommon,
-      auth: urAuth,
-      search: urSearch,
-      ai: urAi,
-      booking: urBooking,
-      payments: urPayments,
-      tutor: urTutor,
-      admin: urAdmin,
-      feedback: urFeedback,
-      volunteer: urVolunteer,
-      homeTuition: urHomeTuition,
-      progress: urProgress,
-      demand: urDemand,
-      groups: urGroups,
-      organisation: urOrganisation,
-    },
-  },
+  // Filled by `loadLanguage` before the first render — see above.
+  resources: {},
   lng: initial,
   fallbackLng: 'en',
   ns: NAMESPACES,

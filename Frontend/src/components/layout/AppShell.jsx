@@ -10,9 +10,9 @@
  * settings screen is a route nobody uses at the moment something goes wrong.
  */
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -211,14 +211,82 @@ function Footer({ onOpenFeedback }) {
   );
 }
 
+/**
+ * Move focus to the new page, and say which one it is.
+ *
+ * ── The failure this fixes ─────────────────────────────────────────────────
+ * A full page load moves focus to the top of the document and a screen reader
+ * announces the new page. A client-side route change does neither: the DOM
+ * swaps underneath, focus stays wherever it was — usually on the link just
+ * clicked, which no longer exists — and nothing is announced. A keyboard user
+ * tabs into whatever happens to follow; a screen-reader user is told nothing at
+ * all and has to hunt for what changed.
+ *
+ * So on every navigation focus moves to `<main>`, which is `tabIndex={-1}` for
+ * exactly this purpose and is never in the tab order otherwise.
+ *
+ * The announcement is separate and polite: moving focus tells you *where* you
+ * are, and the live region tells you *what* arrived, without interrupting
+ * whatever is being read.
+ */
+function useRouteFocus() {
+  const { pathname } = useLocation();
+  const main = useRef(null);
+  const [announcement, setAnnouncement] = useState('');
+
+  useEffect(() => {
+    const target = main.current;
+    if (!target) return;
+
+    // Skipped on the very first render: the browser has just loaded the
+    // document and stealing focus from that is the bug, not the fix.
+    if (target.dataset.mounted === 'true') {
+      target.focus({ preventScroll: true });
+      /*
+       * The heading the route rendered, if it has one. Read after the commit,
+       * so this is the new page's title rather than the one being left.
+       */
+      const heading = target.querySelector('h1');
+      setAnnouncement(heading?.textContent?.trim() ?? pathname);
+    }
+    target.dataset.mounted = 'true';
+  }, [pathname]);
+
+  return { main, announcement };
+}
+
 export function AppShell() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { t } = useTranslation('common');
+  const { main, announcement } = useRouteFocus();
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/*
+        The first thing in the tab order, visible only once focused. Without it
+        a keyboard user tabs the entire header — brand, six navigation links,
+        the language toggle — on every page before reaching the content.
+      */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-50 focus:rounded-control focus:bg-white focus:px-4 focus:py-2 focus:text-small focus:font-medium focus:text-ink focus:shadow-raised"
+      >
+        {t('a11y.skipToContent')}
+      </a>
+
       <Header />
 
-      <main id="main" className="flex-1 pb-action-bar sm:pb-0">
+      {/* Polite: it reports the new page without cutting off what is being read. */}
+      <p aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+
+      <main
+        id="main"
+        ref={main}
+        tabIndex={-1}
+        className="flex-1 pb-action-bar outline-none sm:pb-0"
+      >
         {/*
           Every route is lazy, so a Suspense boundary is required. The fallback
           is a skeleton rather than a spinner: on a slow connection the shape of

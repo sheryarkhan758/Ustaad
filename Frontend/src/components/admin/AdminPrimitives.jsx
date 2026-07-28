@@ -119,12 +119,14 @@ export function CountTile({ to, label, value, tone = 'neutral' }) {
       <span
         className={[
           'mt-0.5 font-mono text-title tnum',
-          urgent ? 'text-flag' : value > 0 ? 'text-ink' : 'text-slate-light',
+          // `slate-light` measures 2.98:1 on white and is for icons and
+          // placeholders, never for a figure somebody has to read.
+          urgent ? 'text-flag' : value > 0 ? 'text-ink' : 'text-slate',
         ].join(' ')}
       >
         {value}
       </span>
-      {value === 0 ? <span className="text-caption text-slate-light">{t('dashboard.none')}</span> : null}
+      {value === 0 ? <span className="text-caption text-slate">{t('dashboard.none')}</span> : null}
     </Link>
   );
 }

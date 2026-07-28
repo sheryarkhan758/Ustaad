@@ -18,7 +18,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LOCALES, applyDocumentLanguage, persistLanguage } from '../../i18n';
+import { LOCALES, applyDocumentLanguage, loadLanguage, persistLanguage } from '../../i18n';
 
 export function LanguageToggle({ className = '' }) {
   const { t, i18n } = useTranslation('common');
@@ -27,6 +27,15 @@ export function LanguageToggle({ className = '' }) {
   const nextLocale = LOCALES[next];
 
   const switchTo = useCallback(async () => {
+    /*
+     * The other dictionary, fetched the first time somebody asks for it.
+     *
+     * Awaited **before** the switch, not after: changing the language with the
+     * bundle missing would repaint every string as its own key for as long as
+     * the request took. Loaded once and then held by i18next, so a reader who
+     * flips back and forth pays for it once.
+     */
+    await loadLanguage(next);
     await i18n.changeLanguage(next);
     persistLanguage(next);
     // `lang` and `dir` on <html> — the layout flip and the font stack both

@@ -135,5 +135,24 @@
     "4": "Thursday",
     "5": "Friday",
     "6": "Saturday"
+  },
+  "a11y": {
+    "skipToContent": "Skip to the main content"
+  },
+  "demo": {
+    "credentialsHeading": "Try it as anybody",
+    "credentialsBody": "Demonstration accounts. Every person, review and message in this dataset is invented.",
+    "role": "Role",
+    "email": "Email",
+    "password": "Password for all of them",
+    "passwordUnset": "The password is whatever this deployment was seeded with — see DEPLOY.md §2.",
+    "credentialsNote": "These accounts exist only on a demonstration database. Nothing here is a real family, and no real person’s documents are behind any of it."
+  },
+  "role": {
+    "parent": "Parent",
+    "tutor": "Tutor",
+    "student": "Student (adult)",
+    "organisation": "Academy",
+    "admin": "Administrator"
   }
 }

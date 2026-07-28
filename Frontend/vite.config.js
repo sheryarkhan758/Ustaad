@@ -72,10 +72,35 @@ export default defineConfig({
          * slow connection, the difference between re-downloading 140 kB and
          * re-downloading 15 kB is the difference between usable and not.
          */
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          query: ['@tanstack/react-query'],
-          i18n: ['i18next', 'react-i18next'],
+        manualChunks(id) {
+          /*
+           * One chunk per language, not one per namespace.
+           *
+           * `src/i18n/index.js` loads a language through `import.meta.glob`,
+           * which by default gives Vite fifteen separate modules and therefore
+           * fifteen requests to open a dictionary. On the connection this is
+           * built for, fifteen round trips to render a page is worse than the
+           * bytes they carry. Grouping them by directory makes a language
+           * exactly one request, which is what the loader's comment claims.
+           */
+          if (id.includes('/locales/')) {
+            const language = id.includes('/locales/ur/') ? 'ur' : 'en';
+            return `locale-${language}`;
+          }
+
+          /*
+           * Split the vendor bundle so a release that touches only application
+           * code does not invalidate React and the router in every cache. On a
+           * slow connection, the difference between re-downloading 140 kB and
+           * re-downloading 15 kB is the difference between usable and not.
+           */
+          if (id.includes('node_modules')) {
+            if (/[/\\](react|react-dom|react-router|react-router-dom)[/\\]/.test(id)) return 'react';
+            if (id.includes('@tanstack')) return 'query';
+            if (/[/\\](i18next|react-i18next)[/\\]/.test(id)) return 'i18n';
+          }
+
+          return undefined;
         },
       },
     },

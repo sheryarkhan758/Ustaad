@@ -951,6 +951,94 @@ return 404, never 403, so an endpoint cannot be used as an existence oracle.
 
 ---
 
+---
+
+## The ninety-second path
+
+A stranger reaching meaningful AI output without an account, a key, or a briefing. Every step is
+seeded; the AI steps replay recorded sessions and make **zero live model calls** (FR-15.7), so the
+path is identical with `GEMINI_API_KEY` and `GROQ_API_KEY` removed from the environment entirely.
+
+| # | Step | Where | What it shows |
+|---|---|---|---|
+| 1 | Land | `/` | What the platform checks, and what it refuses to claim |
+| 2 | Take the primary pathway | `/home-tuition` | Female-only and home delivery stated as **fixed**, not offered as filters (§2.1, decision 15) |
+| 3 | …or describe the difficulty | `/demo` → *A stated weakness resolves to a root gap* | "Weak in Maths" resolving to a signed-number gap three topics upstream, `liveModelCalls: 0` |
+| 4 | Read the shortlist | results on either path | Itemised verification per tutor: which artefacts, checked on what date |
+| 5 | Open a profile | `/t/ayesha-siddiqui` | The full Verification Record, and the line stating no police check is performed |
+| 6 | Book | `/book/ayesha-siddiqui` | Her declared conditions applied — a request that breaches one **cannot be submitted** |
+| 7 | See a completed engagement | `/my/bookings` as the parent | Session notes, a review with its credibility analysis, and a dual-acknowledgement payment record |
+
+Signed in as the parent, `/my/students/:id/progress` adds the ledger: mastery per topic over time,
+the diagnostic gap map against what was actually taught, and a stagnation indicator.
+
+**Verified with the keys removed:** `env -u GEMINI_API_KEY -u GROQ_API_KEY npx vitest run
+server/demo.flow.test.ts` — 14 tests pass, including one asserting the demonstration path imports
+nothing from `server/ai` at all.
+
+---
+
+## Performance
+
+Measured from `npm run build`, first-load set only — the chunks `index.html` actually requests
+before anything renders. Gzip figures are what travels.
+
+| | Before | After | Change |
+|---|---|---|---|
+| First load, English reader | 559.0 kB / **172.5 kB gzip** | 461.5 kB / **145.3 kB gzip** | **−27.2 kB gzip (−16%)** |
+| First load, Urdu reader | 559.0 kB / 172.5 kB gzip | 491.5 kB / **148.2 kB gzip** | −24.3 kB gzip (−14%) |
+| Entry chunk | 229.5 kB | **49.4 kB** | −180 kB (−78%) |
+
+**What changed.** Both dictionaries were compiled into the entry chunk, so every English reader
+downloaded 140 kB of Urdu and every Urdu reader downloaded 112 kB of English. A language is now one
+lazily-loaded chunk, grouped by `manualChunks` so it is one request rather than fifteen, and the
+reader's own language is awaited before the first paint — raw translation keys never appear, which
+was the reason the dictionaries were bundled in the first place. The other language loads only if
+somebody uses the toggle.
+
+**Already split, and left that way.** Recharts (360.9 kB) is reached only from the progress ledger
+and the reliability chart, and `qrcode` only from the profile-sharing screen; both are route-level
+chunks that a first visit never requests. Every route is lazy.
+
+**The floor.** React, the router, TanStack Query and i18next are 297.6 kB raw / 95.3 kB gzip of the
+remaining first load and cannot be reduced without changing the stack.
+
+---
+
+## Accessibility
+
+**Fixed in this pass:**
+
+- **Focus on route change.** A client-side navigation moved no focus and announced nothing, so a
+  keyboard user landed wherever the old DOM had left them and a screen-reader user was told nothing.
+  Focus now moves to `<main>` on every navigation, and a polite live region announces the new
+  page's heading.
+- **A skip link**, first in the tab order — without it every page began with the brand, six
+  navigation links and the language toggle before any content.
+- **Contrast.** Computed for every foreground/background pair in use. Thirteen of fourteen pass WCAG
+  AA; `slate-light` on white measures **2.98:1** and was being used for two figures on the
+  administrator dashboard. Those are now `slate` (5.48:1).
+
+**Already correct, verified:** `prefers-reduced-motion` is respected in `index.css`; form errors
+are announced (`role="alert"` on the error summary and on field errors); modals are real
+`<dialog showModal()>` elements, so focus trapping, Escape and the inert background are the
+platform's rather than hand-rolled; the layout uses logical properties throughout, so nothing is
+stranded on the wrong side in the Urdu view.
+
+**Not verified — and I am not going to claim otherwise:**
+
+- **Keyboard-only traversal of the core path was not walked.** The fixes above are the ones static
+  analysis and the component structure make findable. Tabbing the whole path on a real browser will
+  find things this did not.
+- **`slate-light` is still the placeholder colour** in `Field` and `Combobox`, at 2.98:1.
+  Changing it touches every form in the product and deserves a design decision rather than a
+  drive-by edit.
+- **No screen-reader pass.** Nothing here has been heard in NVDA, JAWS or TalkBack.
+- **Charts are unlabelled to assistive tech beyond their data table.** The progress ledger duplicates
+  its figures in a visually-hidden table, which is a floor, not a solution.
+- **Contrast was computed, not sampled.** Ratios come from the palette; text over an image or a
+  gradient was not checked, though the design uses neither.
+
 ## 9. Deliberate architectural decisions
 
 Three choices a reader might otherwise mistake for gaps.

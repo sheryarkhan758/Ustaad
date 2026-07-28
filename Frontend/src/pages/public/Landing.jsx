@@ -10,6 +10,7 @@
 import { Link } from 'react-router-dom';
 
 import { Card, CardBody } from '../../components/ui/Card';
+import { GuestCredentials } from '../../components/demo/GuestCredentials';
 import { IdentityRecord } from '../../components/verification/VerificationRecord';
 
 export default function Landing() {
@@ -143,6 +144,17 @@ export default function Landing() {
               </CardBody>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/*
+        Guest credentials, in demonstration mode only (§6.15). Renders nothing —
+        and compiles to nothing — when `VITE_DEMO_MODE` is unset, so a
+        deployment that is not a demonstration does not carry the strings.
+      */}
+      <section className="border-t border-slate-line bg-paper">
+        <div className="mx-auto max-w-wide px-4 py-8">
+          <GuestCredentials />
         </div>
       </section>
     </div>
