@@ -100,13 +100,19 @@ function Turn({ role, text }) {
           <span aria-hidden="true" className="flex items-center gap-1.5 text-small text-slate">
             {t('intake.thinking')}
             <span className="flex gap-0.5">
-              {/* Three dots, motion-safe only — a reduced-motion reader gets
-                  the word "thinking" and no animation at all. */}
+              {/*
+                Three dots, motion-safe only — a reduced-motion reader gets the
+                word "thinking" and no animation at all.
+
+                A travelling wave rather than three dots pulsing in unison:
+                the offset reads as ongoing work, which is exactly what it is
+                reporting, and it is the one looping animation in the product.
+              */}
               {[0, 1, 2].map((index) => (
                 <span
                   key={index}
-                  className="h-1.5 w-1.5 rounded-full bg-slate motion-safe:animate-pulse"
-                  style={{ animationDelay: `${index * 150}ms` }}
+                  className="h-1.5 w-1.5 rounded-full bg-slate motion-safe:animate-thinking-dot"
+                  style={{ animationDelay: `${index * 160}ms` }}
                 />
               ))}
             </span>
@@ -123,6 +129,9 @@ function Turn({ role, text }) {
       <div
         className={[
           'max-w-[85%] rounded-control px-3 py-2',
+          // Each turn rises as it arrives, which is what makes a conversation
+          // read as a conversation rather than as a list that grew.
+          'animate-rise',
           isFamily ? 'bg-ink text-white' : 'border border-slate-line bg-white text-ink',
         ].join(' ')}
       >

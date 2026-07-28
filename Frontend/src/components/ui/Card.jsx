@@ -12,8 +12,18 @@ export function Card({ as: As = 'div', interactive = false, className = '', chil
     <As
       className={[
         'rounded-card border border-slate-line bg-white shadow-card',
+        /*
+          An interactive card lifts very slightly on hover — one pixel and a
+          deeper shadow. Enough to read as "this is a control", not enough to
+          reflow anything around it, and it is on `transform` and `box-shadow`
+          so it stays on the compositor rather than triggering layout on a
+          mid-range phone.
+
+          A card that is not interactive does not move, because moving it would
+          promise something it cannot do.
+        */
         interactive
-          ? 'transition-colors hover:border-slate focus-within:border-verdigris-deep'
+          ? 'transition-[colors,transform,box-shadow] duration-quick ease-enter hover:-translate-y-px hover:border-slate hover:shadow-raised focus-within:border-verdigris-deep'
           : '',
         className,
       ]
@@ -165,7 +175,7 @@ export function Td({ numeric = false, className = '', children, ...props }) {
  */
 export function EmptyState({ title, description, action, icon = null }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-slate-line bg-white/60 px-6 py-10 text-center">
+    <div className="flex animate-fade-in flex-col items-center gap-3 rounded-card border border-dashed border-slate-line bg-white/60 px-6 py-10 text-center">
       {icon ? <div className="text-slate-light">{icon}</div> : null}
       <h3 className="font-display text-subtitle text-ink">{title}</h3>
       {description ? <p className="max-w-prose text-small text-slate">{description}</p> : null}

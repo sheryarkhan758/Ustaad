@@ -61,6 +61,17 @@ export function Modal({ open, onClose, title, description, children, footer, pla
       className={[
         'w-full max-w-prose rounded-t-card border border-slate-line bg-white p-0 text-ink shadow-raised',
         'backdrop:bg-ink/40 backdrop:backdrop-blur-[2px]',
+        /*
+          The entrance. Three shapes because the dialogue has three: a bottom
+          sheet rises from the thumb, a centred card pops in place, a slide-over
+          comes in from the edge it will sit against — and in the Urdu view that
+          is the other edge, which is why there are two directions rather than
+          one `translateX`.
+        */
+        'animate-sheet-up backdrop:animate-fade-in',
+        placement === 'side'
+          ? 'sm:animate-slide-from-end sm:rtl:animate-slide-from-end-rtl'
+          : 'sm:animate-pop',
         // Bottom sheet on a phone, either way.
         'mb-0 mt-auto',
         placement === 'side'
@@ -141,6 +152,10 @@ export function Toast({ tone = 'info', title, description, onDismiss }) {
       aria-live="polite"
       className={[
         'pointer-events-auto flex w-full max-w-prose items-start gap-3 rounded-card border px-4 py-3 shadow-raised',
+        // It rises into place from where it will sit. A toast that simply
+        // appears is a toast people miss; a toast that flies across the screen
+        // is one they have to track.
+        'animate-rise',
         TOAST_TONES[tone] ?? TOAST_TONES.info,
       ].join(' ')}
     >

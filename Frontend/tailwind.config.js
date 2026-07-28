@@ -158,14 +158,98 @@ export default {
         wide: '70rem',
       },
 
+      /**
+       * ── Motion ────────────────────────────────────────────────────────────
+       *
+       * The rule this product holds motion to: it explains a change, or it does
+       * not exist. Something appearing, something replacing something else,
+       * something being dismissed — those are worth a hundred and fifty
+       * milliseconds because the movement tells you what happened. A card that
+       * floats on scroll for atmosphere tells you nothing and costs a frame
+       * budget on the mid-range Android this is built for.
+       *
+       * Durations are short on purpose. 150–220ms reads as responsive; past
+       * about 300ms an interface starts to feel like it is deciding whether to
+       * obey you, which is the opposite of what an entrance animation is for.
+       *
+       * Everything here is neutralised by the `prefers-reduced-motion` block in
+       * `index.css`, which sets every duration to 0.01ms with `!important`.
+       * That covers CSS. Animation driven from JavaScript — Recharts draws its
+       * series with its own timer — has to ask separately, which is what
+       * `useReducedMotion` is for.
+       */
+      transitionTimingFunction: {
+        /** Fast out, gentle in. For anything arriving. */
+        enter: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        /** Quicker, flatter. For anything leaving — nobody waits on an exit. */
+        exit: 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+      transitionDuration: {
+        instant: '90ms',
+        quick: '150ms',
+        settled: '220ms',
+      },
       keyframes: {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        /** The default entrance: a short lift, so the eye catches the arrival. */
+        rise: {
+          from: { opacity: '0', transform: 'translateY(0.5rem)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        /** A dialogue taking the top layer. Scale is subtle — 4%, not 20%. */
+        pop: {
+          from: { opacity: '0', transform: 'scale(0.97)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        /** A bottom sheet on a phone. */
+        'sheet-up': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
+        /**
+         * A slide-over from the inline-end edge. Two directions, because
+         * `translateX` is physical and the Urdu view puts the panel on the
+         * other side — see the `[dir]` variants where this is used.
+         */
+        'slide-from-end': {
+          from: { opacity: '0', transform: 'translateX(1.5rem)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        'slide-from-end-rtl': {
+          from: { opacity: '0', transform: 'translateX(-1.5rem)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        /**
+         * One pulse on a value that just changed. Once, never looping: a
+         * repeating highlight is a notification nobody can dismiss.
+         */
+        'flash-once': {
+          '0%': { backgroundColor: 'rgb(15 123 138 / 0.16)' },
+          '100%': { backgroundColor: 'transparent' },
+        },
+        /** The agent is thinking. The one loop in the system, and it is small. */
+        'thinking-dot': {
+          '0%, 80%, 100%': { opacity: '0.25', transform: 'translateY(0)' },
+          '40%': { opacity: '1', transform: 'translateY(-0.15rem)' },
+        },
       },
       animation: {
         shimmer: 'shimmer 1.6s linear infinite',
+        rise: 'rise 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'fade-in': 'fade-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        pop: 'pop 180ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'sheet-up': 'sheet-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'slide-from-end': 'slide-from-end 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'slide-from-end-rtl': 'slide-from-end-rtl 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'flash-once': 'flash-once 900ms ease-out both',
+        'thinking-dot': 'thinking-dot 1.2s ease-in-out infinite',
       },
     },
   },

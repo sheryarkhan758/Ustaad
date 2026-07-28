@@ -54,6 +54,7 @@ import { Warning } from '../../components/ui/Icon';
 import { UserText } from '../../components/ui/UserText';
 import { api } from '../../lib/api';
 import { useFormat } from '../../lib/format';
+import { useReducedMotion } from '../../lib/motion';
 import { useLocalName, useTopics } from '../../lib/reference';
 
 /**
@@ -91,6 +92,13 @@ export default function Progress() {
   const localName = useLocalName();
 
   const axes = chartAxes(i18n.dir());
+  /*
+   * Recharts draws its series on its own timer, which the `!important`
+   * reduced-motion block in `index.css` cannot reach — a stylesheet cannot
+   * stop JavaScript writing intermediate values into the DOM. So the chart
+   * asks the preference directly.
+   */
+  const reduced = useReducedMotion();
 
   const ledger = useQuery({
     queryKey: ['progress', studentProfileId],
@@ -237,6 +245,8 @@ export default function Progress() {
                         strokeWidth={2}
                         dot={{ r: 3 }}
                         connectNulls
+                        isAnimationActive={!reduced}
+                        animationDuration={420}
                       />
                     ))}
                   </LineChart>
@@ -278,8 +288,8 @@ export default function Progress() {
                       formatter={(key) => (key === 'first' ? t('chart.first') : t('chart.latest'))}
                       wrapperStyle={{ fontSize: 12 }}
                     />
-                    <Bar dataKey="first" fill={TRACK} />
-                    <Bar dataKey="latest" fill={SERIES[0]} />
+                    <Bar dataKey="first" fill={TRACK} isAnimationActive={!reduced} animationDuration={420} />
+                    <Bar dataKey="latest" fill={SERIES[0]} isAnimationActive={!reduced} animationDuration={420} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

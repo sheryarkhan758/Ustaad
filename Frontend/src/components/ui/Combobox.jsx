@@ -237,7 +237,12 @@ export function Combobox({
           id={listId}
           role="listbox"
           aria-label={label}
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-control border border-slate-line bg-white py-1 shadow-raised"
+          className={[
+            'absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-control border border-slate-line bg-white py-1 shadow-raised',
+            // The list belongs to the field it drops from, so it grows out of
+            // it rather than appearing over it.
+            'animate-rise',
+          ].join(' ')}
         >
           {filtered.length === 0 ? (
             <li className="px-3 py-2 text-small text-slate">

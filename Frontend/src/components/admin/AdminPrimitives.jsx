@@ -5,8 +5,13 @@
  * Everything else here is built for somebody using it once: a parent choosing a
  * tutor, a tutor setting her rates. This is built for somebody who will be on
  * it for an hour, working a list. Those want opposite things. So: tables rather
- * than cards, information density over whitespace, one row per item, and no
- * animation between states.
+ * than cards, information density over whitespace, one row per item, and **no
+ * entrance animation anywhere in here** — a queue that fades in on every
+ * refetch is a queue somebody has to wait for a hundred times an hour.
+ *
+ * The only motion is a 90ms row highlight on hover, which is pointer feedback
+ * rather than decoration: it tells somebody scanning forty rows which one their
+ * click will land on.
  *
  * ── Every decision carries a reason, and the reason is the confirmation ────
  * A confirmation dialogue asks "are you sure?", which is answered by clicking
@@ -86,7 +91,7 @@ export function DataTable({ caption, columns, rows, empty }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="border-b border-slate-line last:border-0 hover:bg-paper">
+            <tr key={row.id} className="border-b border-slate-line transition-colors duration-instant last:border-0 hover:bg-paper">
               {columns.map((column) => (
                 <td key={column.key} className="px-3 py-2 align-top text-ink">
                   {column.render ? column.render(row) : row[column.key]}

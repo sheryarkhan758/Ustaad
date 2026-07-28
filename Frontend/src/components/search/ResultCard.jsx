@@ -120,7 +120,9 @@ export function ResultCard({ result, topics, areas = [] }) {
   const areaName = areaRow ? localName(areaRow) : null;
 
   return (
-    <Card interactive as="article">
+    // A result rises as it arrives, so a new page of results reads as having
+    // replaced the old one rather than having been swapped underneath.
+    <Card interactive as="article" className="animate-rise">
       <CardBody className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

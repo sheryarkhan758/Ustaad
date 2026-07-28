@@ -16,9 +16,19 @@
 
 import { forwardRef } from 'react';
 
+/**
+ * `active:scale-[0.98]` is the only motion on a button, and it is doing a job.
+ *
+ * On a phone the finger covers the control, so the hover state — the thing that
+ * confirms a press on a desktop — is invisible at exactly the moment it is
+ * needed. A 2% depression is visible around the fingertip and tells somebody on
+ * a slow connection that the tap registered, which is when they would otherwise
+ * tap again and submit twice.
+ */
 const BASE =
   'inline-flex items-center justify-center gap-2 rounded-control font-body font-medium ' +
-  'transition-colors duration-150 select-none ' +
+  'transition-[colors,transform] duration-quick ease-enter select-none ' +
+  'active:scale-[0.98] disabled:active:scale-100 ' +
   'disabled:cursor-not-allowed disabled:opacity-55';
 
 const VARIANTS = {

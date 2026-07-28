@@ -259,6 +259,7 @@ export function AppShell() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { t } = useTranslation('common');
   const { main, announcement } = useRouteFocus();
+  const { pathname } = useLocation();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -299,7 +300,23 @@ export function AppShell() {
             </div>
           }
         >
-          <Outlet />
+          {/*
+            The page entrance.
+
+            Keyed on the path so it replays on every navigation, and applied to
+            a wrapper **inside** `<main>` rather than to `<main>` itself: the
+            element that receives focus on route change must not be the element
+            being remounted, or the focus lands on a node React is about to
+            replace and is lost.
+
+            A fade with a short lift, not a slide between pages. A directional
+            slide implies a spatial relationship — back is left, forward is
+            right — which stops being true the moment somebody uses the
+            navigation rather than the browser's back button.
+          */}
+          <div key={pathname} className="animate-rise">
+            <Outlet />
+          </div>
         </Suspense>
       </main>
 
