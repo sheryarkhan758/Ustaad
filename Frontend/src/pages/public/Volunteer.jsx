@@ -223,12 +223,12 @@ export default function Volunteer() {
     const mailFailed = result.mailDispatchStatus && result.mailDispatchStatus !== 'sent';
 
     return (
-      <div className="mx-auto max-w-prose space-y-4 px-4 py-8">
+      <div className="mx-auto max-w-prose space-y-4 px-4 py-6">
         <Card>
           <CardBody className="space-y-3">
             <div className="flex items-start gap-3">
               <Check className="mt-0.5 shrink-0 text-settled" aria-hidden="true" />
-              <h1 className="font-display text-title text-ink">{t('success.heading')}</h1>
+              <h1 className="font-display text-display text-ink">{t('success.heading')}</h1>
             </div>
 
             <p className="text-small text-ink">{t('success.saved')}</p>

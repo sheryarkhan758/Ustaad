@@ -53,7 +53,7 @@ export default function StudyPlan() {
 
   if (plans.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={plans.error} onRetry={plans.refetch} />
       </div>
     );
@@ -64,7 +64,7 @@ export default function StudyPlan() {
 
   if (!plan) {
     return (
-      <div className="mx-auto max-w-prose space-y-4 px-4 py-8">
+      <div className="mx-auto max-w-prose space-y-4 px-4 py-6">
         <EmptyState title={t('plan.emptyTitle')} description={t('plan.emptyBody')} />
         <ManualSearchLink />
       </div>

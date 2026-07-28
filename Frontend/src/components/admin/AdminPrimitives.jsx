@@ -28,6 +28,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { Page } from '../layout/Page';
 import { Button } from '../ui/Button';
 import { Field, Textarea } from '../ui/Field';
 
@@ -38,18 +39,19 @@ export const MIN_REASON = 15;
  * Layout
  * ====================================================================== */
 
+/**
+ * A queue is a page, on the same frame as every other page.
+ *
+ * It used to define its own container, spacing and a `text-title` heading,
+ * which made every administrator screen sit eight pixels higher than the rest
+ * of the product with a smaller title on it. `wide` because a queue is scanned
+ * in columns.
+ */
 export function QueuePage({ title, intro, children, actions = null }) {
   return (
-    <div className="mx-auto max-w-wide space-y-4 px-4 py-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="font-display text-title text-ink">{title}</h1>
-          {intro ? <p className="mt-1 max-w-prose text-small text-slate">{intro}</p> : null}
-        </div>
-        {actions}
-      </header>
+    <Page width="wide" title={title} intro={intro} actions={actions}>
       {children}
-    </div>
+    </Page>
   );
 }
 
@@ -106,6 +108,23 @@ export function DataTable({ caption, columns, rows, empty }) {
 }
 
 /** A count that is also the way in — the dashboard's whole design. */
+/**
+ * A count that is also the way in — the dashboard's whole design.
+ *
+ * ── Three alignment properties, each of which was wrong ────────────────────
+ * **The figures line up.** They sit on their own row, pushed to the bottom of
+ * the tile by `mt-auto`, so twelve tiles read as one row of numbers rather than
+ * twelve numbers at twelve heights. `h-full` makes every tile fill its grid
+ * cell, so a two-line label does not make its tile shorter than its neighbours.
+ *
+ * **The figure does not move.** "Clear" used to appear under the number only
+ * when it was zero, which shifted every zero tile's number up by a line
+ * relative to the non-zero ones beside it. The caption row is now always
+ * present and empty when there is nothing to say.
+ *
+ * **`tnum`** so `1` and `7` occupy the same width and a column of counts stays
+ * a column while the numbers change under it.
+ */
 export function CountTile({ to, label, value, tone = 'neutral' }) {
   const { t } = useTranslation('admin');
   const urgent = tone === 'urgent' && value > 0;
@@ -114,16 +133,19 @@ export function CountTile({ to, label, value, tone = 'neutral' }) {
     <Link
       to={to}
       className={[
-        'flex flex-col rounded-card border px-3 py-2.5 transition-colors',
+        'flex h-full flex-col rounded-card border px-3 py-2.5',
+        'transition-[colors,transform,box-shadow] duration-quick ease-enter',
+        'hover:-translate-y-px hover:shadow-raised',
         urgent
           ? 'border-flag/40 bg-flag-soft hover:bg-flag-soft/70'
           : 'border-slate-line bg-white hover:bg-paper',
       ].join(' ')}
     >
       <span className="text-caption text-slate">{label}</span>
+
       <span
         className={[
-          'mt-0.5 font-mono text-title tnum',
+          'mt-auto pt-2 font-mono text-title tnum tabular-nums',
           // `slate-light` measures 2.98:1 on white and is for icons and
           // placeholders, never for a figure somebody has to read.
           urgent ? 'text-flag' : value > 0 ? 'text-ink' : 'text-slate',
@@ -131,7 +153,11 @@ export function CountTile({ to, label, value, tone = 'neutral' }) {
       >
         {value}
       </span>
-      {value === 0 ? <span className="text-caption text-slate">{t('dashboard.none')}</span> : null}
+
+      {/* Always rendered, so the figure above it sits at one height. */}
+      <span className="min-h-[1rem] text-caption text-slate">
+        {value === 0 ? t('dashboard.none') : ' '}
+      </span>
     </Link>
   );
 }

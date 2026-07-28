@@ -49,7 +49,7 @@ export default function TutorBookings() {
 
   if (bookings.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={bookings.error} onRetry={bookings.refetch} />
       </div>
     );

@@ -124,7 +124,7 @@ export default function OrgProfile() {
 
   if (profile.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={profile.error} onRetry={profile.refetch} />
       </div>
     );

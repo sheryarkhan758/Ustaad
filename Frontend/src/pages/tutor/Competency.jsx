@@ -70,7 +70,7 @@ export default function Competency() {
 
   if (claims.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={claims.error} onRetry={claims.refetch} />
       </div>
     );

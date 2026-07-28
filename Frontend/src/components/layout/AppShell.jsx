@@ -97,6 +97,9 @@ function Header() {
             <li key={item.to}>
               <NavLink
                 to={item.to}
+                // Without this, `/` matches every route and Home is marked as
+                // the current page everywhere in the product.
+                end={item.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   [

@@ -232,6 +232,19 @@ export const router = createBrowserRouter([
  * English word survives a translation pass unnoticed.
  */
 export const NAV = [
+  /*
+   * Home, first and explicit.
+   *
+   * The wordmark links here, which is the convention — and a convention is not
+   * an affordance. It is unlabelled, it is not in the navigation list a screen
+   * reader reads out, and on a phone it sits at the opposite end of the header
+   * from the menu somebody just opened. A signed-in user four screens deep had
+   * no obvious way back to the front page.
+   *
+   * `end: true` so it is only marked current on `/` itself, rather than on
+   * every route beneath it.
+   */
+  { to: '/', labelKey: 'nav.home', roles: null, end: true },
   { to: '/intake', labelKey: 'nav.intake', roles: null },
   { to: '/search', labelKey: 'nav.search', roles: null },
   { to: '/vacancies', labelKey: 'nav.vacancies', roles: null },

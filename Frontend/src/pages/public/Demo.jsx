@@ -42,7 +42,7 @@ export default function Demo() {
 
   if (scenarios.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={scenarios.error} onRetry={scenarios.refetch} />
       </div>
     );

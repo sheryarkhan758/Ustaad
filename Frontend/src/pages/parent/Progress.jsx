@@ -124,7 +124,7 @@ export default function Progress() {
 
   if (ledger.isError) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <ErrorState error={ledger.error} onRetry={ledger.refetch} />
       </div>
     );
@@ -132,7 +132,7 @@ export default function Progress() {
 
   if (!data) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-6">
         <EmptyState title={t('chart.noData')} description={t('chart.noDataBody')} />
       </div>
     );

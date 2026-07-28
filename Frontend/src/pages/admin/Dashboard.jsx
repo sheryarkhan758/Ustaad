@@ -63,7 +63,7 @@ export default function AdminDashboard() {
 
   if (dashboard.isError) {
     return (
-      <div className="mx-auto max-w-wide px-4 py-8">
+      <div className="mx-auto max-w-wide px-4 py-6">
         <ErrorState error={dashboard.error} onRetry={dashboard.refetch} />
       </div>
     );
@@ -75,7 +75,14 @@ export default function AdminDashboard() {
   return (
     <QueuePage title={t('dashboard.title')} intro={t('dashboard.intro')}>
       <section aria-label={t('dashboard.countsCaption')}>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {/*
+          `items-stretch` (the grid default, stated because it is load-bearing
+          here) plus `h-full` on the tile: every tile fills its row's height, so
+          a two-line label does not leave its tile short beside a one-line
+          neighbour. Twelve tiles on a laptop is three rows of four with the
+          figures aligned across each row.
+        */}
+        <ul className="grid grid-cols-2 items-stretch gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {TILES.map((tile) => (
             <li key={tile.key}>
               <CountTile
@@ -103,7 +110,12 @@ export default function AdminDashboard() {
                   <th scope="row" className="px-3 py-2 text-start font-medium text-ink">
                     {t(`common:role.${role}`, { defaultValue: role })}
                   </th>
-                  <td className="px-3 py-2 text-end font-mono tnum text-ink">{value}</td>
+                  {/* `text-end` + `tnum`: the counts form a column of units in
+                      both reading directions, which is why they are in a table
+                      rather than a list. */}
+                  <td className="px-3 py-2 text-end font-mono tabular-nums tnum text-ink">
+                    {value}
+                  </td>
                 </tr>
               ))}
             </tbody>
